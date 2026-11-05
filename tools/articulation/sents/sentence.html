@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>النطق — الجمل</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            pink: '#FAD2E1',
+                            blue: '#C5D0E6',
+                            green: '#C1E1C1',
+                            yellow: '#FDFD96',
+                            purple: '#E6E6FA',
+                            text: '#4A5568'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFF5F7;
+            font-family: 'Tajawal', sans-serif;
+            color: #4A5568;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Animations */
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .star-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5) translate(-50%, -50%); opacity: 0; }
+            80% { transform: scale(1.1) translate(-50%, -50%); }
+            100% { transform: scale(1) translate(-50%, -50%); opacity: 1; }
+        }
+        .feedback-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform-origin: top left;
+        }
+
+        /* Card Styles */
+        .card-controls {
+            transition: all 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .card-controls.visible {
+            max-height: 100px;
+            opacity: 1;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #eee;
+        }
+
+        .edit-btn-active {
+            background-color: #FAD2E1 !important;
+            color: #D53F8C !important;
+        }
+
+        .test-letter-active {
+            background-color: #C5D0E6 !important;
+            color: white !important;
+            border-color: #C5D0E6 !important;
+        }
+
+        #fireworks-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+        }
+
+        .modal-overlay {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+        }
+
+        #side-panel { transition: all 0.3s ease; }
+        #side-panel.collapsed { width: 0; padding: 0; overflow: hidden; border: none; }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <canvas id="fireworks-canvas"></canvas>
+
+    <!-- Header -->
+    <header class="bg-white p-3 sticky top-0 z-40 border-b border-gray-100">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='../artic.html'" class="w-10 h-10 rounded-xl bg-gray-50 hover:bg-pastel-pink text-pastel-text transition flex items-center justify-center">
+                    <i class="fas fa-home text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <img src="../assets/logo.webp" alt="Articulation — Hamada" class="h-8 w-8 object-contain rounded-xl">
+                <h1 class="font-bold text-lg text-pastel-text">التخاطب - الجمل</h1>
+            </div>
+
+            <div class="w-10"></div> <!-- Spacer -->
+        </div>
+    </header>
+
+    <!-- WORKPLACE -->
+    <section id="workplace" class="flex-grow flex flex-col relative h-[calc(100vh-64px)]">
+
+        <!-- Stars Bar -->
+        <div id="star-panel-container" class="bg-white border-b border-gray-100 p-2 transition-all duration-300 z-30 relative">
+            <div class="container mx-auto flex flex-col items-center">
+                <button onclick="toggleStarPanel()" class="absolute left-4 top-2 text-gray-300 hover:text-gray-500"><i class="fas fa-chevron-up"></i></button>
+                <div class="flex gap-2 md:gap-4 justify-center flex-wrap" id="star-slots">
+                    <!-- Stars generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-grow overflow-hidden relative">
+
+            <!-- Sidebar -->
+            <aside id="side-panel" class="bg-white w-16 md:w-20 flex flex-col items-center py-4 gap-4 z-20 overflow-y-auto shrink-0 border-l border-gray-100">
+
+                <button onclick="toggleStarPanel()" class="p-3 rounded-xl hover:bg-gray-50 text-pastel-text transition" title="إظهار/إخفاء النجوم">
+                    <i class="fas fa-star text-yellow-400 text-lg"></i>
+                </button>
+
+                <!-- Edit Mode Toggle -->
+                <button id="edit-mode-btn" onclick="toggleEditMode()" class="p-3 rounded-xl hover:bg-gray-100 text-pastel-text transition" title="تعديل البطاقات">
+                    <i class="fas fa-pen text-lg"></i>
+                </button>
+
+                <!-- Test Mode Toggle -->
+                <button onclick="openTestSetup()" class="p-3 rounded-xl hover:bg-pastel-blue/30 text-blue-500 transition" title="اختبار">
+                    <i class="fas fa-gamepad text-lg"></i>
+                </button>
+
+                <div class="h-px w-8 bg-gray-200 my-1"></div>
+
+                <button onclick="clearSlots()" class="p-3 rounded-xl hover:bg-red-50 text-red-400 transition mt-auto" title="مسح">
+                    <i class="fas fa-trash-alt text-lg"></i>
+                </button>
+            </aside>
+
+            <!-- Canvas/Main Area -->
+            <main class="flex-grow bg-pastel-pink/10 p-4 relative overflow-y-auto flex flex-col w-full">
+                <button onclick="toggleSidePanel()" class="absolute top-4 right-4 z-10 bg-white p-2.5 rounded-xl border border-gray-100 hover:bg-gray-50 text-gray-400">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="flex-grow flex items-center justify-center p-2 pb-20">
+                    <div id="slots-container" class="grid gap-4 w-full max-w-4xl mx-auto transition-all duration-300 grid-cols-1">
+                        <!-- Dynamic Slots -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- MODALS -->
+
+    <!-- Letter Selection Modal -->
+    <div id="letter-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl p-6 max-w-4xl w-full mx-4 h-[85vh] flex flex-col border border-gray-100">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                <h3 class="text-xl font-bold text-pastel-text">اختر حرفاً</h3>
+                <button onclick="closeModal('letter-modal')" class="text-gray-400 hover:text-red-400 bg-gray-50 rounded-lg p-2">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="letter-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-3 overflow-y-auto p-2 flex-grow">
+                <!-- Letters -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Setup Modal -->
+    <div id="test-setup-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl p-6 max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col border border-gray-100">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                <h3 class="text-xl font-bold text-pastel-text"><i class="fas fa-gamepad ml-2"></i>إعداد الاختبار (10 جولات)</h3>
+                <button onclick="closeModal('test-setup-modal')" class="text-gray-400 hover:text-red-400 bg-gray-50 rounded-lg p-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="flex-grow overflow-y-auto p-2 space-y-6">
+                <!-- Choices Count -->
+                <div>
+                    <p class="font-bold mb-3 text-slate-700">عدد الخيارات في كل جولة:</p>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-xl border border-gray-100 flex-1 justify-center">
+                            <input type="radio" name="choicesCount" value="2" class="w-5 h-5" checked>
+                            <span class="font-bold text-lg">2</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-xl border border-gray-100 flex-1 justify-center">
+                            <input type="radio" name="choicesCount" value="3" class="w-5 h-5">
+                            <span class="font-bold text-lg">3</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-xl border border-gray-100 flex-1 justify-center">
+                            <input type="radio" name="choicesCount" value="4" class="w-5 h-5">
+                            <span class="font-bold text-lg">4</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Letters Selection -->
+                <div>
+                    <p class="font-bold mb-3 text-slate-700">اختر الحروف المطلوبة للاختبار:</p>
+                    <div id="test-letters-grid" class="grid grid-cols-5 md:grid-cols-7 gap-2">
+                        <!-- Filled via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <button onclick="startTest()" class="w-full bg-pastel-blue hover:bg-blue-300 text-white font-bold py-4 rounded-xl text-lg transition">
+                    ابدأ الاختبار
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Game Modal -->
+    <div id="test-game-modal" class="fixed inset-0 z-[60] hidden bg-[#FFF5F7] flex flex-col">
+        <header class="bg-white p-3 md:p-4 flex justify-between items-center border-b border-gray-100 shadow-sm relative z-10">
+            <button onclick="endTest()" class="bg-red-50 hover:bg-red-100 text-red-500 px-4 py-2 rounded-xl font-bold transition">خروج</button>
+
+            <div class="flex items-center gap-3 md:gap-6">
+                <div class="font-bold text-lg md:text-xl text-pastel-text">جولة <span id="test-round-display">1</span> / 10</div>
+                <button onclick="playTestAudio()" class="w-10 h-10 md:w-12 md:h-12 bg-pastel-blue hover:bg-blue-300 rounded-full flex items-center justify-center text-lg md:text-xl text-white transition active:scale-95 shadow-sm" title="استمع مرة أخرى">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+
+            <div class="w-16 md:w-20 text-left font-bold text-green-500 text-lg md:text-xl flex items-center justify-end gap-1 md:gap-2">
+                <span id="test-score-display">0</span> <i class="fas fa-check-circle"></i>
+            </div>
+        </header>
+
+        <!-- منطقة العرض المركزية للبطاقات -->
+        <div class="flex-grow flex items-center justify-center p-4">
+            <div id="test-choices-container">
+                <!-- Dynamically populated 2, 3, or 4 images -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Feedback Overlay -->
+    <div id="test-feedback" class="fixed inset-0 z-[70] hidden pointer-events-none">
+        <div id="feedback-icon" class="absolute top-1/2 left-1/2 text-[12rem] feedback-pop">
+            <!-- Icon injected here -->
+        </div>
+    </div>
+
+    <!-- Audio Files -->
+    <audio id="sound-pop" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="sound-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="sound-error" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
+
+    <script>
+        const alphabets = [
+            {char: 'أ', id: 1}, {char: 'ب', id: 2}, {char: 'ت', id: 3}, {char: 'ث', id: 4},
+            {char: 'ج', id: 5}, {char: 'ح', id: 6}, {char: 'خ', id: 7}, {char: 'د', id: 8},
+            {char: 'ذ', id: 9}, {char: 'ر', id: 10}, {char: 'ز', id: 11}, {char: 'س', id: 12},
+            {char: 'ش', id: 13}, {char: 'ص', id: 14}, {char: 'ض', id: 15}, {char: 'ط', id: 16},
+            {char: 'ظ', id: 17}, {char: 'ع', id: 18}, {char: 'غ', id: 19}, {char: 'ف', id: 20},
+            {char: 'ق', id: 21}, {char: 'ك', id: 22}, {char: 'ل', id: 23}, {char: 'م', id: 24},
+            {char: 'ن', id: 25}, {char: 'هـ', id: 26}, {char: 'و', id: 27}, {char: 'ي', id: 28}
+        ];
+
+        // --- SENTENCES DATA ---
+        const sentencesData = {
+            1: { // حرف أ
+                1: "الأرنب يأكل الجزر.",
+                2: "الأسد ملك الغابة.",
+                3: "أحب أمي وأبي.",
+                4: "أنا أقرأ كتابًا.",
+                5: "أسمع بأذني.",
+                6: "هذا أصبعي.",
+                7: "أرسم بالألوان.",
+                8: "الأكل الصحي مفيد.",
+                9: "القميص لونه أبيض.",
+                10: "أنا ذهبت إلى المدرسة."
+            }
+            // يمكنك إكمال الباقي هنا
+        };
+
+        function getSentence(letterId, imgId) {
+            if (sentencesData[letterId] && sentencesData[letterId][imgId]) {
+                return sentencesData[letterId][imgId];
+            }
+            return `جملة ${imgId}`;
+        }
+
+        const state = {
+            editMode: false,
+            stars: 0,
+            starPanelVisible: true,
+            sidePanelVisible: true,
+            slotsData: [null],
+            activeSlotIndex: null,
+            maxStars: 5
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function init() {
+            renderStars();
+            renderSlots();
+        }
+
+        // --- STARS & VISUALS ---
+
+        function renderStars() {
+            const container = document.getElementById('star-slots');
+            container.innerHTML = '';
+            for (let i = 0; i < state.maxStars; i++) {
+                const isFilled = i < state.stars;
+                const star = document.createElement('div');
+                star.className = `w-10 h-10 md:w-12 md:h-12 cursor-pointer transition transform hover:scale-110 flex items-center justify-center rounded-full ${isFilled ? 'text-yellow-400' : 'bg-gray-100 text-gray-300'}`;
+                star.innerHTML = `<i class="fas fa-star text-2xl md:text-3xl ${isFilled ? 'star-pop' : ''}"></i>`;
+                star.onclick = () => toggleStar(i);
+                container.appendChild(star);
+            }
+        }
+
+        function toggleStar(index) {
+            const isFilled = index < state.stars;
+            const popSound = document.getElementById('sound-pop');
+            const clickSound = document.getElementById('sound-click');
+
+            if (!isFilled) {
+                state.stars++;
+                clickSound.currentTime = 0;
+                clickSound.play().catch(e => console.log(e));
+                renderStars();
+                if (state.stars === state.maxStars) setTimeout(celebrate, 300);
+            } else {
+                state.stars = index;
+                popSound.currentTime = 0;
+                popSound.play().catch(e => console.log(e));
+                renderStars();
+            }
+        }
+
+        function toggleStarPanel() {
+            state.starPanelVisible = !state.starPanelVisible;
+            const p = document.getElementById('star-panel-container');
+            if(state.starPanelVisible) p.style.marginTop = '0';
+            else p.style.marginTop = '-80px';
+        }
+
+        function celebrate() {
+            document.getElementById('sound-success').play().catch(e=>{});
+            launchFireworks();
+            setTimeout(() => {
+                state.stars = 0;
+                renderStars();
+            }, 6000);
+        }
+
+        function launchFireworks() {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            const colors = ['#FAD2E1', '#C5D0E6', '#C1E1C1', '#FDFD96', '#E6E6FA'];
+
+            function createExplosion(x, y) {
+                for(let i=0; i<60; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 5 + 2;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        alpha: 1,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        decay: Math.random() * 0.02 + 0.01
+                    });
+                }
+            }
+
+            createExplosion(canvas.width/2, canvas.height/2);
+
+            function animate() {
+                if (particles.length === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                requestAnimationFrame(animate);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15;
+                    p.alpha -= p.decay;
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                    } else {
+                        ctx.globalAlpha = p.alpha;
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+            }
+            animate();
+        }
+
+        // --- MAIN SLOTS LOGIC ---
+
+        function toggleEditMode() {
+            state.editMode = !state.editMode;
+            const btn = document.getElementById('edit-mode-btn');
+            if (state.editMode) btn.classList.add('edit-btn-active');
+            else btn.classList.remove('edit-btn-active');
+            renderSlots();
+        }
+
+        function renderSlots() {
+            const container = document.getElementById('slots-container');
+            container.innerHTML = '';
+
+            state.slotsData.forEach((slot, index) => {
+                const div = document.createElement('div');
+                div.className = `bg-white rounded-3xl p-3 flex flex-col items-center relative transition-all duration-300 w-full border border-gray-100`;
+
+                if (slot) {
+                    div.style.cursor = 'pointer';
+                    div.onclick = (e) => {
+                        if(!state.editMode) {
+                            playSlotAudio(index);
+                            div.classList.add('scale-[1.02]');
+                            setTimeout(() => div.classList.remove('scale-[1.02]'), 200);
+                        }
+                    };
+                }
+
+                if (!slot) {
+                    div.innerHTML = `
+                        <button onclick="event.stopPropagation(); openLetterPicker(${index})" class="w-full aspect-video bg-gray-50 rounded-2xl flex flex-col items-center justify-center text-gray-400 hover:text-pastel-blue transition p-4 border border-gray-100 hover:bg-pastel-blue/10">
+                            <i class="fas fa-plus text-5xl mb-3 opacity-50"></i>
+                            <span class="font-bold text-xl">إضافة بطاقة</span>
+                        </button>
+                    `;
+                } else {
+                    const imgPath = `images/${slot.letterId}/${slot.imgId}.png`;
+
+                    div.innerHTML = `
+                        <div class="relative w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden mb-2 border border-gray-100 flex items-center justify-between">
+
+                            <button onclick="event.stopPropagation(); navCard(${index}, -1)" class="z-10 bg-white/90 p-3 rounded-l-xl text-slate-700 hover:bg-pastel-blue hover:text-white transition h-1/2 flex items-center shadow-sm">
+                                <i class="fas fa-chevron-right text-xl"></i>
+                            </button>
+
+                            <img src="${imgPath}" onerror="this.src='https://placehold.co/600x338/F7FAFC/cbd5e0?text=${slot.imgId}'" class="absolute inset-0 w-full h-full object-contain p-2">
+
+                            <button onclick="event.stopPropagation(); navCard(${index}, 1)" class="z-10 bg-white/90 p-3 rounded-r-xl text-slate-700 hover:bg-pastel-blue hover:text-white transition h-1/2 flex items-center shadow-sm">
+                                <i class="fas fa-chevron-left text-xl"></i>
+                            </button>
+
+                            <button onclick="event.stopPropagation(); clearSlot(${index})"
+                                class="absolute top-2 right-2 bg-red-50 text-red-500 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition ${state.editMode ? 'block' : 'hidden'} z-20">
+                                <i class="fas fa-times"></i>
+                            </button>
+
+                            <div class="absolute top-2 left-2 bg-white/80 px-3 py-1 rounded-full font-bold text-slate-500 z-10 text-sm">
+                                ${slot.imgId} / 10
+                            </div>
+                        </div>
+
+                        <h3 class="text-lg md:text-xl font-bold text-slate-700 mb-1 min-h-[3rem] w-full text-center px-4 flex items-center justify-center break-words leading-tight">
+                            ${slot.label}
+                        </h3>
+
+                        <div class="card-controls w-full flex flex-col gap-2 ${state.editMode ? 'visible' : ''}" onclick="event.stopPropagation()">
+                             <input type="text" value="${slot.label}" onchange="updateLabel(${index}, this.value)"
+                                class="w-full text-center border border-gray-100 rounded-xl p-2 bg-gray-50 focus:border-pastel-blue outline-none" placeholder="تسمية البطاقة">
+
+                            <div class="flex justify-center gap-4 mt-2">
+                                <button onclick="recordAudio(${index})" id="rec-btn-${index}" class="w-12 h-12 rounded-xl bg-gray-100 hover:bg-pastel-pink text-slate-600 flex items-center justify-center transition relative border border-gray-200">
+                                    <i class="fas fa-microphone text-lg"></i>
+                                    <span id="rec-dot-${index}" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full hidden animate-pulse border-2 border-white"></span>
+                                </button>
+                                <button onclick="playRecording(${index})" id="play-rec-${index}" class="w-12 h-12 rounded-xl bg-pastel-blue hover:bg-blue-300 text-white flex items-center justify-center transition ${slot.customAudio ? '' : 'hidden'}">
+                                    <i class="fas fa-play text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function navCard(index, direction) {
+            let slot = state.slotsData[index];
+            slot.imgId += direction;
+            if (slot.imgId < 1) slot.imgId = 10;
+            if (slot.imgId > 10) slot.imgId = 1;
+
+            slot.label = getSentence(slot.letterId, slot.imgId);
+            slot.customAudio = null;
+
+            renderSlots();
+        }
+
+        function updateLabel(index, val) {
+            if(state.slotsData[index]) state.slotsData[index].label = val;
+            renderSlots();
+        }
+
+        function clearSlot(index) {
+            state.slotsData[index] = null;
+            renderSlots();
+        }
+
+        function clearSlots() {
+            state.slotsData = [null];
+            renderSlots();
+        }
+
+        function openLetterPicker(index) {
+            state.activeSlotIndex = index;
+            const grid = document.getElementById('letter-grid');
+            grid.innerHTML = '';
+
+            alphabets.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "aspect-square bg-gray-50 hover:bg-pastel-blue hover:text-white rounded-xl border border-gray-100 font-bold text-2xl text-slate-600 transition";
+                btn.innerText = item.char;
+                btn.onclick = () => {
+                    state.slotsData[index] = {
+                        letterId: item.id,
+                        imgId: 1,
+                        label: getSentence(item.id, 1),
+                        customAudio: null
+                    };
+                    closeModal('letter-modal');
+                    renderSlots();
+                };
+                grid.appendChild(btn);
+            });
+            openModal('letter-modal');
+        }
+
+        // --- AUDIO ---
+
+        function playSlotAudio(index) {
+            const slot = state.slotsData[index];
+            if(!slot) return;
+
+            if(slot.customAudio) {
+                new Audio(slot.customAudio).play();
+                return;
+            }
+
+            const path = `sounds/${slot.letterId}/${slot.imgId}.wav`;
+            new Audio(path).play().catch(e => {
+                console.log("الصوت غير موجود: " + path);
+            });
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+
+        async function recordAudio(index) {
+            const btn = document.getElementById(`rec-btn-${index}`);
+            const dot = document.getElementById(`rec-dot-${index}`);
+
+            if (btn.classList.contains('bg-red-100')) {
+                if(mediaRecorder) mediaRecorder.stop();
+                btn.classList.remove('bg-red-100', 'text-red-600');
+                btn.classList.add('bg-gray-100', 'text-slate-600');
+                dot.classList.add('hidden');
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    state.slotsData[index].customAudio = URL.createObjectURL(blob);
+                    renderSlots();
+                };
+                mediaRecorder.start();
+                btn.classList.remove('bg-gray-100', 'text-slate-600');
+                btn.classList.add('bg-red-100', 'text-red-600');
+                dot.classList.remove('hidden');
+            } catch (err) {
+                alert("تعذر الوصول إلى الميكروفون");
+            }
+        }
+
+        function playRecording(index) {
+            const slot = state.slotsData[index];
+            if(slot && slot.customAudio) new Audio(slot.customAudio).play();
+        }
+
+        // --- TEST MODE LOGIC ---
+
+        let testState = {
+            selectedLetters: [],
+            choicesCount: 2,
+            round: 1,
+            targetLetterId: null,
+            targetImgId: null,
+            score: 0
+        };
+
+        function openTestSetup() {
+            testState.selectedLetters = [];
+            const grid = document.getElementById('test-letters-grid');
+            grid.innerHTML = '';
+
+            alphabets.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "aspect-square bg-gray-50 rounded-xl border border-gray-100 font-bold text-xl text-slate-600 transition";
+                btn.innerText = item.char;
+                btn.onclick = () => {
+                    const idx = testState.selectedLetters.indexOf(item.id);
+                    if (idx > -1) {
+                        testState.selectedLetters.splice(idx, 1);
+                        btn.classList.remove('test-letter-active');
+                    } else {
+                        testState.selectedLetters.push(item.id);
+                        btn.classList.add('test-letter-active');
+                    }
+                };
+                grid.appendChild(btn);
+            });
+            openModal('test-setup-modal');
+        }
+
+        function startTest() {
+            if (testState.selectedLetters.length === 0) {
+                alert("الرجاء اختيار حرف واحد على الأقل للبدء.");
+                return;
+            }
+
+            testState.choicesCount = parseInt(document.querySelector('input[name="choicesCount"]:checked').value);
+            testState.round = 1;
+            testState.score = 0;
+
+            document.getElementById('test-score-display').innerText = '0';
+
+            closeModal('test-setup-modal');
+            openModal('test-game-modal');
+            generateTestRound();
+        }
+
+        function endTest() {
+            closeModal('test-game-modal');
+        }
+
+        function generateTestRound() {
+            if (testState.round > 10) {
+                endTest();
+                launchFireworks();
+                return;
+            }
+
+            document.getElementById('test-round-display').innerText = testState.round;
+
+            // Pick Target
+            testState.targetLetterId = testState.selectedLetters[Math.floor(Math.random() * testState.selectedLetters.length)];
+            testState.targetImgId = Math.floor(Math.random() * 10) + 1;
+
+            let choices = [{ l: testState.targetLetterId, i: testState.targetImgId }];
+
+            // Generate distractors
+            while(choices.length < testState.choicesCount) {
+                let randomLetter = testState.selectedLetters[Math.floor(Math.random() * testState.selectedLetters.length)];
+                let randomImg = Math.floor(Math.random() * 10) + 1;
+
+                // Avoid duplicates
+                if (!choices.find(c => c.l === randomLetter && c.i === randomImg)) {
+                    choices.push({ l: randomLetter, i: randomImg });
+                }
+            }
+
+            // Shuffle
+            choices.sort(() => Math.random() - 0.5);
+            renderTestChoices(choices);
+
+            // Auto play audio for target
+            setTimeout(playTestAudio, 500);
+        }
+
+        function renderTestChoices(choices) {
+            const container = document.getElementById('test-choices-container');
+            container.innerHTML = '';
+
+            // Adjust layout based on user requested counts (2, 3, or 4)
+            if (testState.choicesCount === 2) {
+                container.className = "grid grid-cols-2 gap-6 md:gap-8 w-full max-w-4xl place-items-center mx-auto";
+            } else if (testState.choicesCount === 3) {
+                container.className = "grid grid-cols-3 gap-6 md:gap-8 w-full max-w-6xl place-items-center mx-auto"; // All in one row
+            } else if (testState.choicesCount === 4) {
+                container.className = "grid grid-cols-2 gap-6 md:gap-8 w-full max-w-4xl place-items-center mx-auto"; // 2x2 grid
+            }
+
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                // Made cards bigger and added shadow
+                btn.className = "bg-white aspect-video w-full rounded-3xl border-2 border-gray-100 p-3 relative overflow-hidden transition-all duration-300 active:scale-95 group hover:border-pastel-blue shadow-md hover:shadow-xl";
+
+                const imgPath = `images/${choice.l}/${choice.i}.png`;
+                btn.innerHTML = `<img src="${imgPath}" onerror="this.src='https://placehold.co/600x400/F7FAFC/cbd5e0?text=${choice.i}'" class="w-full h-full object-contain group-hover:scale-105 transition duration-300">`;
+
+                btn.onclick = () => checkTestAnswer(choice.l, choice.i);
+                container.appendChild(btn);
+            });
+        }
+
+        function playTestAudio() {
+            const path = `sounds/${testState.targetLetterId}/${testState.targetImgId}.wav`;
+            new Audio(path).play().catch(e => console.log("الصوت للاختبار غير متوفر: ", path));
+        }
+
+        function checkTestAnswer(l, i) {
+            const isCorrect = (l === testState.targetLetterId && i === testState.targetImgId);
+            const feedbackBox = document.getElementById('test-feedback');
+            const iconDiv = document.getElementById('feedback-icon');
+
+            feedbackBox.classList.remove('hidden');
+
+            // Remove animation to reset it
+            iconDiv.classList.remove('feedback-pop');
+            void iconDiv.offsetWidth; // trigger reflow
+            iconDiv.classList.add('feedback-pop');
+
+            if(isCorrect) {
+                iconDiv.innerHTML = '<i class="fas fa-check-circle text-green-500 bg-white rounded-full shadow-lg"></i>';
+                document.getElementById('sound-success').play().catch(()=>{});
+                testState.score++;
+                document.getElementById('test-score-display').innerText = testState.score;
+
+                setTimeout(() => {
+                    feedbackBox.classList.add('hidden');
+                    testState.round++;
+                    generateTestRound();
+                }, 1200);
+            } else {
+                iconDiv.innerHTML = '<i class="fas fa-times-circle text-red-500 bg-white rounded-full shadow-lg"></i>';
+                document.getElementById('sound-error').play().catch(()=>{});
+
+                setTimeout(() => {
+                    feedbackBox.classList.add('hidden');
+                }, 1000);
+            }
+        }
+
+        // --- UTILS ---
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function toggleSidePanel() {
+            state.sidePanelVisible = !state.sidePanelVisible;
+            document.getElementById('side-panel').classList.toggle('collapsed');
+        }
+
+        init();
+    </script>
+</body>
+</html>

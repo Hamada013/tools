@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="ui_0">النطق — الرئيسية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            pink: '#FAD2E1',
+                            blue: '#C5D0E6',
+                            green: '#C1E1C1',
+                            yellow: '#FDFD96',
+                            purple: '#E6E6FA',
+                            text: '#4A5568'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Varela Round', 'Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFF5F7;
+            font-family: 'Varela Round', 'Tajawal', sans-serif;
+            color: #4A5568;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .modal-overlay {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-3 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Empty div to maintain spacing since Info button was removed -->
+            <div class="w-10"></div>
+
+            <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-xl overflow-hidden">
+                    <img src="assets/logo.webp" alt="Articulation — Hamada" class="w-full h-full object-contain">
+                </div>
+                <h1 class="font-bold text-lg text-pastel-text" data-translate="ui_1">النطق — مع حمادة ©</h1>
+            </div>
+
+            <button id="lang-btn" onclick="toggleLanguage()" class="bg-pastel-blue/50 text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-pastel-blue transition">
+                عربي
+            </button>
+        </div>
+    </header>
+
+    <!-- HOMEPAGE -->
+    <section id="homepage" class="flex-grow flex flex-col items-center justify-center p-6 space-y-8 animate-fade-in">
+        <div class="text-center space-y-4">
+            <div class="w-40 h-40 mx-auto flex items-center justify-center">
+                <img src="assets/logo.webp" alt="Articulation — Hamada" class="w-full h-full object-contain">
+            </div>
+            <h2 class="text-3xl font-bold text-pastel-text" data-translate="title_sub">أصدر صوتاً</h2>
+        </div>
+
+        <div class="w-full max-w-sm">
+            <!-- Start Button -->
+            <button onclick="openModal('selection-modal')" class="w-full bg-pastel-green hover:bg-green-300 py-4 rounded-2xl shadow-lg font-bold text-slate-700 text-xl flex items-center justify-center gap-3 transform hover:-translate-y-1 transition">
+                <i class="fas fa-play"></i> <span data-translate="btn_start">ابدأ</span>
+            </button>
+
+            <!-- Info and Resource buttons removed as requested -->
+        </div>
+    </section>
+
+    <!-- Selection Modal -->
+    <div id="selection-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center animate-fade-in border border-gray-100">
+            <h3 class="text-2xl font-bold text-pastel-text mb-6" data-translate="select_activity">اختر نشاطاً</h3>
+
+            <div class="flex flex-col gap-3">
+                <!-- Info -->
+                <a href="info/info.html" class="block w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-bold text-slate-600 shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-info-circle text-gray-400"></i>
+                    <span data-translate="menu_info">معلومات</span>
+                </a>
+
+                <!-- Syllable -->
+                <a href="syllable/syllable.html" class="block w-full bg-pastel-yellow hover:bg-yellow-200 py-3 rounded-xl font-bold text-slate-600 shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-music text-yellow-500 opacity-50"></i>
+                    <span data-translate="menu_syllable">مقطع</span>
+                </a>
+
+                <!-- Word -->
+                <a href="word/word.html" class="block w-full bg-pastel-green hover:bg-green-200 py-3 rounded-xl font-bold text-slate-600 shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-font text-green-600 opacity-50"></i>
+                    <span data-translate="menu_word">كلمة</span>
+                </a>
+
+                <!-- Sentence -->
+                <a href="sents/sentence.html" class="block w-full bg-pastel-pink hover:bg-pink-200 py-3 rounded-xl font-bold text-slate-600 shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-align-left text-pink-500 opacity-50"></i>
+                    <span data-translate="menu_sentence">جملة</span>
+                </a>
+
+                <!-- Story -->
+                <a href="story/story.html" class="block w-full bg-pastel-blue hover:bg-blue-200 py-3 rounded-xl font-bold text-slate-600 shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-book-open text-blue-500 opacity-50"></i>
+                    <span data-translate="menu_story">قصة</span>
+                </a>
+            </div>
+
+            <button onclick="closeModal('selection-modal')" class="mt-6 text-gray-400 hover:text-red-400 transition">
+                <i class="fas fa-times"></i> <span data-translate="close_label">إغلاق</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            en: {
+                title_sub: "Make a Sound",
+                btn_start: "Start",
+                select_activity: "Select Activity",
+                menu_info: "Info",
+                menu_syllable: "Syllable",
+                menu_word: "Word",
+                menu_sentence: "Sentence",
+                menu_story: "Story",
+                dir: "ltr"
+            },
+            ar: {
+                title_sub: "أصدر صوتاً",
+                btn_start: "ابدأ",
+                select_activity: "اختر نشاطاً",
+                menu_info: "معلومات",
+                menu_syllable: "مقطع",
+                menu_word: "كلمة",
+                menu_sentence: "جملة",
+                menu_story: "قصة",
+                dir: "rtl"
+            }
+        };
+
+        Object.assign(translations.en, {"ui_0": "Articulation - Home", "ui_1": "Articulation - Hamada ©", "close_label": "Close"});
+        Object.assign(translations.ar, {"ui_0": "النطق — الرئيسية", "ui_1": "النطق — مع حمادة ©", "close_label": "إغلاق"});
+
+        let currentLang = 'ar';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            updateLanguageUI();
+        }
+
+        function updateLanguageUI() {
+            const t = translations[currentLang];
+            document.getElementById('lang-btn').innerText = currentLang === 'en' ? 'عربي' : 'English';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = t.dir;
+
+            // Update text for elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if(t[key]) el.innerText = t[key];
+            });
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        // Initialize
+        updateLanguageUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="ui_0">النطق — مخارج الأصوات</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Tajawal:wght@400;500;700;800&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            pink: '#FAD2E1',
+                            pinkDark: '#f5a6c4',
+                            blue: '#C5D0E6',
+                            blueDark: '#99b0d6',
+                            green: '#C1E1C1',
+                            greenDark: '#9ccf9c',
+                            yellow: '#FDFD96',
+                            purple: '#E6E6FA',
+                            text: '#2D3748'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Varela Round', 'Tajawal', 'sans-serif'],
+                        ipa: ['Noto Sans', 'sans-serif'],
+                        arabic: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFF5F7;
+            font-family: 'Varela Round', 'Tajawal', sans-serif;
+            color: #2D3748;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Animations */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-enter {
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+        }
+
+        .ipa-font {
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+        }
+
+        /* Arabic specific adjustments */
+        :lang(ar) {
+            font-family: 'Tajawal', sans-serif;
+        }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-pink-50 to-blue-50">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+
+            <!-- Logo Area -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="location.reload()">
+                <img src="../assets/logo.webp" alt="Articulation — Hamada" class="h-10 w-10 object-contain rounded-xl">
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-pastel-text" data-translate="extra_0">النطق</h1>
+                    <p class="text-[10px] text-gray-400 font-bold tracking-wider uppercase" data-translate="ui_1">مساعد التدريب على النطق</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-3">
+                <!-- External Home Button -->
+                <button onclick="window.location.href='../artic.html'" class="w-10 h-10 rounded-full bg-gray-50 hover:bg-pastel-pink text-pastel-text transition flex items-center justify-center shadow-sm">
+                    <i class="fas fa-home"></i>
+                </button>
+
+                <!-- Internal Back Button (Hidden by default) -->
+                <button onclick="showSelectionView()" id="home-btn" class="hidden w-9 h-9 rounded-full bg-gray-100 hover:bg-pastel-blue hover:text-white text-gray-500 transition items-center justify-center">
+                    <i class="fas fa-arrow-left text-sm rtl:rotate-180"></i>
+                </button>
+
+                <button id="lang-btn" onclick="toggleLanguage()" class="group relative bg-white border border-gray-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-bold hover:border-pastel-blue hover:text-pastel-blueDark transition shadow-sm overflow-hidden">
+                    <span class="relative z-10 flex items-center gap-2">
+                        <i class="fas fa-globe text-xs opacity-50"></i>
+                        <span id="lang-text">عربي</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col p-4 md:p-6 relative max-w-7xl mx-auto w-full">
+
+        <!-- VIEW 1: SELECTION GRID -->
+        <div id="selection-view" class="flex flex-col gap-8 animate-enter w-full">
+
+            <!-- Hero / Welcome -->
+            <div class="text-center space-y-3 py-6">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-700" data-translate="select_sound">اختر صوتاً</h2>
+                <p class="text-slate-400 font-medium max-w-md mx-auto leading-relaxed" data-translate="ipa_note">استكشف مخارج الحروف باستخدام الأبجدية الصوتية الدولية</p>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex justify-center w-full">
+                <div class="bg-white/60 p-1.5 rounded-full shadow-sm border border-white inline-flex flex-wrap justify-center gap-1">
+                    <button onclick="filterCategory('consonants')" class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm" data-category="consonants" data-translate="ui_2">صوامت</button>
+                    <button onclick="filterCategory('vowels')" class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300" data-category="vowels" data-translate="ui_3">صوائت</button>
+                    <button id="cluster-btn" onclick="filterCategory('clusters')" class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300" data-category="clusters" data-translate="ui_4">عناقيد</button>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div id="sound-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4 pb-20 px-2">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- VIEW 2: DETAIL WORKPLACE -->
+        <div id="detail-view" class="hidden flex-col h-full animate-enter max-w-5xl mx-auto w-full">
+
+            <!-- Navigation Header for Detail -->
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="showSelectionView()" class="flex items-center gap-2 text-slate-500 hover:text-pastel-text hover:bg-white bg-white/50 px-4 py-2 rounded-full transition duration-300 font-bold text-sm">
+                    <i class="fas fa-arrow-left rtl:rotate-180"></i> <span data-translate="back_menu">رجوع</span>
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <span class="text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100" id="counter-display">1 / 20</span>
+                </div>
+            </div>
+
+            <!-- Main Card Layout -->
+            <div class="flex flex-col lg:flex-row gap-6 flex-grow items-stretch justify-center h-full min-h-[500px]">
+
+                <!-- LEFT COLUMN: VISUAL/EXAMPLE -->
+                <div class="flex-1 glass-panel rounded-3xl p-2 flex flex-col relative group border-t-4 border-pastel-pink transition-all hover:shadow-lg">
+                    <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur text-pink-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-eye"></i> <span data-translate="label_visual">المعين البصري</span>
+                    </div>
+
+                    <!-- Dynamic Content Container -->
+                    <div class="flex-grow bg-gradient-to-b from-white to-pink-50/30 rounded-2xl flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+
+                        <!-- Image with Fallback Logic handled in JS -->
+                        <img id="detail-image" src="" alt="Mouth position"
+                             class="max-w-full max-h-[250px] object-contain drop-shadow-xl z-10 transition duration-500 transform group-hover:scale-105 hidden">
+
+                        <!-- Fallback Typographic Card (Shown if image fails) -->
+                        <div id="fallback-card" class="flex flex-col items-center justify-center z-0">
+                            <span id="big-ipa" class="text-9xl text-pastel-pinkDark ipa-font font-bold opacity-20 select-none">/b/</span>
+                            <div class="mt-4">
+                                <span class="text-sm text-slate-400 font-bold uppercase tracking-widest mb-1 block" data-translate="label_example">مثال</span>
+                                <h3 id="example-word" class="text-4xl font-bold text-slate-700">—</h3>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Audio Action -->
+                    <div class="p-4 flex justify-center">
+                        <button onclick="playAudio()" class="flex items-center gap-3 bg-pastel-pink hover:bg-pastel-pinkDark text-pink-900 px-8 py-3 rounded-2xl font-bold shadow-md hover:shadow-lg transition transform hover:-translate-y-1 active:scale-95 w-full justify-center md:w-auto">
+                            <i class="fas fa-volume-up"></i>
+                            <span data-translate="btn_listen">استمع</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: INSTRUCTIONS -->
+                <div class="flex-1 glass-panel rounded-3xl p-6 md:p-10 flex flex-col relative border-t-4 border-pastel-blue">
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> <span data-translate="label_guide">دليل النطق</span>
+                    </div>
+
+                    <div class="mt-8 flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 bg-pastel-blue rounded-2xl flex items-center justify-center text-3xl font-bold text-blue-800 shadow-inner ipa-font" id="current-ipa-display">
+                            /b/
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-600" data-translate="label_production">كيفية النطق:</h3>
+                            <div class="h-1 w-12 bg-pastel-blue rounded-full mt-1"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow overflow-y-auto custom-scrollbar pr-2">
+                        <p id="detail-text" class="text-xl leading-9 text-slate-600 font-medium">
+                            <!-- Text injected here -->
+                        </p>
+                    </div>
+
+                    <!-- Bottom Nav Controls -->
+                    <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-100">
+                        <button onclick="prevSound()" class="h-12 w-12 rounded-full border-2 border-slate-100 hover:border-pastel-blue hover:bg-pastel-blue hover:text-white text-slate-400 transition flex items-center justify-center group">
+                            <i class="fas fa-chevron-left text-lg transform group-hover:-translate-x-1 transition rtl:rotate-180"></i>
+                        </button>
+
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-widest" data-translate="ui_5">التنقل</span>
+
+                        <button onclick="nextSound()" class="h-12 w-12 rounded-full border-2 border-slate-100 hover:border-pastel-blue hover:bg-pastel-blue hover:text-white text-slate-400 transition flex items-center justify-center group">
+                            <i class="fas fa-chevron-right text-lg transform group-hover:translate-x-1 transition rtl:rotate-180"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/50 backdrop-blur-sm mt-auto border-t border-slate-100">
+        <div class="container mx-auto p-4 text-center text-xs text-slate-400 font-bold">
+            <p data-translate="ui_6">© 2023 مساعد النطق</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA ---
+
+        const soundData = {
+            en: {
+                consonants: [
+                    { id: 'p', ipa: 'p', example: "Pop", info: "Bring lips together, build up air pressure, and release with a puff of air. Voice is OFF." },
+                    { id: 'b', ipa: 'b', example: "Ball", info: "Bring lips together, build up air pressure, and release. Turn your voice ON (vibrate vocal cords)." },
+                    { id: 'm', ipa: 'm', example: "Mom", info: "Close lips. Turn voice on. Let air escape through your nose. Feel the vibration on your lips." },
+                    { id: 'w', ipa: 'w', example: "Water", info: "Round lips into a small circle. Turn voice on and move lips apart." },
+                    { id: 'f', ipa: 'f', example: "Fan", info: "Place top teeth on bottom lip. Blow air through. Voice is OFF." },
+                    { id: 'v', ipa: 'v', example: "Van", info: "Place top teeth on bottom lip. Blow air through and turn voice ON (buzzy sound)." },
+                    { id: 'th1', ipa: 'θ', example: "Thumb", info: "Place tongue tip between teeth. Blow air gently. Voice is OFF." },
+                    { id: 'th2', ipa: 'ð', example: "This", info: "Place tongue tip between teeth. Blow air and turn voice ON." },
+                    { id: 't', ipa: 't', example: "Toe", info: "Tip of tongue taps the bump behind top teeth. Build pressure and release with a burst." },
+                    { id: 'd', ipa: 'd', example: "Dog", info: "Tip of tongue taps the bump behind top teeth. Turn voice ON." },
+                    { id: 's', ipa: 's', example: "Sun", info: "Teeth together, lips smile. Tongue tip up or down behind teeth. Blow skinny air stream." },
+                    { id: 'z', ipa: 'z', example: "Zoo", info: "Same position as /s/, but turn your voice ON. Make a buzzing bee sound." },
+                    { id: 'n', ipa: 'n', example: "No", info: "Tongue tip on the bump behind top teeth. Voice on. Air comes out the nose." },
+                    { id: 'l', ipa: 'l', example: "Lion", info: "Tongue tip touches the bump behind top teeth. Voice on. Air flows around the sides of tongue." },
+                    { id: 'sh', ipa: 'ʃ', example: "Shoe", info: "Round lips slightly. Pull tongue back a bit. Blow air (quiet sound 'shhh')." },
+                    { id: 'zh', ipa: 'ʒ', example: "Measure", info: "Same as /ʃ/ but turn voice on." },
+                    { id: 'ch', ipa: 'tʃ', example: "Chair", info: "Start with /t/, slide quickly into /ʃ/. An explosive sound (like 'choo choo')." },
+                    { id: 'j', ipa: 'dʒ', example: "Juice", info: "Start with /d/, slide quickly into /ʒ/. Voice on." },
+                    { id: 'r', ipa: 'r', example: "Red", info: "Pull tongue back and bunch it up. Sides of tongue touch top back teeth. Do not touch the roof of mouth with tip." },
+                    { id: 'y', ipa: 'j', example: "Yellow", info: "Sides of tongue touch top teeth. Middle of tongue goes up. Voice on." },
+                    { id: 'k', ipa: 'k', example: "Kite", info: "Back of tongue goes up to touch soft palate. Build pressure and release. Voice OFF." },
+                    { id: 'g', ipa: 'g', example: "Go", info: "Back of tongue goes up. Voice ON. Make a gulping sound." },
+                    { id: 'h', ipa: 'h', example: "Hat", info: "Open mouth, relax tongue. Breathe out gently. Voice OFF." },
+                    { id: 'ng', ipa: 'ŋ', example: "Ring", info: "Back of tongue up (like /k/). Voice on. Air comes out nose." }
+                ],
+                vowels: [
+                    { id: 'ee', ipa: 'i', example: "Bee", info: "Smile wide. Tongue high and forward." },
+                    { id: 'i', ipa: 'ɪ', example: "Igloo", info: "Relax jaw slightly from /i/." },
+                    { id: 'eh', ipa: 'e', example: "Egg", info: "Mid-front vowel. Drop jaw slightly more." },
+                    { id: 'ae', ipa: 'æ', example: "Cat", info: "Jaw low. Tongue forward and flat." },
+                    { id: 'ah', ipa: 'ɑ', example: "Hot", info: "Open mouth wide. Tongue flat and low." },
+                    { id: 'aw', ipa: 'ɔ', example: "Dog", info: "Round lips slightly. Tongue back." },
+                    { id: 'uh', ipa: 'ʊ', example: "Book", info: "Round lips loosely. Tongue back." },
+                    { id: 'oo', ipa: 'u', example: "Moon", info: "Round lips tight. Tongue high and back." },
+                    { id: 'uh_cup', ipa: 'ʌ', example: "Cup", info: "Relax mouth. Tongue central." },
+                    { id: 'schwa', ipa: 'ə', example: "Banana", info: "The Schwa. Completely relaxed mouth. Short sound." }
+                ],
+                clusters: [
+                    { id: 'sp', ipa: 'sp', example: "Spoon", info: "Start with snake sound /s/, pop lips for /p/." },
+                    { id: 'st', ipa: 'st', example: "Star", info: "Start with /s/, tap tongue for /t/." },
+                    { id: 'sk', ipa: 'sk', example: "Sky", info: "Start with /s/, lift back of tongue for /k/." },
+                    { id: 'sm', ipa: 'sm', example: "Smile", info: "Start with /s/, close lips for /m/." },
+                    { id: 'sn', ipa: 'sn', example: "Snow", info: "Start with /s/, tongue tip up for /n/." },
+                    { id: 'sl', ipa: 'sl', example: "Slide", info: "Start with /s/, lift tongue for /l/." },
+                    { id: 'pl', ipa: 'pl', example: "Plane", info: "Pop /p/, immediately lift tongue for /l/." },
+                    { id: 'bl', ipa: 'bl', example: "Blue", info: "Burst /b/, lift tongue for /l/." },
+                    { id: 'fl', ipa: 'fl', example: "Flower", info: "Bite lip /f/, lift tongue /l/." },
+                    { id: 'pr', ipa: 'pr', example: "Present", info: "Pop /p/, pull tongue back for /r/." },
+                    { id: 'tr', ipa: 'tr', example: "Tree", info: "Tap /t/, pull back for /r/." }
+                ]
+            },
+            ar: {
+                consonants: [
+                    { id: 'aa', ipa: 'ʔ', example: "أرنب", info: "صوت الهمزة. اغلق الحبال الصوتية ثم افتحها فجأة." },
+                    { id: 'b', ipa: 'b', example: "بطة", info: "اطبق الشفتين معاً ثم اطلق الهواء مع اهتزاز الحبال الصوتية." },
+                    { id: 't', ipa: 't', example: "توت", info: "طرف اللسان يلمس منبت الأسنان العليا. انفجار هوائي خفيف." },
+                    { id: 'th', ipa: 'θ', example: "ثعلب", info: "ضع طرف اللسان بين الأسنان وانفخ الهواء (ث)." },
+                    { id: 'j', ipa: 'dʒ', example: "جمل", info: "وسط اللسان يلمس سقف الحلق. صوت الجيم." },
+                    { id: '7', ipa: 'ħ', example: "حصان", info: "ارجع لسان المزمار للخلف. صوت الحاء (بحة)." },
+                    { id: 'kh', ipa: 'x', example: "خروف", info: "مؤخرة اللسان ترتفع قريباً من اللهاة. صوت الخاء (شخير)." },
+                    { id: 'd', ipa: 'd', example: "دب", info: "طرف اللسان على منبت الأسنان العليا. صوت مجهور." },
+                    { id: 'thal', ipa: 'ð', example: "ذرة", info: "طرف اللسان بين الأسنان مع اهتزاز (ذ)." },
+                    { id: 'r', ipa: 'r', example: "رمان", info: "طرف اللسان يضرب سقف الحلق ضربات متكررة (تكرير)." },
+                    { id: 'z', ipa: 'z', example: "زرافة", info: "الأسنان مغلقة، اللسان خلفها، اهتزاز (ز)." },
+                    { id: 's', ipa: 's', example: "سمكة", info: "الأسنان مغلقة، اللسان خلفها، صفير بدون اهتزاز (س)." },
+                    { id: 'sh', ipa: 'ʃ', example: "شمس", info: "وسط اللسان يرتفع. تفشي الهواء (ش)." },
+                    { id: 's_emph', ipa: 'sˤ', example: "صاروخ", info: "صوت الصاد. مثل السين ولكن مع استعلاء اقصى اللسان وتفخيم." },
+                    { id: 'd_emph', ipa: 'dˤ', example: "ضفدع", info: "صوت الضاد. حافة اللسان تضغط على الاضراس العليا." },
+                    { id: 't_emph', ipa: 'tˤ', example: "طائرة", info: "صوت الطاء. مثل التاء ولكن مع تفخيم واستعلاء اللسان." },
+                    { id: 'th_emph', ipa: 'ðˤ', example: "ظرف", info: "صوت الظاء. طرف اللسان بين الأسنان مع تفخيم." },
+                    { id: 'ein', ipa: 'ʕ', example: "عنب", info: "صوت العين. تضييق البلعوم." },
+                    { id: 'gh', ipa: 'ɣ', example: "غزال", info: "صوت الغين. مؤخرة اللسان مع اللهاة. اهتزاز." },
+                    { id: 'f', ipa: 'f', example: "فيل", info: "الأسنان العليا على الشفة السفلى. نفخ الهواء." },
+                    { id: 'q', ipa: 'q', example: "قلم", info: "صوت القاف. اقصى اللسان يلمس المنطقة اللينة في سقف الحلق." },
+                    { id: 'k', ipa: 'k', example: "كتاب", info: "صوت الكاف. ادنى قليلاً من القاف. المنطقة الصلبة واللينة." },
+                    { id: 'l', ipa: 'l', example: "ليمون", info: "طرف اللسان يلمس اللثة العليا." },
+                    { id: 'm', ipa: 'm', example: "موز", info: "اطباق الشفتين وا خراج الهواء من الأنف." },
+                    { id: 'n', ipa: 'n', example: "نحلة", info: "طرف اللسان على اللثة. هواء من الأنف." },
+                    { id: 'h', ipa: 'h', example: "هرم", info: "هواء يخرج من اقصى الحلق. صوت الهاء." },
+                    { id: 'w', ipa: 'w', example: "وردة", info: "استدارة الشفتين مع تضييق." },
+                    { id: 'y', ipa: 'j', example: "يد", info: "وسط اللسان يرتفع لوسط الحلق (ي)." }
+                ],
+                vowels: [
+                    { id: 'a_long', ipa: 'a:', example: "باب", info: "الالف الممدودة. فتح الفم واسترخاء اللسان." },
+                    { id: 'u_long', ipa: 'u:', example: "توت", info: "الواو الممدودة. ضم الشفتين." },
+                    { id: 'i_long', ipa: 'i:', example: "تين", info: "الياء الممدودة. خفض الفك وارتفاع وسط اللسان." }
+                ],
+                clusters: []
+            }
+        };
+
+        const translations = {
+            en: {
+                select_sound: "Select a Sound",
+                ipa_note: "Explore articulation points using the International Phonetic Alphabet (IPA)",
+                back_menu: "Menu",
+                dir: "ltr",
+                cat_cons: "Consonants",
+                cat_vow: "Vowels",
+                cat_clus: "Clusters",
+                label_visual: "Visual Aid",
+                label_guide: "Elicitation Guide",
+                label_production: "How to produce:",
+                label_example: "Example Word",
+                btn_listen: "Listen",
+                font: "Varela Round"
+            },
+            ar: {
+                select_sound: "اختر صوتاً",
+                ipa_note: "استكشف مخارج الحروف باستخدام الأبجدية الصوتية الدولية",
+                back_menu: "القائمة",
+                dir: "rtl",
+                cat_cons: "صوامت",
+                cat_vow: "صوائت",
+                cat_clus: "عناقيد",
+                label_visual: "المعين البصري",
+                label_guide: "دليل النطق",
+                label_production: "كيفية النطق:",
+                label_example: "مثال",
+                btn_listen: "استمع",
+                font: "Tajawal"
+            }
+        };
+
+        // --- STATE & UTILS ---
+
+        Object.assign(translations.en, {"ui_0": "Articulation - Info & Elicitation", "ui_1": "Therapy Assistant", "ui_2": "Consonants", "ui_3": "Vowels", "ui_4": "Clusters", "ui_5": "Navigation", "ui_6": "&copy; 2023 Articulation Assistant", "close_label": "Close"});
+        Object.assign(translations.ar, {"ui_0": "النطق — مخارج الأصوات", "ui_1": "مساعد التدريب على النطق", "ui_2": "صوامت", "ui_3": "صوائت", "ui_4": "عناقيد", "ui_5": "التنقل", "ui_6": "© 2023 مساعد النطق", "close_label": "إغلاق"});
+
+        Object.assign(translations.en, {"extra_0": "Articulation"});
+        Object.assign(translations.ar, {"extra_0": "النطق"});
+        let state = {
+            lang: 'ar',
+            currentCategory: 'consonants',
+            currentList: [],
+            currentIndex: 0
+        };
+
+        function setHTMLDir(dir) {
+            document.documentElement.dir = dir;
+            document.documentElement.lang = state.lang;
+
+            // Adjust layouts based on direction
+            if(dir === 'rtl') {
+                document.querySelectorAll('.fa-chevron-right').forEach(el => el.style.transform = "rotate(180deg)");
+                document.querySelectorAll('.fa-chevron-left').forEach(el => el.style.transform = "rotate(180deg)");
+                document.querySelectorAll('.fa-arrow-left').forEach(el => el.style.transform = "rotate(180deg)");
+            } else {
+                document.querySelectorAll('.fa-chevron-right').forEach(el => el.style.transform = "");
+                document.querySelectorAll('.fa-chevron-left').forEach(el => el.style.transform = "");
+                document.querySelectorAll('.fa-arrow-left').forEach(el => el.style.transform = "");
+            }
+        }
+
+        // --- CORE FUNCTIONS ---
+
+        function toggleLanguage() {
+            state.lang = state.lang === 'en' ? 'ar' : 'en';
+            state.currentCategory = 'consonants'; // Reset category on lang switch
+            updateLanguageUI();
+
+            // Re-render grid if visible
+            if(!document.getElementById('selection-view').classList.contains('hidden')) {
+                renderSelectionGrid();
+            } else {
+                // If in detail view, try to find equivalent sound or go back to menu?
+                // For simplicity, go back to menu
+                showSelectionView();
+            }
+        }
+
+        function updateLanguageUI() {
+            const t = translations[state.lang];
+
+            // Header Button
+            document.getElementById('lang-text').innerText = state.lang === 'en' ? 'عربي' : 'English';
+
+            // HTML Dir
+            setHTMLDir(t.dir);
+
+            // Toggle cluster button visibility (Hide for Arabic as data is empty)
+            const clusterBtn = document.getElementById('cluster-btn');
+            if (state.lang === 'ar') clusterBtn.style.display = 'none';
+            else clusterBtn.style.display = 'block';
+
+            // Translate Static elements
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if(t[key]) el.innerText = t[key];
+            });
+
+            // Update Tabs Styling
+            updateActiveTabUI();
+        }
+
+        function filterCategory(cat) {
+            state.currentCategory = cat;
+            updateActiveTabUI();
+            renderSelectionGrid();
+        }
+
+        function updateActiveTabUI() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                // Reset styles
+                btn.classList.remove('bg-pastel-blue', 'text-white', 'shadow-md', 'scale-105');
+                btn.classList.add('text-slate-500', 'hover:bg-gray-50');
+
+                // Set Active
+                if(btn.dataset.category === state.currentCategory) {
+                    btn.classList.remove('text-slate-500', 'hover:bg-gray-50');
+                    btn.classList.add('bg-pastel-blue', 'text-white', 'shadow-md', 'scale-105');
+                }
+            });
+        }
+
+        function renderSelectionGrid() {
+            const grid = document.getElementById('sound-grid');
+            grid.innerHTML = '';
+
+            // Get Data
+            const list = soundData[state.lang][state.currentCategory] || [];
+            state.currentList = list;
+
+            list.forEach((sound, index) => {
+                const btn = document.createElement('button');
+                // Card Styling
+                btn.className = "group relative aspect-square bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center overflow-hidden";
+
+                btn.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-br from-white to-slate-50 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                    <span class="text-3xl font-bold ipa-font text-slate-600 group-hover:text-pastel-blueDark relative z-10">${sound.ipa}</span>
+                    <span class="text-[10px] uppercase tracking-wide text-slate-300 group-hover:text-pastel-blue relative z-10 mt-1 font-bold">${sound.example || ''}</span>
+                    <div class="absolute bottom-0 h-1 w-full bg-pastel-blue transform scale-x-0 group-hover:scale-x-100 transition duration-300"></div>
+                `;
+
+                btn.onclick = () => selectSound(index);
+                grid.appendChild(btn);
+            });
+        }
+
+        // --- NAVIGATION & DETAIL VIEW ---
+
+        function selectSound(index) {
+            state.currentIndex = index;
+
+            // Animation for View Switch
+            const selectionView = document.getElementById('selection-view');
+            const detailView = document.getElementById('detail-view');
+            const homeBtn = document.getElementById('home-btn');
+
+            selectionView.classList.add('hidden');
+            detailView.classList.remove('hidden');
+            detailView.classList.add('flex');
+            homeBtn.classList.remove('hidden');
+            homeBtn.classList.add('flex');
+
+            // Scroll to top
+            window.scrollTo(0,0);
+
+            renderDetail();
+        }
+
+        function showSelectionView() {
+            const selectionView = document.getElementById('selection-view');
+            const detailView = document.getElementById('detail-view');
+            const homeBtn = document.getElementById('home-btn');
+
+            detailView.classList.add('hidden');
+            detailView.classList.remove('flex');
+            selectionView.classList.remove('hidden');
+            homeBtn.classList.add('hidden');
+            homeBtn.classList.remove('flex');
+        }
+
+        function renderDetail() {
+            const sound = state.currentList[state.currentIndex];
+
+            // 1. Update Text Content
+            document.getElementById('current-ipa-display').innerText = `/${sound.ipa}/`;
+            document.getElementById('detail-text').innerText = sound.info;
+            document.getElementById('example-word').innerText = sound.example;
+
+            // 2. Update Image Logic (Try to load image, fallback to card if fail)
+            const imgEl = document.getElementById('detail-image');
+            const fallbackCard = document.getElementById('fallback-card');
+            const bigIpa = document.getElementById('big-ipa');
+
+            // Set content for fallback
+            bigIpa.innerText = `/${sound.ipa}/`;
+
+            // Since we don't have real images in this portable version,
+            // we will default to the nice typographic card.
+            // However, I've kept the logic if you add images later.
+            // For now, I'll force fallback to show the design.
+
+            /* To use images:
+               imgEl.src = `../images/${state.lang}/${sound.id}.png`;
+               imgEl.classList.remove('hidden');
+               fallbackCard.classList.add('hidden');
+            */
+
+            // Using pure CSS/HTML fallback for self-contained file:
+            imgEl.src = "";
+            imgEl.classList.add('hidden');
+            fallbackCard.classList.remove('hidden');
+            fallbackCard.classList.add('flex');
+
+            // 3. Update Counter
+            document.getElementById('counter-display').innerText = `${state.currentIndex + 1} / ${state.currentList.length}`;
+        }
+
+        function nextSound() {
+            if (state.currentIndex < state.currentList.length - 1) {
+                state.currentIndex++;
+            } else {
+                state.currentIndex = 0; // Loop
+            }
+            renderDetail();
+        }
+
+        function prevSound() {
+            if (state.currentIndex > 0) {
+                state.currentIndex--;
+            } else {
+                state.currentIndex = state.currentList.length - 1; // Loop
+            }
+            renderDetail();
+        }
+
+        // --- AUDIO ---
+
+        function playAudio() {
+            const sound = state.currentList[state.currentIndex];
+            if(!sound || !sound.example) return;
+
+            // Stop any current speech
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(sound.example);
+
+            // Set Language
+            utterance.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+            utterance.rate = 0.9; // Slightly slower for clarity
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- INIT ---
+        // Pre-load logic
+        updateLanguageUI();
+        filterCategory('consonants');
+
+    </script>
+</body>
+</html>

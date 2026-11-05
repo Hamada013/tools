@@ -7,7 +7,7 @@ const visible=(page,selector)=>page.locator(selector).waitFor({state:'visible'})
 async function fit(page,label){
  const issues=await page.evaluate(()=>{
   const errors=[];if(document.documentElement.scrollWidth>innerWidth+1)errors.push('horizontal page overflow');
-  for(const element of document.querySelectorAll('#activity-view .syllable-card, #activity-view .grade, #activity-view .drop-target, #pause-button, #replay-button, #activity-view #previous-page, #activity-view #next-page')){
+  for(const element of document.querySelectorAll('#activity-view .syllable-card, #activity-view .grade, #activity-view .drop-target, #pause-button, #listening-cue, #activity-view #previous-page, #activity-view #next-page')){
    if(!element.getClientRects().length)continue;const r=element.getBoundingClientRect();if(r.left<-.5||r.right>innerWidth+.5||r.top<-.5||r.bottom>innerHeight+.5)errors.push(element.className+' outside viewport '+JSON.stringify({x:r.x,y:r.y,w:r.width,h:r.height}));
    if(element.tagName==='BUTTON'&&(r.width<43||r.height<43))errors.push(element.className+' small touch target');
   }
@@ -50,6 +50,10 @@ async function run(engine,name,origin){
   for(const [width,height]of viewports){await page.setViewportSize({width,height});await fit(page,`${name} listening ${width}x${height}`);}
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:`/private/tmp/artic-syllable-${name}-listening.png`,fullPage:true});
   let draft=(await stored(page)).find(s=>s.kind==='listening');assert.equal(draft.plan.length,3);assert.equal(draft.plan[0].choices.length,3);
+  assert.equal(await page.locator('#replay-button').count(),0);
+  await page.locator('#listening-cue').focus();await page.keyboard.press('Enter');await listeningReady(page);
+  assert.equal((await stored(page)).find(s=>s.kind==='listening').records.length,0,'Listening card playback never records an answer');
+  assert.equal(await page.locator('.syllable-part>span').count(),0,'No duplicated printed letter captions');
   const wrong=draft.plan[0].choices.find(id=>id!==draft.plan[0].id);
   await page.locator(`#choice-grid [data-item="${wrong}"]`).dblclick({delay:30});
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('articulation-syllable-results-v1')).sessions.find(s=>s.kind==='listening').records.length===1);
@@ -62,8 +66,8 @@ async function run(engine,name,origin){
   await setup(page,'production','cv');await page.waitForFunction(()=>!document.querySelector('[data-grade="100"]').disabled);
   assert.equal(await page.locator('#syllable-audio').evaluate(audio=>audio.paused),true);assert.deepEqual((await stored(page)).find(s=>s.kind==='production').cues,{});
   for(const [width,height]of viewports){await page.setViewportSize({width,height});await fit(page,`${name} production ${width}x${height}`);}
-  await page.setViewportSize({width:390,height:844});await page.locator('[data-grade="0"]').click();await page.waitForTimeout(520);await page.waitForFunction(()=>!document.querySelector('[data-grade="100"]').disabled);
-  await page.locator('#replay-button').click();await page.waitForFunction(()=>document.querySelector('#syllable-audio').currentTime>0);
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:`/private/tmp/artic-syllable-${name}-production.png`,fullPage:true});await page.locator('[data-grade="0"]').click();await page.waitForTimeout(520);await page.waitForFunction(()=>!document.querySelector('[data-grade="100"]').disabled);
+  await page.locator('#production-stage button').click();await page.waitForFunction(()=>document.querySelector('#syllable-audio').currentTime>0);
   await page.locator('#pause-button').click();await visible(page,'#paused-view');await page.reload();await visible(page,'#resume-button');await page.locator('#resume-button').click();await page.waitForFunction(()=>!document.querySelector('[data-grade="40"]').disabled);
   assert.match(await page.locator('#audio-status').textContent(),/سبق تشغيل/);await page.locator('[data-grade="40"]').click();await page.waitForTimeout(520);await page.waitForFunction(()=>!document.querySelector('[data-grade="100"]').disabled);await page.locator('[data-grade="100"]').click();await visible(page,'#results-view');
   let production=(await stored(page)).find(s=>s.kind==='production');assert.deepEqual(production.records.map(r=>r.outcome),['incorrect','emerging','correct']);assert.deepEqual(production.records.map(r=>r.score),[0,40,100]);assert.deepEqual(production.records.map(r=>r.modeled),[false,true,false]);assert.match(await page.locator('#result-content').textContent(),/47%/);
@@ -77,12 +81,15 @@ async function run(engine,name,origin){
   assert.deepEqual(percentages.records.slice(0,6).map(r=>r.score),[0,20,40,60,80,100]);assert.match(await page.locator('#result-content').textContent(),/50%/);
   // Tap/keyboard matching and pointer dragging; matched targets cannot score twice.
   await setup(page,'matching','vcv');
+  assert.equal(await page.locator('#matching-targets .icon').count(),0);
+  await page.locator('.drop-target').first().click();await page.waitForFunction(()=>document.querySelector('#syllable-audio').currentTime>0);
+  assert.match(await page.locator('#matching-count').textContent(),/0 \/ 3/,'Listening to a covered card never matches it');
   for(const [width,height]of viewports){await page.setViewportSize({width,height});await fit(page,`${name} matching ${width}x${height}`);}
   await page.setViewportSize({width:390,height:844});
-  let id=await page.locator('.matching-source').first().getAttribute('data-item');await page.locator(`.matching-source[data-item="${id}"]`).click();await page.locator(`.drop-target[data-target="${id}"]`).click();assert.match(await page.locator('#matching-count').textContent(),/1 \/ 3/);assert.equal(await page.locator(`.drop-target[data-target="${id}"]`).isDisabled(),true);
-  id=await page.locator('.matching-source:not(:disabled)').first().getAttribute('data-item');const source=page.locator(`.matching-source[data-item="${id}"]`),target=page.locator(`.drop-target[data-target="${id}"]`),a=await source.boundingBox(),b=await target.boundingBox();
+  let id=await page.locator('.matching-source').first().getAttribute('data-item');await page.locator(`.matching-source[data-item="${id}"]`).click();await page.locator(`.drop-target[data-target="${id}"]`).click();assert.match(await page.locator('#matching-count').textContent(),/1 \/ 3/);assert.equal(await page.locator(`.drop-target[data-target="${id}"]`).isDisabled(),false);await page.locator(`.drop-target[data-target="${id}"]`).click();assert.match(await page.locator('#matching-count').textContent(),/1 \/ 3/);
+  id=await page.locator('.matching-source:not(.matched)').first().getAttribute('data-item');const source=page.locator(`.matching-source[data-item="${id}"]`),target=page.locator(`.drop-target[data-target="${id}"]`),a=await source.boundingBox(),b=await target.boundingBox();
   await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:12});await page.mouse.up();assert.match(await page.locator('#matching-count').textContent(),/2 \/ 3/);
-  id=await page.locator('.matching-source:not(:disabled)').first().getAttribute('data-item');await page.locator(`.matching-source[data-item="${id}"]`).focus();await page.keyboard.press('Enter');await page.locator(`.drop-target[data-target="${id}"]`).focus();await page.keyboard.press('Enter');assert.match(await page.locator('#matching-count').textContent(),/3 \/ 3/);
+  id=await page.locator('.matching-source:not(.matched)').first().getAttribute('data-item');await page.locator(`.matching-source[data-item="${id}"]`).focus();await page.keyboard.press('Enter');await page.locator(`.drop-target[data-target="${id}"]`).focus();await page.keyboard.press('Enter');assert.match(await page.locator('#matching-count').textContent(),/3 \/ 3/);
   await page.locator('#restart-button').click();
   id=await page.locator('.matching-source').first().getAttribute('data-item');
   if(name==='chromium'){
@@ -108,7 +115,7 @@ async function run(engine,name,origin){
   await page.waitForFunction(()=>document.querySelector('#audio-status').textContent.length>0);
   assert.equal(await page.locator('#choice-grid button').first().isDisabled(),true);assert.equal(await page.locator('#skip-button').isDisabled(),false);
   assert.equal((await stored(page)).at(-1).records.length,0);
-  await page.unroute('**/sounds/**');await page.locator('#replay-button').click();await listeningReady(page);
+  await page.unroute('**/sounds/**');await page.locator('#listening-cue').click();await listeningReady(page);
   assert.equal((await stored(page)).at(-1).records.length,0);
   await page.locator('#pause-button').click();await visible(page,'#paused-view');await page.locator('#finish-button').click();await visible(page,'#results-view');
   await page.locator('#home-button').click();await visible(page,'#home-view');await page.screenshot({path:`/private/tmp/artic-syllable-${name}-home-phone.png`,fullPage:true});

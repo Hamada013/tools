@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="ui_0">النطق — القصص</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            pink: '#FAD2E1',
+                            blue: '#C5D0E6',
+                            green: '#C1E1C1',
+                            yellow: '#FDFD96',
+                            purple: '#E6E6FA',
+                            text: '#4A5568',
+                            dark: '#2D3748'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Varela Round', 'Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFF5F7;
+            font-family: 'Varela Round', 'Tajawal', sans-serif;
+            color: #4A5568;
+            overflow: hidden; /* Prevent body scroll, handle in containers */
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* Animations */
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .star-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .highlight-word {
+            background-color: #FDFD96; /* Pastel Yellow */
+            border-radius: 4px;
+            padding: 0 2px;
+            transition: background-color 0.2s;
+            color: #2D3748;
+            font-weight: bold;
+        }
+
+        /* Book Styles */
+        .book-container {
+            perspective: 1500px;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 4/3; /* Standard bookish ratio */
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .book-page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: white;
+            border-radius: 20px 5px 5px 20px;
+            box-shadow:
+                inset 20px 0 50px rgba(0,0,0,0.05), /* Spine shadow */
+                0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform-origin: left center;
+            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+            backface-visibility: hidden;
+            z-index: 10;
+        }
+
+        .book-spine {
+            position: absolute;
+            left: 0;
+            top: 2%;
+            bottom: 2%;
+            width: 20px;
+            background: linear-gradient(to right, #eee, #ddd, #eee);
+            border-radius: 5px 0 0 5px;
+            z-index: 20;
+        }
+
+        /* Flip animation classes */
+        .page-turned {
+            transform: rotateY(-180deg);
+            z-index: 1;
+        }
+
+        /* Controls */
+        .control-btn {
+            transition: all 0.2s;
+        }
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+        .btn-active-mode {
+            background-color: #C1E1C1 !important; /* Pastel Green */
+            color: #276749 !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Custom scrollbar for text area */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #C5D0E6; border-radius: 10px; }
+
+        .modal-overlay {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body class="h-screen flex flex-col">
+
+    <canvas id="fireworks-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-3 z-50 shrink-0">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='../artic.html'" class="w-10 h-10 rounded-full bg-gray-50 hover:bg-pastel-pink text-pastel-text transition flex items-center justify-center">
+                    <i class="fas fa-home text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <img src="../assets/logo.webp" alt="Articulation — Hamada" class="h-8 w-8 object-contain rounded-xl">
+                <h1 class="font-bold text-lg text-pastel-text" data-translate="ui_1">النطق — القصص</h1>
+            </div>
+
+            <button id="lang-btn" onclick="toggleLanguage()" class="bg-pastel-blue/50 text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-pastel-blue transition">
+                عربي
+            </button>
+        </div>
+    </header>
+
+    <!-- WORKPLACE -->
+    <div class="flex flex-grow overflow-hidden relative">
+
+        <!-- Sidebar -->
+        <aside class="bg-white w-18 md:w-20 shadow-[2px_0_10px_rgba(0,0,0,0.05)] flex flex-col items-center py-4 gap-4 z-20 overflow-y-auto shrink-0 border-r border-gray-50">
+
+            <!-- Star Limit Toggle -->
+            <div class="flex flex-col items-center gap-1">
+                <button onclick="cycleStarLimit()" class="w-12 h-12 rounded-xl bg-yellow-50 hover:bg-yellow-100 text-yellow-500 transition flex flex-col items-center justify-center border border-yellow-100 shadow-sm" title="تغيير عدد النجوم">
+                    <i class="fas fa-star text-lg mb-0.5"></i>
+                    <span id="star-limit-text" class="text-xs font-bold">5</span>
+                </button>
+            </div>
+
+            <div class="w-10 h-px bg-gray-200"></div>
+
+            <!-- Pre-recorded Sound Toggle -->
+            <button id="sound-source-btn" onclick="toggleSoundSource()" class="w-12 h-12 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 transition flex items-center justify-center border border-gray-200" title="تبديل التسجيلات الصوتية">
+                <i class="fas fa-file-audio text-xl"></i>
+            </button>
+
+            <!-- Read & Highlight -->
+            <button onclick="readCurrentPage()" class="w-12 h-12 rounded-xl bg-blue-50 hover:bg-pastel-blue text-blue-500 transition flex items-center justify-center border border-blue-100" title="قراءة مع تمييز النص">
+                <i class="fas fa-volume-high text-xl"></i>
+            </button>
+
+             <!-- Edit Mode -->
+             <button id="edit-btn" onclick="toggleEditMode()" class="w-12 h-12 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 transition flex items-center justify-center border border-gray-200" title="تعديل النص">
+                <i class="fas fa-pen text-xl"></i>
+            </button>
+
+            <div class="mt-auto">
+                 <button onclick="resetStory()" class="w-12 h-12 rounded-xl hover:bg-red-50 text-red-400 transition mb-2" title="إعادة القصة">
+                    <i class="fas fa-trash-alt text-lg"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow bg-pastel-pink/10 flex flex-col relative w-full h-full overflow-hidden">
+
+            <!-- Stars Panel (Top) -->
+            <div class="bg-white/80 backdrop-blur-sm border-b border-white/50 p-2 shadow-sm shrink-0 z-30 transition-all" id="star-panel">
+                <div class="container mx-auto flex justify-center flex-wrap gap-2" id="star-slots">
+                    <!-- Stars injected here -->
+                </div>
+            </div>
+
+            <!-- Book Container Area -->
+            <div class="flex-grow flex items-center justify-center p-4 relative overflow-y-auto">
+
+                <!-- Setup View (Visible if no story loaded) -->
+                <div id="setup-view" class="text-center">
+                    <div onclick="openLetterModal()" class="w-64 h-80 bg-white rounded-3xl border-4 border-dashed border-pastel-blue flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition shadow-lg group">
+                        <i class="fas fa-book-medical text-6xl text-pastel-blue mb-4 group-hover:scale-110 transition"></i>
+                        <span class="text-xl font-bold text-gray-400" data-translate="open_book">افتح كتاب القصة</span>
+                        <span class="text-sm text-gray-300 mt-2" data-translate="ui_2">(اختر الحرف والقصة)</span>
+                    </div>
+                </div>
+
+                <!-- Book View -->
+                <div id="book-view" class="book-container hidden">
+                    <div class="book-spine"></div>
+
+                    <!-- The Page -->
+                    <div class="book-page bg-white p-4 md:p-6" id="active-page">
+
+                        <!-- Image Section (Top ~60%) -->
+                        <div class="relative w-full h-[60%] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 mb-4 shadow-inner">
+                            <img id="page-image" src="" class="w-full h-full object-contain p-2" onerror="this.src='https://placehold.co/600x400/FAD2E1/white?text=No+Image'">
+
+                            <!-- Page Indicator -->
+                            <div class="absolute top-3 right-3 bg-white/90 px-3 py-1 rounded-full text-xs font-bold shadow-sm text-gray-500">
+                                <span id="page-num">1</span>/5
+                            </div>
+                        </div>
+
+                        <!-- Text Section (Bottom ~40%) -->
+                        <div class="flex-grow flex flex-col relative">
+                            <!-- Display Text -->
+                            <div id="text-display" class="flex-grow text-center flex items-center justify-center text-xl md:text-3xl font-bold text-slate-700 leading-relaxed px-4 custom-scroll overflow-y-auto" dir="auto" data-translate="ui_3">
+                                جارٍ التحميل…
+                            </div>
+
+                            <!-- Editor (Hidden by default) -->
+                            <textarea id="text-editor" class="absolute inset-0 w-full h-full p-2 border-2 border-pastel-blue rounded-xl resize-none hidden text-center text-xl font-bold text-slate-700 focus:outline-none bg-blue-50/50" oninput="saveTextEdit(this.value)"></textarea>
+
+                            <!-- Navigation Controls (Bottom Bar) -->
+                            <div class="mt-4 flex justify-between items-center px-2">
+                                <button onclick="prevPage()" class="w-12 h-12 rounded-full bg-gray-100 hover:bg-pastel-blue hover:text-white transition flex items-center justify-center text-gray-400 shadow-sm disabled:opacity-30" id="btn-prev">
+                                    <i class="fas fa-chevron-left text-xl" data-dir-icon="left"></i>
+                                </button>
+
+                                <div class="flex gap-2">
+                                     <!-- Play Audio Button (Small) -->
+                                     <button onclick="readCurrentPage()" class="w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition">
+                                        <i class="fas fa-play"></i>
+                                     </button>
+                                </div>
+
+                                <button onclick="nextPage()" class="w-12 h-12 rounded-full bg-gray-100 hover:bg-pastel-blue hover:text-white transition flex items-center justify-center text-gray-400 shadow-sm disabled:opacity-30" id="btn-next">
+                                    <i class="fas fa-chevron-right text-xl" data-dir-icon="right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Letter Modal -->
+    <div id="letter-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-4xl w-full mx-4 h-[80vh] flex flex-col animate-pop">
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
+                <h3 class="text-2xl font-bold text-pastel-text" data-translate="select_letter">اختر حرفاً</h3>
+                <button onclick="closeModal('letter-modal')" class="text-gray-400 hover:text-red-400"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <div id="letter-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-3 overflow-y-auto p-2 flex-grow custom-scroll">
+                <!-- JS Generated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Modal (Numbers 1-5) -->
+    <div id="story-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 text-center space-y-6 animate-pop">
+
+            <div class="flex items-center justify-center gap-3 mb-2">
+                <span class="text-gray-400" data-translate="extra_0">الحرف:</span>
+                <span id="selected-letter-badge" class="w-10 h-10 bg-pastel-pink text-white rounded-lg flex items-center justify-center font-bold text-xl">—</span>
+            </div>
+
+            <h3 class="text-2xl font-bold text-pastel-text" data-translate="select_story">اختر القصة</h3>
+
+            <div class="grid grid-cols-5 gap-3">
+                <!-- Numbers 1-5 -->
+                <button onclick="loadStory(1)" class="aspect-square rounded-2xl bg-gray-50 hover:bg-pastel-green hover:text-green-800 border border-gray-200 text-xl font-bold text-slate-600 transition shadow-sm story-btn">1</button>
+                <button onclick="loadStory(2)" class="aspect-square rounded-2xl bg-gray-50 hover:bg-pastel-green hover:text-green-800 border border-gray-200 text-xl font-bold text-slate-600 transition shadow-sm story-btn">2</button>
+                <button onclick="loadStory(3)" class="aspect-square rounded-2xl bg-gray-50 hover:bg-pastel-green hover:text-green-800 border border-gray-200 text-xl font-bold text-slate-600 transition shadow-sm story-btn">3</button>
+                <button onclick="loadStory(4)" class="aspect-square rounded-2xl bg-gray-50 hover:bg-pastel-green hover:text-green-800 border border-gray-200 text-xl font-bold text-slate-600 transition shadow-sm story-btn">4</button>
+                <button onclick="loadStory(5)" class="aspect-square rounded-2xl bg-gray-50 hover:bg-pastel-green hover:text-green-800 border border-gray-200 text-xl font-bold text-slate-600 transition shadow-sm story-btn">5</button>
+            </div>
+
+            <button onclick="closeModal('story-modal')" class="text-sm text-gray-400 underline hover:text-gray-600" data-translate="ui_4">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="sound-pop" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="sound-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const alphabets = {
+            ar: [
+                {char: 'أ', id: 1}, {char: 'ب', id: 2}, {char: 'ت', id: 3}, {char: 'ث', id: 4},
+                {char: 'ج', id: 5}, {char: 'ح', id: 6}, {char: 'خ', id: 7}, {char: 'د', id: 8},
+                {char: 'ذ', id: 9}, {char: 'ر', id: 10}, {char: 'ز', id: 11}, {char: 'س', id: 12},
+                {char: 'ش', id: 13}, {char: 'ص', id: 14}, {char: 'ض', id: 15}, {char: 'ط', id: 16},
+                {char: 'ظ', id: 17}, {char: 'ع', id: 18}, {char: 'غ', id: 19}, {char: 'ف', id: 20},
+                {char: 'ق', id: 21}, {char: 'ك', id: 22}, {char: 'ل', id: 23}, {char: 'م', id: 24},
+                {char: 'ن', id: 25}, {char: 'هـ', id: 26}, {char: 'و', id: 27}, {char: 'ي', id: 28}
+            ],
+            en: Array.from({length: 26}, (_, i) => ({
+                char: String.fromCharCode(65 + i),
+                id: i + 1
+            }))
+        };
+
+        const translations = {
+            en: {
+                select_letter: "Select Letter",
+                select_story: "Select Story Number",
+                open_book: "Open a Story Book",
+                dir: "ltr"
+            },
+            ar: {
+                select_letter: "اختر حرفاً",
+                select_story: "اختر رقم القصة",
+                open_book: "افتح كتاب القصة",
+                dir: "rtl"
+            }
+        };
+
+        // --- STATE ---
+        Object.assign(translations.en, {"ui_0": "Articulation - Story", "ui_1": "Articulation - Story", "ui_2": "(Select Letter & Story)", "ui_3": "Loading...", "ui_4": "Cancel", "close_label": "Close"});
+        Object.assign(translations.ar, {"ui_0": "النطق — القصص", "ui_1": "النطق — القصص", "ui_2": "(اختر الحرف والقصة)", "ui_3": "جارٍ التحميل…", "ui_4": "إلغاء", "close_label": "إغلاق"});
+
+        Object.assign(translations.en, {"extra_0": "Letter:"});
+        Object.assign(translations.ar, {"extra_0": "الحرف:"});
+        const state = {
+            lang: 'ar',
+            maxStars: 5, // 5, 10, or 15
+            stars: 0,
+
+            selectedLetter: null,
+            currentStoryId: null, // 1-5
+
+            // Story Content (Array of 5 objects)
+            pages: [],
+            currentPageIndex: 0, // 0-4
+
+            useRecordedSounds: false,
+            editMode: false,
+            isPlaying: false,
+            speechSynth: window.speechSynthesis,
+            currentUtterance: null
+        };
+
+        // --- INIT & CORE ---
+        function init() {
+            renderStars();
+            updateLanguageUI();
+
+            // Touch Swipe Support for Book
+            const book = document.getElementById('book-view');
+            let touchStartX = 0;
+            book.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+            book.addEventListener('touchend', e => {
+                const diff = touchStartX - e.changedTouches[0].screenX;
+                if (Math.abs(diff) > 50) { // Threshold
+                    const isRTL = state.lang === 'ar';
+                    // Determine Swipe Direction based on RTL/LTR
+                    // LTR: Swipe Left (pos diff) -> Next. Swipe Right (neg diff) -> Prev.
+                    // RTL: Swipe Left (pos diff) -> Prev. Swipe Right (neg diff) -> Next.
+                    if (diff > 0) isRTL ? prevPage() : nextPage();
+                    else isRTL ? nextPage() : prevPage();
+                }
+            });
+        }
+
+        // --- STAR SYSTEM ---
+        function cycleStarLimit() {
+            if (state.maxStars === 5) state.maxStars = 10;
+            else if (state.maxStars === 10) state.maxStars = 15;
+            else state.maxStars = 5;
+
+            state.stars = 0; // Reset progress on change
+            document.getElementById('star-limit-text').innerText = state.maxStars;
+            renderStars();
+        }
+
+        function renderStars() {
+            const container = document.getElementById('star-slots');
+            container.innerHTML = '';
+            for (let i = 0; i < state.maxStars; i++) {
+                const isFilled = i < state.stars;
+                const star = document.createElement('div');
+                // Adjust size based on count to fit screen
+                const sizeClass = state.maxStars > 10 ? 'w-8 h-8 text-xl' : 'w-10 h-10 md:w-12 md:h-12 text-2xl md:text-3xl';
+
+                star.className = `${sizeClass} cursor-pointer transition transform hover:scale-110 flex items-center justify-center rounded-full ${isFilled ? 'text-yellow-400' : 'bg-gray-100 text-gray-300'}`;
+                star.innerHTML = `<i class="fas fa-star ${isFilled ? 'star-pop' : ''}"></i>`;
+                star.onclick = () => toggleStar(i);
+                container.appendChild(star);
+            }
+        }
+
+        function toggleStar(index) {
+            const isFilled = index < state.stars;
+            if (!isFilled) {
+                state.stars++;
+                playAudio('sound-click');
+                renderStars();
+                if (state.stars === state.maxStars) setTimeout(celebrate, 300);
+            } else {
+                state.stars = index;
+                playAudio('sound-pop');
+                renderStars();
+            }
+        }
+
+        function celebrate() {
+            playAudio('sound-success');
+            launchFireworks();
+            setTimeout(() => {
+                state.stars = 0;
+                renderStars();
+            }, 6000);
+        }
+
+        function playAudio(id) {
+            const audio = document.getElementById(id);
+            audio.currentTime = 0;
+            audio.play().catch(e => {});
+        }
+
+        // --- NAVIGATION & UI ---
+        function toggleLanguage() {
+            state.lang = state.lang === 'en' ? 'ar' : 'en';
+            resetStory();
+            updateLanguageUI();
+        }
+
+        function updateLanguageUI() {
+            const t = translations[state.lang];
+            document.getElementById('lang-btn').innerText = state.lang === 'en' ? 'عربي' : 'English';
+            document.documentElement.lang = state.lang;
+            document.documentElement.dir = t.dir;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                el.innerText = t[el.getAttribute('data-translate')];
+            });
+
+            // Flip icons for RTL
+            document.querySelectorAll('[data-dir-icon="left"]').forEach(i => i.className = `fas fa-chevron-${state.lang === 'ar' ? 'right' : 'left'} text-xl`);
+            document.querySelectorAll('[data-dir-icon="right"]').forEach(i => i.className = `fas fa-chevron-${state.lang === 'ar' ? 'left' : 'right'} text-xl`);
+        }
+
+        function openLetterModal() {
+            const grid = document.getElementById('letter-grid');
+            grid.innerHTML = '';
+            alphabets[state.lang].forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "aspect-square bg-gray-50 hover:bg-pastel-blue hover:text-white rounded-xl border border-gray-100 font-bold text-2xl text-slate-600 transition shadow-sm";
+                btn.innerText = item.char;
+                btn.onclick = () => {
+                    state.selectedLetter = item;
+                    closeModal('letter-modal');
+                    openStoryModal();
+                };
+                grid.appendChild(btn);
+            });
+            openModal('letter-modal');
+        }
+
+        function openStoryModal() {
+            document.getElementById('selected-letter-badge').innerText = state.selectedLetter.char;
+            openModal('story-modal');
+        }
+
+        // --- STORY LOGIC ---
+        function loadStory(storyId) {
+            state.currentStoryId = storyId;
+            closeModal('story-modal');
+
+            // Generate Data for 5 pages
+            state.pages = [];
+            for(let i = 1; i <= 5; i++) {
+                state.pages.push({
+                    id: i,
+                    // Path: images/{lang}/{letterId}/{storyId}/{i}.png
+                    imagePath: `images/${state.lang}/${state.selectedLetter.id}/${storyId}/${i}.png`,
+                    // Path: sounds/{lang}/{letterId}/{storyId}/{i}.mp3
+                    soundPath: `sounds/${state.lang}/${state.selectedLetter.id}/${storyId}/${i}.mp3`,
+                    // Default text
+                    text: state.lang === 'en'
+                        ? `This is picture number ${i} of the story.`
+                        : `هذه هي الصورة رقم ${i} من القصة.`
+                });
+            }
+
+            state.currentPageIndex = 0;
+            document.getElementById('setup-view').classList.add('hidden');
+            document.getElementById('book-view').classList.remove('hidden');
+            renderPage();
+        }
+
+        function resetStory() {
+            state.pages = [];
+            state.currentStoryId = null;
+            document.getElementById('book-view').classList.add('hidden');
+            document.getElementById('setup-view').classList.remove('hidden');
+            cancelSpeech();
+        }
+
+        function renderPage() {
+            const pageData = state.pages[state.currentPageIndex];
+
+            // Image
+            document.getElementById('page-image').src = pageData.imagePath;
+
+            // Text vs Editor
+            const displayEl = document.getElementById('text-display');
+            const editorEl = document.getElementById('text-editor');
+
+            if(state.editMode) {
+                displayEl.classList.add('hidden');
+                editorEl.classList.remove('hidden');
+                editorEl.value = pageData.text;
+            } else {
+                displayEl.classList.remove('hidden');
+                editorEl.classList.add('hidden');
+                displayEl.innerHTML = pageData.text; // Plain text initially
+            }
+
+            // Page Number
+            document.getElementById('page-num').innerText = state.currentPageIndex + 1;
+
+            // Nav State
+            document.getElementById('btn-prev').disabled = state.currentPageIndex === 0;
+            document.getElementById('btn-next').disabled = state.currentPageIndex === 4;
+
+            cancelSpeech();
+        }
+
+        function prevPage() {
+            if (state.currentPageIndex > 0) {
+                state.currentPageIndex--;
+                renderPage();
+            }
+        }
+
+        function nextPage() {
+            if (state.currentPageIndex < 4) {
+                state.currentPageIndex++;
+                renderPage();
+            }
+        }
+
+        // --- AUDIO & HIGHLIGHTING ---
+
+        function toggleSoundSource() {
+            state.useRecordedSounds = !state.useRecordedSounds;
+            const btn = document.getElementById('sound-source-btn');
+            if (state.useRecordedSounds) {
+                btn.classList.add('btn-active-mode');
+                // Show toast or alert?
+            } else {
+                btn.classList.remove('btn-active-mode');
+            }
+        }
+
+        function toggleEditMode() {
+            state.editMode = !state.editMode;
+            const btn = document.getElementById('edit-btn');
+            if(state.editMode) btn.classList.add('btn-active-mode');
+            else btn.classList.remove('btn-active-mode');
+            renderPage(); // re-render to switch between display/textarea
+        }
+
+        function saveTextEdit(val) {
+            state.pages[state.currentPageIndex].text = val;
+        }
+
+        function cancelSpeech() {
+            state.speechSynth.cancel();
+            // clear highlights
+            const display = document.getElementById('text-display');
+            if(display) {
+               // Restore plain text without spans to avoid stuck highlights
+               if(!state.editMode && state.pages[state.currentPageIndex]) {
+                   display.innerText = state.pages[state.currentPageIndex].text;
+               }
+            }
+        }
+
+        function readCurrentPage() {
+            cancelSpeech();
+            const page = state.pages[state.currentPageIndex];
+            if(!page) return;
+
+            // MODE 1: Recorded Files
+            if (state.useRecordedSounds) {
+                const audio = new Audio(page.soundPath);
+                audio.play().catch(e => {
+                    alert((state.lang === 'ar' ? 'تعذر العثور على الملف الصوتي:\n' : 'Audio file not found:\n') + page.soundPath);
+                });
+                return;
+            }
+
+            // MODE 2: TTS with Highlight
+            const text = page.text.trim();
+            if(!text) return;
+
+            // 1. Prepare HTML with spans
+            const displayEl = document.getElementById('text-display');
+            const words = text.split(/\s+/);
+
+            // Map original text to spans.
+            // Simple strategy: wrap words in spans.
+            // Note: This simple split removes extra whitespace logic, but good enough for reading.
+            displayEl.innerHTML = words.map((w, i) => `<span id="word-${i}">${w}</span>`).join(' ');
+
+            // 2. Setup Utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+            utterance.rate = 0.9; // Slightly slower for kids
+
+            let charIndexToWordIndex = [];
+            let runningLength = 0;
+
+            // Build a map of character indices to word indices
+            // This is needed because 'onboundary' gives charIndex
+            words.forEach((word, index) => {
+                const start = runningLength;
+                const end = runningLength + word.length;
+                // For every character in this word + following space, map to this word index
+                for(let k=start; k <= end; k++) {
+                    // Note: This is an approximation.
+                    // 'end' includes the space which technically belongs to the next,
+                    // but onboundary usually fires at start of word.
+                    charIndexToWordIndex[k] = index;
+                }
+                runningLength += word.length + 1; // +1 for space
+            });
+
+            utterance.onboundary = (event) => {
+                if(event.name === 'word') {
+                    // Remove all highlights
+                    document.querySelectorAll('.highlight-word').forEach(el => el.classList.remove('highlight-word'));
+
+                    // Find current word
+                    // event.charIndex is the index of the character about to be spoken
+                    // In many browsers, charIndex is accurate to the original string
+
+                    // Simple approach using our map logic or just counting boundaries if simple text
+                    // Let's try to match by word count approximation if map fails
+
+                    // Better Approach for complex text:
+                    // Just trust the event order? No, user might pause.
+
+                    // Let's try the map we built, assuming standard spacing:
+                    let wordIdx = charIndexToWordIndex[event.charIndex];
+
+                    // Fallback: Sometimes charIndex is weird.
+                    // Let's try to just highlight based on word index?
+                    // No, TTS engines differ.
+
+                    // Let's stick to the map. If undefined, look ahead slightly.
+                    if (wordIdx === undefined && charIndexToWordIndex[event.charIndex + 1] !== undefined) {
+                        wordIdx = charIndexToWordIndex[event.charIndex + 1];
+                    }
+
+                    if (wordIdx !== undefined) {
+                        const span = document.getElementById(`word-${wordIdx}`);
+                        if(span) span.classList.add('highlight-word');
+                    }
+                }
+            };
+
+            utterance.onend = () => {
+                document.querySelectorAll('.highlight-word').forEach(el => el.classList.remove('highlight-word'));
+                // Restore original clean text structure? No, spans are fine.
+            };
+
+            state.speechSynth.speak(utterance);
+        }
+
+
+        // --- FIREWORKS (Copy from previous) ---
+        function launchFireworks() {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            const colors = ['#FAD2E1', '#C5D0E6', '#C1E1C1', '#FDFD96', '#E6E6FA'];
+            function createExplosion(x, y) {
+                for(let i=0; i<60; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 5 + 2;
+                    particles.push({
+                        x: x, y: y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+                        alpha: 1, color: colors[Math.floor(Math.random()*colors.length)], decay: 0.02
+                    });
+                }
+            }
+            createExplosion(canvas.width/2, canvas.height/2);
+            function animate() {
+                if (!particles.length) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
+                requestAnimationFrame(animate);
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.alpha -= p.decay;
+                    if (p.alpha <= 0) particles.splice(i, 1);
+                    else {
+                        ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color;
+                        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            }
+            animate();
+        }
+
+        // --- UTILS ---
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        init();
+    </script>
+</body>
+</html>

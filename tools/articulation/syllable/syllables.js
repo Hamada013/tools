@@ -99,9 +99,8 @@ function initializeActivity() {
     invalidate(); $('#audio-status').textContent=''; $('#feedback').replaceChildren(); $('#feedback').className='feedback';
     $('#activity-title').textContent=title(state.kind);
     $('#activity-meta').textContent=`${state.mode.toUpperCase()} · ${state.letters.map(id=>LETTERS[id-1].char).join('، ')}`;
-    for (const id of ['practice-grid','choice-grid','production-stage','matching-board','production-grades','practice-filters','pagination','matching-count','assessment-status']) $('#'+id).hidden=true;
+    for (const id of ['practice-grid','listening-cue','choice-grid','production-stage','matching-board','production-grades','practice-filters','pagination','matching-count','assessment-status']) $('#'+id).hidden=true;
     $('#settings-button').hidden=['listening','production'].includes(state.kind);
-    $('#replay-button').hidden=!['listening','production'].includes(state.kind);
     $('#pause-button').hidden=!['listening','production'].includes(state.kind);
     $('#skip-button').hidden=!['listening','production'].includes(state.kind);
     $('#restart-button').hidden=state.kind!=='matching';
@@ -119,7 +118,7 @@ function startActivity() {
     else void safe(renderTrial)();
 }
 function syllableMarkup(item) {
-    return `<span class="syllable-parts" dir="rtl">${item.parts.map(id=>`<span class="syllable-part"><img src="images/${id}.png" alt="" decoding="async"><span>${LETTERS[id-1].char}</span></span>`).join('')}</span>`;
+    return `<span class="syllable-parts" dir="rtl">${item.parts.map(id=>`<span class="syllable-part"><img src="images/${id}.png" alt="" decoding="async"></span>`).join('')}</span>`;
 }
 function syllableButton(item, handler, extraClass='') {
     const button=document.createElement('button');button.type='button';button.className=`syllable-card ${extraClass}`;
@@ -152,8 +151,8 @@ async function playItem(item, element=null, assessment=false) {
             updateResponseControls();resolve(ok);
         };
         audio.onended=()=>finish(true);
-        audio.onerror=()=>finish(false,'تعذر تشغيل المقطع. أعد التشغيل أو تخطّه.');
-        playTimer=setTimeout(()=>{audio.pause();finish(false,'توقف الصوت. اضغط إعادة التشغيل للمحاولة مجدداً.');},15000);
+        audio.onerror=()=>finish(false,'تعذر تشغيل المقطع. اضغط البطاقة للمحاولة مجدداً أو تخطّه.');
+        playTimer=setTimeout(()=>{audio.pause();finish(false,'توقف الصوت. اضغط البطاقة للمحاولة مجدداً.');},15000);
         audio.src=item.audio;
         audio.play().then(()=>{
             if(token!==playToken||generation!==state.generation)return;
@@ -163,7 +162,7 @@ async function playItem(item, element=null, assessment=false) {
                 try {writeSession(state.session);state.cueUnsaved=false;}
                 catch(error){state.cueUnsaved=true;audio.pause();showError(error.message);finish(false);}
             }
-        }).catch(()=>finish(false,'اضغط إعادة التشغيل لسماع المقطع. إذا تعذر الصوت، يمكنك التخطي.'));
+        }).catch(()=>finish(false,'اضغط البطاقة لسماع المقطع. إذا تعذر الصوت، يمكنك التخطي.'));
     });
 }
 function itemIndex() { return new Map(bank(state.session.letters,state.session.mode).map(item=>[item.id,item])); }
@@ -173,7 +172,7 @@ function updateResponseControls() {
     const allowed=state.imagesReady&&!state.busy&&!state.playing&&!state.cueUnsaved&&(state.kind==='production'||state.heard);
     $$('#choice-grid button, #production-grades button').forEach(button=>{button.disabled=!allowed;});
     $('#skip-button').disabled=state.busy||state.cueUnsaved;
-    $('#replay-button').disabled=state.busy||state.playing;
+    $$('#listening-cue, #production-stage button').forEach(button=>{button.disabled=state.busy||state.playing;});
 }
 async function imageReadiness(container) {
     return Promise.all([...container.querySelectorAll('img')].map(image=>{
@@ -184,7 +183,12 @@ async function imageReadiness(container) {
         });
     }));
 }
-async function renderTrial() {
+function replayAssessment() {
+    if(state.screen!=='activity'||state.busy||state.playing||state.session?.status!=='draft')return;
+    if(!state.imagesReady)return renderTrial(true);
+    return playItem(currentItem(),state.kind==='listening'?$('#listening-cue'):$('#production-stage button'),true);
+}
+async function renderTrial(playModel=false) {
     invalidate();state.heard=false;state.imagesReady=false;state.cueUnsaved=false;
     const generation=state.generation,session=state.session;
     if(session.status!=='draft'){showResults(session);return;}
@@ -195,20 +199,20 @@ async function renderTrial() {
     $('#feedback').replaceChildren();$('#feedback').className='feedback';$('#audio-status').textContent='';
     $('#choice-grid').replaceChildren();$('#production-stage').replaceChildren();
     if(session.kind==='listening') {
-        $('#choice-grid').hidden=false;
+        $('#choice-grid').hidden=false;$('#listening-cue').hidden=false;
         for(const id of entry.choices) $('#choice-grid').append(syllableButton(index.get(id),()=>void safe(()=>respond(id===item.id?'correct':'incorrect',id))()));
     } else {
         $('#production-stage').hidden=false;$('#production-grades').hidden=false;
-        const card=document.createElement('div');card.className='syllable-card production-card';card.setAttribute('aria-label',`انطق المقطع ${item.label}`);card.innerHTML=syllableMarkup(item);$('#production-stage').append(card);
+        const card=syllableButton(item,safe(replayAssessment),'production-card');card.setAttribute('aria-label',`استمع إلى نموذج المقطع ${item.label}`);$('#production-stage').append(card);
         $('#audio-status').textContent=session.cues[item.id]?'سبق تشغيل نموذج صوتي لهذا المقطع.':'دون نموذج صوتي';
     }
     updateResponseControls();
     // Start on the initiating tap before yielding, preserving Safari's audio gesture.
-    const playback=session.kind==='listening'?playItem(item,null,true):null;
+    const playback=session.kind==='listening'||playModel?playItem(item,session.kind==='listening'?$('#listening-cue'):$('#production-stage button'),true):null;
     const ready=await imageReadiness(session.kind==='listening'?$('#choice-grid'):$('#production-stage'));
     if(generation!==state.generation||state.screen!=='activity')return;
     state.imagesReady=ready.every(Boolean);updateResponseControls();
-    if(!state.imagesReady){stopAudio();$('#audio-status').textContent='تعذر تحميل صورة. أعد التشغيل لتحميلها أو تخطّ المقطع.';return;}
+    if(!state.imagesReady){stopAudio();updateResponseControls();$('#audio-status').textContent='تعذر تحميل صورة. اضغط البطاقة لتحميلها أو تخطّ المقطع.';return;}
     if(playback)await playback;
 }
 async function respond(outcome,selected='',score) {
@@ -261,7 +265,7 @@ function newMatching() {
     $('#matching-board').hidden=false;$('#matching-count').hidden=false;renderMatching();
 }
 function selectSource(id,button) {
-    if(state.matching.matched.includes(id))return;
+    if(state.matching.matched.includes(id)){void safe(()=>playItem(state.matching.items.find(item=>item.id===id),button))();return;}
     state.selectedSource=id;
     $$('#matching-sources button').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.item===id)));
     const item=state.matching.items.find(item=>item.id===id);void safe(()=>playItem(item,button))();
@@ -271,14 +275,16 @@ function renderMatching() {
     $('#matching-sources').replaceChildren();$('#matching-targets').replaceChildren();
     for(const id of match.sources) {
         let button;button=syllableButton(index.get(id),()=>{if(!button._dragged)selectSource(id,button);button._dragged=false;},'matching-source');
-        button.disabled=match.matched.includes(id);button.setAttribute('aria-pressed',String(id===state.selectedSource));button.classList.toggle('matched',button.disabled);
+        button.setAttribute('aria-pressed',String(id===state.selectedSource));button.classList.toggle('matched',match.matched.includes(id));
         attachDrag(button,id);$('#matching-sources').append(button);
     }
     match.targets.forEach((id,i)=>{
-        const item=index.get(id),matched=match.matched.includes(id),row=document.createElement('div');row.className='matching-target'+(matched?' matched':'');
-        const listen=document.createElement('button');listen.className='icon';listen.type='button';listen.innerHTML=icon('volume');listen.setAttribute('aria-label',`استمع إلى الخيار ${i+1}`);listen.addEventListener('click',()=>void safe(()=>playItem(item))());
-        const target=document.createElement('button');target.type='button';target.className='drop-target';target.dataset.target=id;target.disabled=matched;target.setAttribute('aria-label',matched?`تمت مطابقة ${item.label}`:`مطابقة مع الخيار ${i+1}`);
-        target.innerHTML=matched?syllableMarkup(item):icon('match');target.addEventListener('click',()=>matchTarget(id));row.append(listen,target);$('#matching-targets').append(row);
+        const item=index.get(id),matched=match.matched.includes(id);
+        const target=document.createElement('button');target.type='button';target.className='matching-target drop-target'+(matched?' matched':'');target.dataset.target=id;
+        target.setAttribute('aria-label',matched?`استمع إلى المقطع المطابق ${item.label}`:`الخيار ${i+1} — استمع وطابق`);
+        target.innerHTML=matched?syllableMarkup(item):icon('match');
+        target.addEventListener('click',safe(()=>{const playback=playItem(item,target);if(!matched&&state.selectedSource)matchTarget(id);return playback;}));
+        $('#matching-targets').append(target);
     });
     $('#matching-count').textContent=`${match.matched.length} / 3`;
 }
@@ -292,7 +298,7 @@ function attachDrag(button,id) {
     let pointer=null,ghost=null,startX=0,startY=0,dragging=false;
     const cleanup=()=>{ghost?.remove();ghost=null;pointer=null;$$('.drop-target.is-over').forEach(el=>el.classList.remove('is-over'));};
     button.addEventListener('pointerdown',event=>{
-        if(button.disabled||event.button!==0)return;
+        if(button.disabled||state.matching.matched.includes(id)||event.button!==0)return;
         pointer=event.pointerId;startX=event.clientX;startY=event.clientY;dragging=false;button._dragged=false;
         button.setPointerCapture(pointer);
     });
@@ -303,12 +309,12 @@ function attachDrag(button,id) {
         }
         if(!dragging)return;
         event.preventDefault();ghost.style.left=event.clientX+'px';ghost.style.top=event.clientY+'px';
-        $$('.drop-target.is-over').forEach(el=>el.classList.remove('is-over'));const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.drop-target');if(target&&!target.disabled)target.classList.add('is-over');
+        $$('.drop-target.is-over').forEach(el=>el.classList.remove('is-over'));const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.drop-target');if(target&&!state.matching.matched.includes(target.dataset.target))target.classList.add('is-over');
     });
     button.addEventListener('pointerup',event=>{
         if(event.pointerId!==pointer)return;
         button._dragged=dragging;const target=dragging?document.elementFromPoint(event.clientX,event.clientY)?.closest('.drop-target'):null;
-        cleanup();if(target&&!target.disabled)matchTarget(target.dataset.target);
+        cleanup();if(target&&!state.matching.matched.includes(target.dataset.target))matchTarget(target.dataset.target);
     });
     button.addEventListener('pointercancel',cleanup);button.addEventListener('lostpointercapture',cleanup);
 }
@@ -328,7 +334,7 @@ $('#home-button').addEventListener('click',safe(home));$('#paused-home').addEven
 $('#settings-button').addEventListener('click',()=>openSetup(state.kind));$('#pause-button').addEventListener('click',safe(pauseTest));
 $('#continue-button').addEventListener('click',safe(()=>resume(state.session)));$('#resume-button').addEventListener('click',safe(()=>resume(latestDraft())));
 $('#finish-button').addEventListener('click',safe(finishPartial));
-$('#replay-button').addEventListener('click',safe(()=>!state.imagesReady?renderTrial():playItem(currentItem(),null,true)));
+$('#listening-cue').addEventListener('click',safe(replayAssessment));
 $('#skip-button').addEventListener('click',safe(()=>respond('skip')));
 $$('[data-grade]').forEach(button=>button.addEventListener('click',safe(()=>{const score=Number(button.dataset.grade);return respond(score===100?'correct':score===0?'incorrect':'emerging','',score);})));
 $('#previous-page').addEventListener('click',()=>{state.page--;renderPractice();});$('#next-page').addEventListener('click',()=>{state.page++;renderPractice();});

@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="ui_0">النطق — الكلمات</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            pink: '#FAD2E1',
+                            blue: '#C5D0E6',
+                            green: '#C1E1C1',
+                            yellow: '#FDFD96',
+                            purple: '#E6E6FA',
+                            text: '#4A5568'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Varela Round', 'Tajawal', 'sans-serif'],
+                    },
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-5px)' },
+                            '75%': { transform: 'translateX(5px)' }
+                        }
+                    },
+                    animation: {
+                        shake: 'shake 0.3s ease-in-out'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFF5F7;
+            font-family: 'Varela Round', 'Tajawal', sans-serif;
+            color: #4A5568;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Animations */
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .star-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* Card Styles */
+        .card-controls {
+            transition: all 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .card-controls.visible {
+            max-height: 100px;
+            opacity: 1;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #eee;
+        }
+
+        .edit-btn-active {
+            background-color: #FAD2E1 !important;
+            color: #D53F8C !important;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .glow-target {
+            box-shadow: 0 0 20px 8px rgba(66, 153, 225, 0.6) !important;
+            border-color: #4299E1 !important;
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        #fireworks-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+        }
+
+        .modal-overlay {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .hidden-section { display: none !important; }
+
+        #side-panel { transition: all 0.3s ease; }
+        #side-panel.collapsed { width: 0; padding: 0; overflow: hidden; }
+
+        /* Filter Tab Styles */
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f0f0f0;
+            color: #888;
+        }
+        .filter-tab.active {
+            background: #C5D0E6; /* pastel-blue */
+            color: #4A5568;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body class="min-h-screen flex flex-col" onload="init()">
+
+    <canvas id="fireworks-canvas"></canvas>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-3 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button onclick="showParentInfo()" class="w-10 h-10 rounded-full bg-gray-50 hover:bg-pastel-blue text-pastel-text transition flex items-center justify-center">
+                    <i class="fas fa-info-circle text-lg"></i>
+                </button>
+                <button onclick="window.location.href='../artic.html'" class="w-10 h-10 rounded-full bg-gray-50 hover:bg-pastel-pink text-pastel-text transition flex items-center justify-center shadow-sm">
+                    <i class="fas fa-home text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-xl overflow-hidden">
+                    <img src="../assets/logo.webp" alt="Articulation — Hamada" class="w-full h-full object-contain">
+                </div>
+                <h1 class="font-bold text-lg text-pastel-text" data-translate="ui_1">النطق — الكلمات</h1>
+            </div>
+
+            <button id="lang-btn" onclick="toggleLanguage()" class="bg-pastel-blue/50 text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-pastel-blue transition">
+                عربي
+            </button>
+        </div>
+    </header>
+
+    <!-- WORKPLACE (Default View) -->
+    <section id="workplace" class="flex-grow flex flex-col relative h-[calc(100vh-64px)]">
+
+        <!-- Stars Bar -->
+        <div id="star-panel-container" class="bg-white border-b border-gray-100 p-2 transition-all duration-300 z-30 shadow-sm relative">
+            <div class="container mx-auto flex flex-col items-center">
+                <button onclick="toggleStarPanel()" class="absolute right-4 top-2 text-gray-300 hover:text-gray-500"><i class="fas fa-chevron-up"></i></button>
+                <div class="flex gap-1 md:gap-3 justify-center flex-wrap" id="star-slots">
+                    <!-- Stars -->
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-grow overflow-hidden relative">
+
+            <!-- Sidebar -->
+            <aside id="side-panel" class="bg-white w-16 md:w-20 shadow-[2px_0_10px_rgba(0,0,0,0.05)] flex flex-col items-center py-4 gap-4 z-20 overflow-y-auto shrink-0 border-r border-gray-50">
+
+                <button onclick="toggleStarPanel()" class="p-3 rounded-xl hover:bg-gray-50 text-pastel-text transition" title="إظهار أو إخفاء النجوم">
+                    <i class="fas fa-star text-yellow-400 text-lg"></i>
+                </button>
+
+                <button onclick="openModal('template-modal')" class="p-3 rounded-xl hover:bg-pastel-blue text-pastel-text transition" title="قوالب البطاقات">
+                    <i class="fas fa-th text-lg"></i>
+                </button>
+
+                <button id="edit-mode-btn" onclick="toggleEditMode()" class="p-3 rounded-xl hover:bg-gray-100 text-pastel-text transition relative" title="تعديل البطاقات">
+                    <i class="fas fa-pen text-lg"></i>
+                </button>
+
+                <div class="h-px w-8 bg-gray-200 my-1"></div>
+
+                <button onclick="showModeSelect('test')" class="p-3 rounded-xl hover:bg-pastel-green text-pastel-text transition flex flex-col items-center gap-1" title="اختبار">
+                    <i class="fas fa-check-circle text-lg"></i>
+                    <span class="text-[9px] font-bold" data-translate="ui_2">اختبار</span>
+                </button>
+
+                <button onclick="showModeSelect('practice')" class="p-3 rounded-xl hover:bg-pastel-yellow text-pastel-text transition flex flex-col items-center gap-1" title="تدريب">
+                    <i class="fas fa-graduation-cap text-lg"></i>
+                    <span class="text-[9px] font-bold" data-translate="ui_3">تدريب</span>
+                </button>
+
+                <button onclick="shuffleSlots()" class="p-3 rounded-xl hover:bg-pastel-purple text-pastel-text transition mt-auto" title="خلط البطاقات">
+                    <i class="fas fa-random text-lg"></i>
+                </button>
+
+                <button onclick="clearSlots()" class="p-3 rounded-xl hover:bg-red-50 text-red-400 transition mb-2" title="مسح الكل">
+                    <i class="fas fa-trash-alt text-lg"></i>
+                </button>
+            </aside>
+
+            <!-- Canvas/Main Area -->
+            <main class="flex-grow bg-pastel-pink/10 p-4 relative overflow-y-auto flex flex-col w-full">
+
+                <button onclick="toggleSidePanel()" class="absolute top-4 left-4 z-10 bg-white p-2.5 rounded-full shadow hover:bg-gray-50 text-gray-400">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="flex-grow flex items-center justify-center p-2 pb-20">
+                    <div id="slots-container" class="grid gap-4 w-full max-w-6xl mx-auto transition-all duration-300">
+                        <!-- Dynamic Slots -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- MODALS -->
+
+    <!-- Template Selection Modal -->
+    <div id="template-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center animate-fade-in">
+            <h3 class="text-xl font-bold text-pastel-text mb-6" data-translate="ui_4">كم بطاقة؟</h3>
+            <div class="flex justify-center gap-3 flex-wrap">
+                <button onclick="setTemplate(1)" class="w-12 h-12 rounded-xl bg-pastel-blue hover:scale-110 transition font-bold text-slate-600 shadow-sm">1</button>
+                <button onclick="setTemplate(2)" class="w-12 h-12 rounded-xl bg-pastel-pink hover:scale-110 transition font-bold text-slate-600 shadow-sm">2</button>
+                <button onclick="setTemplate(3)" class="w-12 h-12 rounded-xl bg-pastel-green hover:scale-110 transition font-bold text-slate-600 shadow-sm">3</button>
+                <button onclick="setTemplate(4)" class="w-12 h-12 rounded-xl bg-pastel-yellow hover:scale-110 transition font-bold text-slate-600 shadow-sm">4</button>
+                <button onclick="setTemplate(5)" class="w-12 h-12 rounded-xl bg-pastel-purple hover:scale-110 transition font-bold text-slate-600 shadow-sm">5</button>
+            </div>
+            <button onclick="closeModal('template-modal')" class="mt-8 text-gray-400 hover:text-gray-600" data-translate="ui_5">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- Letter Selection Modal -->
+    <div id="letter-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-4xl w-full mx-4 h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-pastel-text" data-translate="select_letter">اختر صوتاً</h3>
+                <button onclick="closeModal('letter-modal')" class="text-gray-400 hover:text-red-400">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Categories -->
+            <div class="flex justify-center gap-2 mb-4" id="letter-categories">
+                <button onclick="setLetterFilter('consonants')" class="filter-tab active" data-filter="consonants" data-translate="extra_0">صوامت</button>
+                <button onclick="setLetterFilter('vowels')" class="filter-tab" data-filter="vowels" data-translate="ui_6">صوائت</button>
+                <button onclick="setLetterFilter('clusters')" class="filter-tab" data-filter="clusters" data-translate="ui_7">عناقيد</button>
+            </div>
+
+            <div id="letter-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-3 overflow-y-auto p-2 flex-grow">
+                <!-- Letters -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Position Selector Modal -->
+    <div id="position-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full mx-4 text-center">
+             <h3 class="font-bold text-xl mb-6 text-pastel-text" data-translate="ui_8">موضع الصوت في الكلمة</h3>
+             <div id="position-btn-container" class="grid grid-cols-3 gap-3">
+                <button id="pos-first-btn" onclick="selectPosition('first')" class="p-4 bg-blue-50 rounded-xl hover:bg-blue-100 font-bold text-slate-600 border-2 border-transparent hover:border-blue-200 transition" data-translate="extra_1">أول الكلمة</button>
+                <button id="pos-middle-btn" onclick="selectPosition('middle')" class="p-4 bg-green-50 rounded-xl hover:bg-green-100 font-bold text-slate-600 border-2 border-transparent hover:border-green-200 transition" data-translate="ui_9">وسط الكلمة</button>
+                <button id="pos-last-btn" onclick="selectPosition('last')" class="p-4 bg-pink-50 rounded-xl hover:bg-pink-100 font-bold text-slate-600 border-2 border-transparent hover:border-pink-200 transition" data-translate="ui_10">آخر الكلمة</button>
+             </div>
+             <button onclick="closeModal('position-modal'); openModal('letter-modal')" class="mt-6 text-gray-400 hover:text-gray-600" data-translate="ui_11">رجوع</button>
+        </div>
+    </div>
+
+    <!-- Image Grid Modal -->
+    <div id="image-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-5xl w-full mx-4 h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-pastel-text" data-translate="extra_2">اختر كلمة</h3>
+                <button onclick="closeModal('image-modal')" class="text-gray-400 hover:text-red-400">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="image-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 overflow-y-auto p-2 flex-grow">
+                <!-- Images -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode Selection Modal -->
+    <div id="mode-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center animate-fade-in">
+            <h3 class="text-xl font-bold mb-6" id="mode-title" data-translate="ui_12">اختر عدد الجولات</h3>
+            <div class="flex gap-4 justify-center">
+                <button onclick="startMode(5)" class="bg-pastel-blue hover:bg-blue-300 w-20 h-20 rounded-2xl font-bold text-2xl shadow-lg transition transform hover:scale-105 flex flex-col items-center justify-center text-slate-600">
+                    <span>5</span>
+                    <span class="text-xs font-normal" data-translate="ui_13">جولات</span>
+                </button>
+                <button onclick="startMode(10)" class="bg-pastel-pink hover:bg-pink-300 w-20 h-20 rounded-2xl font-bold text-2xl shadow-lg transition transform hover:scale-105 flex flex-col items-center justify-center text-slate-600">
+                    <span>10</span>
+                    <span class="text-xs font-normal" data-translate="ui_14">جولات</span>
+                </button>
+            </div>
+            <button onclick="closeModal('mode-modal')" class="mt-8 text-gray-400" data-translate="ui_15">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- Generic Info Modal -->
+    <div id="info-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-2xl w-full mx-4 relative max-h-[90vh] flex flex-col">
+            <button onclick="closeModal('info-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-red-400">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h3 id="modal-title" class="text-2xl font-bold text-pastel-text mb-4 text-center" data-translate="ui_16">معلومات</h3>
+            <div id="modal-content" class="text-gray-600 leading-relaxed overflow-y-auto p-2"></div>
+        </div>
+    </div>
+
+    <!-- Audio Files for UI SFX -->
+    <audio id="sound-pop" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="sound-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+    <script>
+        // --- DATA CONFIGURATION ---
+
+        const phoneticData = {
+            en: {
+                consonants: [
+                    { id: 1, char: 'B', ipa: '/b/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 2, char: 'D', ipa: '/d/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 3, char: 'F', ipa: '/f/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 4, char: 'G', ipa: '/g/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 5, char: 'H', ipa: '/h/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 6, char: 'J', ipa: '/dʒ/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 7, char: 'K', ipa: '/k/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 8, char: 'L', ipa: '/l/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 9, char: 'M', ipa: '/m/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 10, char: 'N', ipa: '/n/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 11, char: 'P', ipa: '/p/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 12, char: 'R', ipa: '/r/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 13, char: 'S', ipa: '/s/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 14, char: 'T', ipa: '/t/', counts: { first: 20, middle: 15, last: 10 } },
+                    { id: 15, char: 'V', ipa: '/v/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 16, char: 'W', ipa: '/w/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 17, char: 'Y', ipa: '/j/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 18, char: 'Z', ipa: '/z/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 19, char: 'Ch', ipa: '/tʃ/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 20, char: 'Sh', ipa: '/ʃ/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 21, char: 'Th', ipa: '/θ/', counts: { first: 15, middle: 10, last: 5 } },
+                    { id: 22, char: 'Th', ipa: '/ð/', counts: { first: 15, middle: 10, last: 5 } }
+                ],
+                vowels: [
+                    { id: 30, char: 'A', ipa: '/æ/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 31, char: 'E', ipa: '/e/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 32, char: 'I', ipa: '/ɪ/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 33, char: 'O', ipa: '/ɒ/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 34, char: 'U', ipa: '/ʌ/', counts: { first: 10, middle: 10, last: 10 } }
+                ],
+                clusters: [
+                    { id: 40, char: 'Bl', ipa: '/bl/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 41, char: 'Br', ipa: '/br/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 42, char: 'Cl', ipa: '/kl/', counts: { first: 10, middle: 10, last: 10 } },
+                    { id: 43, char: 'Cr', ipa: '/kr/', counts: { first: 10, middle: 10, last: 10 } }
+                ]
+            },
+     ar: {
+                consonants: [
+                    { id: 1, char: 'أ', ipa: '/ʔ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 2, char: 'ب', ipa: '/b/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 3, char: 'ت', ipa: '/t/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 4, char: 'ث', ipa: '/θ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 5, char: 'ج', ipa: '/dʒ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 6, char: 'ح', ipa: '/ħ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 7, char: 'خ', ipa: '/x/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 8, char: 'د', ipa: '/d/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 9, char: 'ذ', ipa: '/ð/', counts: { first: 15, middle: 15, last: 15 } },
+                    { id: 10, char: 'ر', ipa: '/r/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 11, char: 'ز', ipa: '/z/', counts: { first: 15, middle: 15, last: 15 } },
+                    { id: 12, char: 'س', ipa: '/s/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 13, char: 'ش', ipa: '/ʃ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 14, char: 'ص', ipa: '/sˤ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 15, char: 'ض', ipa: '/dˤ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 16, char: 'ط', ipa: '/tˤ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 17, char: 'ظ', ipa: '/ðˤ/', counts: { first: 15, middle: 15, last: 15 } },
+                    { id: 18, char: 'ع', ipa: '/ʕ/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 19, char: 'غ', ipa: '/ɣ/', counts: { first: 25, middle: 25, last: 13 } },
+                    { id: 20, char: 'ف', ipa: '/f/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 21, char: 'ق', ipa: '/q/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 22, char: 'ك', ipa: '/k/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 23, char: 'ل', ipa: '/l/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 24, char: 'م', ipa: '/m/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 25, char: 'ن', ipa: '/n/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 26, char: 'هـ', ipa: '/h/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 27, char: 'و', ipa: '/w/', counts: { first: 25, middle: 25, last: 25 } },
+                    { id: 28, char: 'ي', ipa: '/j/', counts: { first: 25, middle: 25, last: 25 } }
+                ],
+                vowels: [
+                    { id: 50, char: 'Long A', ipa: '/a:/', counts: {  middle: 25 } },
+                    { id: 51, char: 'Long U', ipa: '/u:/', counts: {  middle: 25 } },
+                    { id: 52, char: 'Long I', ipa: '/i:/', counts: {  middle: 25 } }
+                ],
+                clusters: [] // REMOVED FOR ARABIC
+            }
+        };
+
+        const vocabulary = {
+            en: {
+                1: { first: { 1: "Banana" } }
+            },
+            ar: {
+                1: {
+                    first: { 1: "أرنب", 2: "أسد", 3: "إبريق", 4: "إبرة", 5: "أخ", 6: "أخت", 7: "أم", 8: "أب", 9: "أذن", 10: "إصبع", 11: "أنف", 12: "أيدي", 13: "أسنان", 14: "أفعة", 15: "أكلة", 16: "أرض", 17: "أين", 18: "أخد", 19: "أرز", 20: "ألوان", 21: "ألعاب", 22: "أصدقاء", 23: "أسبوع", 24: "أزرق", 25: "أناناس" },
+                    middle: { 1: "مائي", 2: "متألم", 3: "قراءة", 4: "مائدة", 5: "ذئب", 6: "فأر", 7: "سائل", 8: "رئيس", 9: "فأس", 10: "كأس", 11: "مؤذن", 12: "مئذنة", 13: "طائرة", 14: "دائرة", 15: "بائع", 16: "بئر", 17: "مئزر", 18: "رأس", 19: "روؤس", 20: "بيئة", 21: "سأل", 22: "لؤلؤ", 23: "مفاجأة", 24: "حائط", 25: "مؤلف" },
+                    last: { 1: "سماء", 2: "مساء", 3: "ضوء", 4: "دواء", 5: "هواء", 6: "بناء", 7: "ماء", 8: "فناء", 9: "غطاء", 10: "دعاء", 11: "لاء", 12: "هاء", 13: "شتاء", 14: "تاء", 15: "حساء", 16: "أطباء", 17: "عشاء", 18: "هدوء", 19: "قرأ", 20: "جزء", 21: "يبدأ", 22: "رداء", 23: "بطيء", 24: "لؤلؤ", 25: "بريء" }
+                },
+
+2: {
+  first: { 1: "باب", 2: "بن", 3: "بطة", 4: "بنت", 5: "برج", 6: "بقرة", 7: "بصل", 8: "بطيخ", 9: "بحر", 10: "بومة", 11: "بسكويت", 12: "بئر", 13: "بدر", 14: "بطن", 15: "برتقال", 16: "بذرة", 17: "بعوضة", 18: "بطانية", 19: "بلبل", 20: "بساط", 21: "برية", 22: "بندورة", 23: "بيضة", 24: "بطاطا", 25: "بالون" },
+  middle: { 1: "طابة", 2: "حبوب", 3: "جبل", 4: "صابون", 5: "عنب", 6: "حبل", 7: "لبن", 8: "ثعبان", 9: "شبك", 10: "نبع", 11: "لعبة", 12: "حبر", 13: "مسبح", 14: "ألبوم", 15: "حبيب", 16: "طبيب", 17: "غابة", 18: "ملابس", 19: "طبل", 20: "شبل", 21: "دبدوب", 22: "سبعة", 23: "مكعبات", 24: "جبس", 25: "علبة" },
+  last: { 1: "كلب", 2: "حليب", 3: "ثوب", 4: "ثعلب", 5: "علب", 6: "شب", 7: "غراب", 8: "تعب", 9: "طيب", 10: "كتب", 11: "سرب", 12: "حطب", 13: "مكتب", 14: "ضباب", 15: "قريب", 16: "كتاب", 17: "ذهب", 18: "قلب", 19: "لهب", 20: "غلب", 21: "حرب", 22: "حلب", 23: "صلب", 24: "غريب", 25: "طبيب" }
+},
+3: {
+  first: { 1: "تفاحة", 2: "تمساح", 3: "تين", 4: "تاج", 5: "تليفون", 6: "تلفاز", 7: "تمر", 8: "تلميذ", 9: "تبن", 10: "تمثال", 11: "تنين", 12: "تمرين", 13: "توب", 14: "تاء", 15: "تيك تيك", 16: "تونة", 17: "تاتا", 18: "تيس", 19: "تنور", 20: "تاب", 21: "تنورة", 22: "تبولة", 23: "تحت", 24: "تراب", 25: "تنين" },
+  middle: { 1: "دفتر", 2: "ستة", 3: "مفتاح", 4: "خاتم", 5: "قتال", 6: "متحف", 7: "كتب", 8: "نبتة", 9: "شتاء", 10: "بنتين", 11: "سترة", 12: "نتيجة", 13: "سمكتين", 14: "مكتبة", 15: "بيتين", 16: "شجرتين", 17: "طاولتين", 18: "بتول", 19: "سيارتين", 20: "شتلة", 21: "استاذ", 22: "زيتون", 23: "كتاب", 24: "متجر", 25: "فستان" },
+  last: { 1: "بنت", 2: "بيت", 3: "وقت", 4: "صوت", 5: "حوت", 6: "موت", 7: "تحت", 8: "زيت", 9: "جرابات", 10: "ست", 11: "انت", 12: "نبات", 13: "آكلت", 14: "شربت", 15: "شفت", 16: "توت", 17: "سلحفاة", 18: "نحت", 19: "نبت", 20: "مكعبات", 21: "شجرات", 22: "طاولات", 23: "سيارات", 24: "طيارات", 25: "دراجات" }
+},
+4: {
+  first: { 1: "ثعلب", 2: "ثوب", 3: "ثمرة", 4: "ثلج", 5: "ثعبان", 6: "ثقيل", 7: "ثلاثي", 8: "ثوم", 9: "ثريا", 10: "ثروة", 11: "مثلث", 12: "ثابت", 13: "ثقة", 14: "ثنية", 15: "ثقب", 16: "ثمن", 17: "ثقافة", 18: "ثور", 19: "ثمين", 20: "ثواني", 21: "ثكنة", 22: "ثانوية", 23: "ثياب", 24: "ثنائي", 25: "ثاء" },
+  middle: { 1: "مثلث", 2: "ممثل", 3: "ممثلة", 4: "بثرة", 5: "بعثرة", 6: "مثبت", 7: "مَثَل", 8: "كثيب", 9: "منثور", 10: "كثير", 11: "مثمر", 12: "كثرة", 13: "بحثت", 14: "مثالي", 15: "تمثال", 16: "كمثرى", 17: "ثلاثة", 18: "وثيقة", 19: "آثاث", 20: "بثينة", 21: "ثرثار", 22: "مثلجات", 23: "وثب", 24: "ميثاق", 25: "يثبت" },
+  last: { 1: "ليث", 2: "عبث", 3: "بحث", 4: "مثلث", 5: "لهث", 6: "حادث", 7: "حرث", 8: "يلوث", 9: "بعث", 10: "ثلاث", 11: "إناث", 12: "تلوث", 13: "محراث", 14: "حديث", 15: "بث", 16: "كوارث", 17: "مكث", 18: "يتحدث", 19: "خبيث", 20: "ملوث", 21: "متشبث", 22: "أشعث", 23: "غيث", 24: "تراث", 25: "آثاث" }
+},
+5: {
+  first: { 1: "جمل", 2: "جبل", 3: "جاموس", 4: "جرس", 5: "جزر", 6: "جريدة", 7: "جسم", 8: "جدار", 9: "جوعان", 10: "جدة", 11: "جمع", 12: "جسر", 13: "جرح", 14: "جواز", 15: "جن", 16: "جندي", 17: "جملة", 18: "جرابات", 19: "جفن", 20: "جوهرة", 21: "جو", 22: "جري", 23: "جار", 24: "جبهة", 25: "جرار" },
+  middle: { 1: "نجم", 2: "رجل", 3: "رجل", 4: "عجل", 5: "مستعجل", 6: "سجن", 7: "نجار", 8: "عجلة", 9: "فجل", 10: "مجرور", 11: "متجر", 12: "أجنحة", 13: "عجينة", 14: "مجرى", 15: "نجوم", 16: "حجارة", 17: "منجل", 18: "مجد", 19: "مجرفة", 20: "وجه", 21: "عجاج", 22: "برجين", 23: "ضجة", 24: "مجسم", 25: "مسجد" },
+  last: { 1: "برج", 2: "ثلج", 3: "درج", 4: "مزاج", 5: "منهج", 6: "فرج", 7: "لزج", 8: "موج", 9: "رجاج", 10: "زجاج", 11: "يمزج", 12: "يعوج", 13: "يعرج", 14: "انتاج", 15: "نسج", 16: "أبراج", 17: "ضج", 18: "سياج", 19: "دجاج", 20: "مكياج", 21: "مساج", 22: "يعالج", 23: "تزلج", 24: "محتاج", 25: "بيج" }
+},
+6: {
+  first: { 1: "حصان", 2: "حمامة", 3: "حب", 4: "حوت", 5: "حليب", 6: "حفلة", 7: "حائط", 8: "حذاء", 9: "حجر", 10: "حرباء", 11: "حمل", 12: "حصن", 13: "حقيبة", 14: "حديقة", 15: "حبل", 16: "حمار", 17: "حطب", 18: "حلوى", 19: "حوض", 20: "حلو", 21: "حامل", 22: "حملة", 23: "حافة", 24: "حبار", 25: "حقل" },
+  middle: { 1: "بحر", 2: "لحن", 3: "كحلة", 4: "نحلة", 5: "محل", 6: "ضحلة", 7: "نصيحة", 8: "نحيف", 9: "يسحق", 10: "يتحمم", 11: "مريحة", 12: "محطة", 13: "لحية", 14: "محتاج", 15: "صحيح", 16: "نحكي", 17: "ضحكة", 18: "ريحان", 19: "فحيح", 20: "فلاحون", 21: "يضحك", 22: "فحم", 23: "لحم", 24: "ممسحة", 25: "محرمة" },
+  last: { 1: "مفتاح", 2: "سلاح", 3: "جناح", 4: "فلاح", 5: "صياح", 6: "وشاح", 7: "جرح", 8: "مريح", 9: "فرح", 10: "شبح", 11: "نجاح", 12: "سائح", 13: "صباح", 14: "رياح", 15: "ريح", 16: "تفاح", 17: "مزح", 18: "يشلح", 19: "صلح", 20: "طرح", 21: "مالح", 22: "يسبح", 23: "يمسح", 24: "قبيح", 25: "ملاح" }
+},
+7: {
+  first: { 1: "خبز", 2: "خروف", 3: "خيمة", 4: "خيار", 5: "خمسة", 6: "خشب", 7: "خزان", 8: "خضار", 9: "خنجر", 10: "خيل", 11: "خزامى", 12: "خيط", 13: "خزنة", 14: "خط", 15: "ختم", 16: "خليج", 17: "خلية", 18: "خيال", 19: "خسة", 20: "خارج", 21: "خزانة", 22: "خل", 23: "خفاش", 24: "خلف", 25: "خم" },
+  middle: { 1: "نخلة", 2: "مخدة", 3: "بخار", 4: "يدخل", 5: "بخيل", 6: "يخرج", 7: "مخزن", 8: "فخذ", 9: "فخار", 10: "دخان", 11: "مخلل", 12: "سخي", 13: "داخل", 14: "يخجل", 15: "مخرج", 16: "مخطط", 17: "خلخال", 18: "بخاخ", 19: "يخلط", 20: "ملوخية", 21: "زخرفة", 22: "بخاخة", 23: "نخل", 24: "تخييم", 25: "مخدات" },
+  last: { 1: "مخ", 2: "فخ", 3: "صرخ", 4: "نفخ", 5: "مسخ", 6: "طبخ", 7: "شيخ", 8: "أخ", 9: "فرخ", 10: "مناخ", 11: "بخاخ", 12: "صاروخ", 13: "صواريخ", 14: "وسخ", 15: "كوخ", 16: "أكواخ", 17: "بطيخ", 18: "مريخ", 19: "طباخ", 20: "وبخ", 21: "خوخ", 22: "سبانخ", 23: "ينسخ", 24: "بخ", 25: "جخ" }
+},
+8: {
+  first: { 1: "دب", 2: "درج", 3: "دجاجة", 4: "دفتر", 5: "دخان", 6: "دودة", 7: "دراجة", 8: "دبوس", 9: "دمية", 10: "دولاب", 11: "دلو", 12: "دواء", 13: "دلوفين", 14: "دق", 15: "درب", 16: "ديناصور", 17: "دراق", 18: "دكان", 19: "دم", 20: "دور", 21: "دوامة", 22: "دف", 23: "ديك", 24: "درع", 25: "دبابة" },
+  middle: { 1: "مدرسة", 2: "سندويش", 3: "مدينة", 4: "يدين", 5: "بدلة", 6: "صندوق", 7: "حديقة", 8: "دودة", 9: "هدوء", 10: "معدن", 11: "قدر", 12: "عدد", 13: "ردم", 14: "وردة", 15: "ندى", 16: "غداء", 17: "هدية", 18: "عدسة", 19: "بدي", 20: "عيدان", 21: "حدود", 22: "هدهد", 23: "مدفع", 24: "صديق", 25: "رداء" },
+  last: { 1: "يد", 2: "ولد", 3: "جلد", 4: "أسد", 5: "خلد", 6: "رماد", 7: "جرادة", 8: "عيد", 9: "رعد", 10: "سد", 11: "فهد", 12: "عنيد", 13: "عامود", 14: "قرد", 15: "سعيد", 16: "نقود", 17: "صياد", 18: "مهد", 19: "مشرد", 20: "ورد", 21: "ضد", 22: "يصد", 23: "يعد", 24: "خد", 25: "شد" }
+},
+9: {
+  first: { 1: "ذهب", 2: "ذئب", 3: "ذكر", 4: "ذراع", 5: "ذيل", 6: "ذهن", 7: "ذرة", 8: "ذاب", 9: "ذقن", 10: "ذبابة", 11: "ذباب", 12: "ذخيرة", 13: "ذكرى", 14: "ذهب", 15: "ذروة" },
+  middle: { 1: "هذا", 2: "ماذا", 3: "غذاء", 4: "لذيذ", 5: "أذن", 6: "إذاعة", 7: "حذر", 8: "كذاب", 9: "بذرة", 10: "أذية", 11: "أذان", 12: "جذع", 13: "لماذا", 14: "حذاء", 15: "نافذة" },
+  last: { 1: "خذ", 2: "فخذ", 3: "تلميذ", 4: "استاذ", 5: "انقاذ", 6: "رذاذ", 7: "لذيذ", 8: "يشحذ", 9: "جرذ", 10: "قفنذ", 11: "نوافذ", 12: "منقذ", 13: "ينفذ", 14: "فولاذ", 15: "ملاذ" }
+},
+10: {
+  first: { 1: "رمان", 2: "رجل", 3: "رأس", 4: "ريشة", 5: "رغيف", 6: "رمل", 7: "رعد", 8: "رسمة", 9: "راديو", 10: "رصيف", 11: "ريح", 12: "رمانة", 13: "رداء", 14: "روضة", 15: "ربيع", 16: "رز", 17: "رباب", 18: "ريش", 19: "رمش", 20: "ركن", 21: "رياضة", 22: "ريحة", 23: "رضيع", 24: "رفيق", 25: "رافعة" },
+  middle: { 1: "سيارة", 2: "فراشة", 3: "مرآة", 4: "طائرة", 5: "كرة", 6: "بركة", 7: "مدرسة", 8: "برتقالة", 9: "حمراء", 10: "ضرير", 11: "بركان", 12: "طريق", 13: "زرافة", 14: "عصفورة", 15: "عربة", 16: "شجرة", 17: "برج", 18: "سرير", 19: "مرحاض", 20: "صاروخ", 21: "جرس", 22: "غراب", 23: "قرد", 24: "ابريق", 25: "بطريق" },
+  last: { 1: "جزر", 2: "نهر", 3: "قمر", 4: "بحر", 5: "جدار", 6: "فجر", 7: "شجر", 8: "قدر", 9: "حجر", 10: "سكر", 11: "مطر", 12: "دبور", 13: "جسر", 14: "قبر", 15: "مر", 16: "منظر", 17: "دفتر", 18: "منشار", 19: "نمر", 20: "مصر", 21: "زر", 22: "شرير", 23: "احمر", 24: "اصفر", 25: "اخضر" }
+},
+11: {
+  first: { 1: "زرافة", 2: "زهرة", 3: "زجاج", 4: "زبدة", 5: "زر", 6: "زيت", 7: "زبيب", 8: "زجاجة", 9: "زيتون", 10: "زكام", 11: "زينة", 12: "زهري", 13: "زيارة", 14: "زوج", 15: "زمن", 16: "زلمة", 17: "زعلان", 18: "زائر", 19: "زنبق", 20: "زقاق", 21: "زبد", 22: "زحلوطة", 23: "زريبة", 24: "زمور", 25: "زواحف" },
+  middle: { 1: "جزرة", 2: "مزهرية", 3: "موزة", 4: "حزام", 5: "ميزان", 6: "جزيرة", 7: "لوزة", 8: "غزال", 9: "فازة", 10: "كنزة", 11: "وزة", 12: "مزارع", 13: "مزرعة", 14: "عزف", 15: "حزين", 16: "عكازة", 17: "عنزة", 18: "منزل", 19: "ازرار", 20: "مزمار", 21: "لزيقة", 22: "يزرع", 23: "تلفزيون", 24: "حلزون", 25: "خزانة" },
+  last: { 1: "أرز", 2: "بريز", 3: "لوز", 4: "وز", 5: "فوز", 6: "جاز", 7: "غاز", 8: "جوز", 9: "حز", 10: "عجز", 11: "كنز", 12: "رمز", 13: "تلفاز", 14: "خبز", 15: "موز", 16: "مخبز", 17: "مايونيز", 18: "كرز", 19: "قفز", 20: "هز", 21: "جينز", 22: "جهاز", 23: "فريز", 24: "حاجز", 25: "يركز" }
+},
+12: {
+  first: { 1: "سمكة", 2: "سيارة", 3: "ساعة", 4: "سكين", 5: "سيارات", 6: "سماء", 7: "سلة", 8: "سلم", 9: "سرير", 10: "سن", 11: "سوق", 12: "سور", 13: "سحاب", 14: "سنارة", 15: "سجاد", 16: "سيف", 17: "سندويش", 18: "سكر", 19: "سمسم", 20: "ساق", 21: "سبعة", 22: "سنجاب", 23: "سجن", 24: "سهل", 25: "ساخن" },
+  middle: { 1: "لسان", 2: "مدرسة", 3: "بساط", 4: "مسمار", 5: "بسكويت", 6: "عسل", 7: "كرسي", 8: "مسطرة", 9: "غسل", 10: "رسالة", 11: "مسرح", 12: "مسؤول", 13: "بسبوس", 14: "بسيط", 15: "خنفساء", 16: "أسد", 17: "حسك", 18: "مسك", 19: "غسالة", 20: "مستقنع", 21: "يسرق", 22: "يعسوب", 23: "نعسان", 24: "كسلان", 25: "مبسوط" },
+  last: { 1: "هوس", 2: "كأس", 3: "درس", 4: "جرس", 5: "فرس", 6: "رأس", 7: "نفس", 8: "كبس", 9: "حرس", 10: "ناس", 11: "فارس", 12: "شمس", 13: "عريس", 14: "همس", 15: "بوليس", 16: "فاس", 17: "ألماس", 18: "قوس", 19: "اناناس", 20: "مدرس", 21: "طاووس", 22: "ملابس", 23: "مغناطيس", 24: "عرس", 25: "يجلس" }
+},
+13: {
+  first: { 1: "شجرة", 2: "شمس", 3: "شارع", 4: "شاي", 5: "شرطة", 6: "شباك", 7: "شاطئ", 8: "شمعة", 9: "شكل", 10: "شبل", 11: "شوكة", 12: "شعر", 13: "شراع", 14: "شرشف", 15: "شحاد", 16: "شفاه", 17: "شريط", 18: "شجيرات", 19: "شوكولاتة", 20: "شمندر", 21: "شمام", 22: "شكرا", 23: "شمسية", 24: "شرير", 25: "شرارة" },
+  middle: { 1: "عشاء", 2: "عشب", 3: "مشبك", 4: "عشرة", 5: "مشط", 6: "عشيرة", 7: "وشاح", 8: "وشم", 9: "قشرة", 10: "مشاة", 11: "مشروب", 12: "مشروع", 13: "مشي", 14: "مشغل", 15: "نشاط", 16: "فرشاية", 17: "رشاش", 18: "حشرات", 19: "منشار", 20: "ريشة", 21: "خشب", 22: "مشمش", 23: "فراشة", 24: "شاشة", 25: "غشاش" },
+  last: { 1: "رش", 2: "طرش", 3: "نقش", 4: "غش", 5: "عش", 6: "فراش", 7: "رشاش", 8: "نقاش", 9: "نعش", 10: "عرش", 11: "شرش", 12: "قماش", 13: "كبش", 14: "ريش", 15: "خفاش", 16: "جيش", 17: "مشمش", 18: "قرش", 19: "شاش", 20: "رفش", 21: "خدش", 22: "دوش", 23: "غشاش", 24: "كرش", 25: "ليش" }
+},
+14: {
+  first: { 1: "صابون", 2: "صندوق", 3: "صباح", 4: "صحن", 5: "صقر", 6: "صورة", 7: "صوت", 8: "صخرة", 9: "صغار", 10: "صحيفة", 11: "صلاة", 12: "صوص", 13: "صديق", 14: "صفر", 15: "صيف", 16: "صبي", 17: "صمغ", 18: "صنبور", 19: "صاروخ", 20: "صنارة", 21: "صرصار", 22: "صيد", 23: "صوف", 24: "صبار", 25: "صينية" },
+  middle: { 1: "عصير", 2: "بصلة", 3: "عصا", 4: "مصباح", 5: "لصوص", 6: "حصان", 7: "مصاصة", 8: "بصمة", 9: "مصعد", 10: "مصنع", 11: "حصيرة", 12: "حصن", 13: "لاصق", 14: "قصير", 15: "رصاص", 16: "حصاة", 17: "قصر", 18: "قصب", 19: "صيصان", 20: "اصفر", 21: "عصافير", 22: "معصب", 23: "اتصال", 24: "مصانع", 25: "مصور" },
+  last: { 1: "نص", 2: "قص", 3: "صوص", 4: "لص", 5: "مقص", 6: "قصص", 7: "شخص", 8: "لصوص", 9: "رقص", 10: "رصاص", 11: "قميص", 12: "ناقص", 13: "راقص", 14: "اجاص", 15: "قرص", 16: "يغوص", 17: "باص", 18: "قفص", 19: "قناص", 20: "حمص", 21: "فحص", 22: "يعقص", 23: "يقص", 24: "يمص", 25: "بحص" }
+},
+15: {
+  first: { 1: "ضوء", 2: "ضفدع", 3: "ضرس", 4: "ضبع", 5: "ضباب", 6: "ضرب", 7: "ضابط", 8: "ضحك", 9: "ضعيف", 10: "ضب", 11: "ضمادة", 12: "ضيف", 13: "ضجة", 14: "ضد", 15: "ضيعة", 16: "ضخم", 17: "ضيق", 18: "ضاع", 19: "ضغط", 20: "ضاحية", 21: "ضفة", 22: "ضيافة", 23: "ضيوف", 24: "ضمة", 25: "ضمن" },
+  middle: { 1: "اخضر", 2: "أرضية", 3: "بيضة", 4: "خضار", 5: "مضرب", 6: "بعوضة", 7: "نضارة", 8: "مضمضة", 9: "عضلة", 10: "رضيع", 11: "غضب", 12: "فاضي", 13: "منضدة", 14: "فضة", 15: "حضانة", 16: "مضرّة", 17: "عضة", 18: "منفضدة", 19: "حفاضة", 20: "عارضة", 21: "بيضاء", 22: "رياضة", 23: "فيضان", 24: "عضمة", 25: "حضن" },
+  last: { 1: "بيض", 2: "ابيض", 3: "بعوض", 4: "يخض", 5: "مريض", 6: "عريض", 7: "يعض", 8: "مقبض", 9: "عرض", 10: "حوض", 11: "رفض", 12: "حامض", 13: "اغراض", 14: "قبض", 15: "قوارض", 16: "رض", 17: "يركض", 18: "بعض", 19: "ينفض", 20: "ارض", 21: "عارض", 22: "عوراض", 23: "يمضمض", 24: "ينهض", 25: "نقيض" }
+},
+16: {
+  first: { 1: "طاولة", 2: "طائرة", 3: "طفل", 4: "طين", 5: "طعام", 6: "طبيب", 7: "طريق", 8: "طبول", 9: "طاقة", 10: "طن", 11: "طنان", 12: "طماطم", 13: "طالب", 14: "طلاب", 15: "طبل", 16: "طلاء", 17: "طباخ", 18: "طق طق", 19: "طيور", 20: "طير", 21: "طوق", 22: "طاووس", 23: "طبق", 24: "طبيبة", 25: "طويل" },
+  middle: { 1: "بطة", 2: "مطرقة", 3: "مطبخ", 4: "مطاط", 5: "بطاطا", 6: "قطعة", 7: "مطر", 8: "محطة", 9: "بطاقة", 10: "مطبعة", 11: "خطوات", 12: "قطار", 13: "نقطة", 14: "قطة", 15: "حطب", 16: "قطط", 17: "سطل", 18: "اخطبوط", 19: "مطار", 20: "بطيخ", 21: "أطفال", 22: "منطاد", 23: "بطانية", 24: "قطن", 25: "بطن" },
+  last: { 1: "نط", 2: "بط", 3: "قط", 4: "خط", 5: "خيط", 6: "خليط", 7: "نقط", 8: "شط", 9: "قطط", 10: "بسيط", 11: "ملاقط", 12: "اخطبوط", 13: "قرنبيط", 14: "نشاط", 15: "مطاط", 16: "سوط", 17: "يعيط", 18: "بلاط", 19: "بساط", 20: "خلاط", 21: "شريط", 22: "غلط", 23: "خلط", 24: "سقط", 25: "مشط" }
+},
+17: {
+  first: { 1: "ظرف", 2: "ظهر", 3: "ظفر", 4: "ظلام", 5: "ظبي", 6: "ظرف", 7: "ظاهر", 8: "ظلال", 9: "ظريف", 10: "ظمأ", 11: "ظهيرة", 12: "ظربان", 13: "ظفيرة", 14: "ظهور", 15: "ظاء" },
+  middle: { 1: "حافظة", 2: "مظلة", 3: "عظيم", 4: "بوظة", 5: "وظيفة", 6: "نظافة", 7: "ينظر", 8: "مظاهرة", 9: "لحظة", 10: "منظار", 11: "عظَمة", 12: "عظام", 13: "منظف", 14: "حظر", 15: "محفظة" },
+  last: { 1: "حظ", 2: "غليظ", 3: "يقظ", 4: "باهظ", 5: "حفظ", 6: "يحفظ", 7: "الحظ", 8: "وعظ", 9: "يستقيظ", 10: "استيقظ", 11: "يلفظ", 12: "محافظ", 13: "اكتظاظ", 14: "فظ", 15: "جاحظ" }
+},
+18: {
+  first: { 1: "عصفور", 2: "علم", 3: "عنب", 4: "عين", 5: "عرباية", 6: "عود", 7: "عقل", 8: "عمل", 9: "عدس", 10: "عبير", 11: "عقد", 12: "عسل", 13: "عصير", 14: "عائلة", 15: "عنكبوت", 16: "عطر", 17: "علبة", 18: "عملة", 19: "عدو", 20: "عصر", 21: "عجلة", 22: "عداد", 23: "عنق", 24: "عروس", 25: "عنيد" },
+  middle: { 1: "شمعة", 2: "ملعب", 3: "سعيد", 4: "طعام", 5: "دمعة", 6: "شعير", 7: "لاعب", 8: "يسعل", 9: "ساعة", 10: "نعناع", 11: "يعطس", 12: "شعور", 13: "مرعوب", 14: "معلم", 15: "فزاعة", 16: "نعامة", 17: "رافعة", 18: "يعيط", 19: "اسعاف", 20: "سماعة", 21: "سعد", 22: "بعوضة", 23: "صناعة", 24: "شعاع", 25: "معطف" },
+  last: { 1: "دموع", 2: "جوع", 3: "يرجع", 4: "يسمع", 5: "مصنع", 6: "طمع", 7: "شموع", 8: "يطلع", 9: "وجع", 10: "شراع", 11: "مزارع", 12: "فرع", 13: "ضبع", 14: "ذراع", 15: "اصبع", 16: "ضفدع", 17: "مربع", 18: "مذيع", 19: "بضائع", 20: "دفاع", 21: "بائع", 22: "نبع", 23: "اجتماع", 24: "فزع", 25: "رضيع" }
+},
+19: {
+  first: { 1: "غزال", 2: "غابة", 3: "غيمة", 4: "غرفة", 5: "غطاء", 6: "غضب", 7: "غسالة", 8: "غصن", 9: "غسيل", 10: "غبار", 11: "غاز", 12: "غداء", 13: "غلاف", 14: "غميق", 15: "غوريلا", 16: "غيث", 17: "غراء", 18: "غنية", 19: "غريب", 20: "غواصة", 21: "غرسة", 22: "غطس", 23: "غلي", 24: "غين", 25: "غراب" },
+  middle: { 1: "بغل", 2: "ببغاد", 3: "شغل", 4: "برغي", 5: "يغوص", 6: "لغز", 7: "جغرافيا", 8: "كنغر", 9: "مغامر", 10: "يغلي", 11: "يغني", 12: "يغرس", 13: "رغوة", 14: "مغادرة", 15: "مغلف", 16: "مغارة", 17: "مغني", 18: "يرغب", 19: "مغرفة", 20: "رغيف", 21: "مغسلة", 22: "مغناطيس", 23: "رغبة", 24: "يغادر", 25: "المغرب" },
+  last: { 1: "دماغ", 2: "مبلغ", 3: "صائغ", 4: "صمغ", 5: "فارغ", 6: "يمضغ", 7: "صبغ", 8: "يراوغ", 9: "لدغ", 10: "استفرغ", 11: "دغدغ", 12: "بلغ", 13: "رسغ" }
+},
+20: {
+  first: { 1: "فيل", 2: "فم", 3: "فراشة", 4: "فستان", 5: "فاصوليا", 6: "فلفل", 7: "فارس", 8: "فول", 9: "فجر", 10: "فار", 11: "فهد", 12: "فحم", 13: "فراولة", 14: "فأس", 15: "فلاح", 16: "فقمة", 17: "فندق", 18: "فرس", 19: "فقير", 20: "فنان", 21: "فرشاية", 22: "فخار", 23: "فلافل", 24: "فنجان", 25: "فواكه" },
+  middle: { 1: "تفاحة", 2: "دفتر", 3: "تفاح", 4: "رفوف", 5: "غرفة", 6: "كفيف", 7: "سفينة", 8: "قفاز", 9: "كفوف", 10: "قافلة", 11: "حافلة", 12: "قفل", 13: "سفن", 14: "ملفوف", 15: "يحفر", 16: "يفرشي", 17: "طفل", 18: "يقفز", 19: "محفظة", 20: "قنفذ", 21: "زرافة", 22: "نافورة", 23: "خفاش", 24: "قفص", 25: "سلحفاة" },
+  last: { 1: "خوف", 2: "ظرف", 3: "كتف", 4: "أنف", 5: "شرشف", 6: "خاروف", 7: "ضعيف", 8: "أليف", 9: "حرف", 10: "يصرف", 11: "ريف", 12: "معطف", 13: "ضيوف", 14: "هاتف", 15: "كهف", 16: "صف", 17: "رف", 18: "ينظف", 19: "صوف", 20: "لطيف", 21: "خريف", 22: "مقرف", 23: "مصروف", 24: "خواريف", 25: "نصف" }
+},
+21: {
+  first: { 1: "قمر", 2: "قلم", 3: "قطة", 4: "قبعة", 5: "قالب", 6: "قطط", 7: "قريب", 8: "قفاز", 9: "قوس", 10: "قوي", 11: "قداحة", 12: "قلعة", 13: "قبر", 14: "قهوة", 15: "قفص", 16: "قنديل", 17: "قانون", 18: "قصة", 19: "قديم", 20: "قمامة", 21: "قليل", 22: "قبيلة", 23: "قلب", 24: "قصب", 25: "قطن" },
+  middle: { 1: "حقيبة", 2: "مقعد", 3: "ثقب", 4: "ملعقة", 5: "ثقيل", 6: "رقم", 7: "بقرة", 8: "ناقة", 9: "مقص", 10: "عقرب", 11: "عقاب", 12: "مطرقة", 13: "ورقة", 14: "أرقام", 15: "مقلاية", 16: "فقمة", 17: "نقاش", 18: "شقيق", 19: "رقيق", 20: "يسقي", 21: "جقل", 22: "أصدقاء", 23: "ثقافة", 24: "عقد", 25: "عقل" },
+  last: { 1: "ورق", 2: "طريق", 3: "بطريق", 4: "عميق", 5: "عرق", 6: "رقيق", 7: "أفق", 8: "نسق", 9: "سباق", 10: "يلصق", 11: "يلعق", 12: "ساق", 13: "طبق", 14: "يدق", 15: "حريق", 16: "بق", 17: "لاصق", 18: "طوق", 19: "محقق", 20: "حلاق", 21: "سائق", 22: "بوق", 23: "ابريق", 24: "يبصق", 25: "يغرق" }
+},
+22: {
+  first: { 1: "كتاب", 2: "كرسي", 3: "كلب", 4: "كرة", 5: "كسول", 6: "كعك", 7: "كوالا", 8: "كنغر", 9: "كتكوت", 10: "كوكب", 11: "كتف", 12: "كرم", 13: "كرز", 14: "كوب", 15: "كف", 16: "كيس", 17: "كبل", 18: "كَتب", 19: "كُتب", 20: "كلام", 21: "كاسة", 22: "كأس", 23: "كندرة", 24: "كنيسة", 25: "كولا" },
+  middle: { 1: "فواكه", 2: "سكين", 3: "مكنسة", 4: "مكتبة", 5: "شكل", 6: "مكتب", 7: "يبكي", 8: "يسكن", 9: "فكرة", 10: "بكرا", 11: "بركة", 12: "مكعب", 13: "دكان", 14: "يركل", 15: "وكر", 16: "دبكة", 17: "مكة", 18: "علكة", 19: "بركان", 20: "حركة", 21: "مركز", 22: "يحكي", 23: "تركتور", 24: "عكازة", 25: "ملكة" },
+  last: { 1: "سمك", 2: "ملك", 3: "لايك", 4: "عمك", 5: "ملاك", 6: "ضحك", 7: "شوك", 8: "يحك", 9: "ديك", 10: "سلك", 11: "سباك", 12: "تدليك", 13: "شباك", 14: "شبابيك", 15: "مفك", 16: "يفرك", 17: "شبك", 18: "سيرك", 19: "نيزك", 20: "يمسك", 21: "مشبك", 22: "فمك", 23: "رأسك", 24: "أنفك", 25: "عينك" }
+},
+23: {
+  first: { 1: "لبن", 2: "ليمون", 3: "لعبة", 4: "لسان", 5: "لحم", 6: "لؤلؤ", 7: "لاما", 8: "لوز", 9: "لحام", 10: "ليل", 11: "لحاف", 12: "لعبة", 13: "لون", 14: "لقمة", 15: "ليش؟", 16: "لمين؟", 17: "لوح", 18: "لاصق", 19: "لهب", 20: "ليلى", 21: "لمس", 22: "لصوص", 23: "لفة", 24: "لاعب", 25: "لوحة" },
+  middle: { 1: "فلم", 2: "قلم", 3: "معلم", 4: "بلح", 5: "فلاح", 6: "ملكة", 7: "سلم", 8: "نحلة", 9: "نملة", 10: "نخلة", 11: "سلة", 12: "علم", 13: "سلاح", 14: "علكة", 15: "بلبل", 16: "ملفوف", 17: "كلب", 18: "فلفل", 19: "ملعقة", 20: "سلطة", 21: "شلمونة", 22: "شوكولا", 23: "بنطلون", 24: "ألوان", 25: "عيلة" },
+  last: { 1: "رمل", 2: "نمل", 3: "حبل", 4: "حمل", 5: "جمل", 6: "جبل", 7: "طبل", 8: "شبل", 9: "بيل", 10: "برميل", 11: "جميل", 12: "رجال", 13: "يغسل", 14: "غسيل", 15: "فيل", 16: "فلافل", 17: "فول", 18: "طويل", 19: "شلال", 20: "نحل", 21: "تمثال", 22: "وحل", 23: "منازل", 24: "موبايل", 25: "يشيل" }
+},
+24: {
+  first: { 1: "موز", 2: "ماء", 3: "مدرسة", 4: "مفتاح", 5: "مقعد", 6: "مكعب", 7: "ملح", 8: "مخدة", 9: "مريض", 10: "مطر", 11: "ملعقة", 12: "ملعب", 13: "مكنسة", 14: "مسجد", 15: "مقص", 16: "مقلمة", 17: "مصنع", 18: "منزل", 19: "منبه", 20: "مدينة", 21: "مكتب", 22: "مرجوحة", 23: "مفاتيح", 24: "مروحة", 25: "ملابس" },
+  middle: { 1: "احمر", 2: "سمكة", 3: "نمل", 4: "صمغ", 5: "نملة", 6: "رمان", 7: "سمين", 8: "حمل", 9: "سميري", 10: "سُمك", 11: "جمل", 12: "حمار", 13: "جميل", 14: "حمامة", 15: "شمعة", 16: "عامود", 17: "ليمون", 18: "ماما", 19: "تمثال", 20: "قمامة", 21: "مشمش", 22: "تمساح", 23: "قمح", 24: "بومة", 25: "يسمع" },
+  last: { 1: "فم", 2: "قلم", 3: "علم", 4: "لحم", 5: "فحم", 6: "فلم", 7: "حلم", 8: "اسم", 9: "كرم", 10: "سلم", 11: "خدم", 12: "طعام", 13: "رقم", 14: "نجم", 15: "جسم", 16: "هرم", 17: "ثوم", 18: "رسم", 19: "عظم", 20: "طماطم", 21: "يشم", 22: "لام", 23: "سهم", 24: "امام", 25: "مطعم" }
+},
+25: {
+  first: { 1: "نار", 2: "نمر", 3: "نسر", 4: "نحلة", 5: "نجوم", 6: "نجمة", 7: "نهر", 8: "نجار", 9: "نسور", 10: "نور", 11: "نوع", 12: "نون", 13: "نباح", 14: "نخلة", 15: "نبتة", 16: "نظارة", 17: "نعامة", 18: "نام", 19: "نملة", 20: "نرد", 21: "نيل", 22: "نعناع", 23: "نحيف", 24: "نزهة", 25: "نافذة" },
+  middle: { 1: "بنفسج", 2: "عنب", 3: "تنورة", 4: "بنطال", 5: "منارة", 6: "بنت", 7: "بنات", 8: "بنتين", 9: "بندورة", 10: "لبنة", 11: "سنجاب", 12: "أنف", 13: "أسنان", 14: "جبنة", 15: "بناء", 16: "اناناس", 17: "منقار", 18: "فانوس", 19: "مجنون", 20: "مهندس", 21: "فنان", 22: "زينة", 23: "نعنع", 24: "رمانة", 25: "جناح" },
+  last: { 1: "تليفون", 2: "فن", 3: "يرن", 4: "ليمون", 5: "حزين", 6: "فنان", 7: "لبن", 8: "ميزان", 9: "حصان", 10: "عين", 11: "سكن", 12: "أذن", 13: "مين ؟", 14: "ألوان", 15: "أسنان", 16: "رمان", 17: "عيون", 18: "لون", 19: "دهان", 20: "عطشان", 21: "سمين", 22: "مجنون", 23: "بطن", 24: "صابون", 25: "قطن" }
+},
+26: {
+  first: { 1: "هواء", 2: "هاتف", 3: "همبرغر", 4: "هدية", 5: "هدف", 6: "هلال", 7: "هرة", 8: "هي", 9: "هدوء", 10: "هوية", 11: "هرم", 12: "هبوط", 13: "هدهد", 14: "هضبة", 15: "هلا", 16: "هذا", 17: "هجوم", 18: "هيكل", 19: "هيام", 20: "هشام", 21: "هم هم", 22: "همس", 23: "همجي", 24: "هزيمه", 25: "هالوين" },
+  middle: { 1: "لهاية", 2: "نهر", 3: "سهم", 4: "سهام", 5: "نهاية", 6: "نهار", 7: "جبهة", 8: "سهران", 9: "زهرة", 10: "قهوة", 11: "دهان", 12: "انهار", 13: "مهر", 14: "أهرام", 15: "ذهب", 16: "مقهى", 17: "أزهار", 18: "كهف", 19: "مهرج", 20: "بهارات", 21: "جهاز", 22: "شهب", 23: "جهاد", 24: "مشهور", 25: "لهب" },
+  last: { 1: "وجه", 2: "شوكولاته", 3: "له له", 4: "منبه", 5: "مياه", 6: "انتبه", 7: "وجوه", 8: "يشبه", 9: "اتجاه", 10: "نزهة", 11: "فواكه", 12: "تائه", 13: "حكاه", 14: "عطاه", 15: "طعماه", 16: "شربه", 17: "وجيه", 18: "كره", 19: "يده", 20: "رأسه", 21: "اخوه", 22: "اخته", 23: "امامه", 24: "خلفه", 25: "جنبه" }
+},
+27: {
+  first: { 1: "وردة", 2: "ولد", 3: "وجه", 4: "ورق", 5: "وز", 6: "والد", 7: "وقت", 8: "وسادة", 9: "ورشة", 10: "وادي", 11: "وكر", 12: "وحدة", 13: "وسام", 14: "وليمة", 15: "وثيقة", 16: "وزير", 17: "واحد", 18: "وحش", 19: "وشاح", 20: "وردي", 21: "وقود", 22: "وطواط", 23: "وحيد القرن", 24: "وعاء", 25: "ورود" },
+  middle: { 1: "قهوة", 2: "دواء", 3: "فواكه", 4: "حيوان", 5: "كوالا", 6: "دوامة", 7: "فول", 8: "بوابة", 9: "بلكون", 10: "اسود", 11: "حضراوات", 12: "طاولة", 13: "قوس", 14: "ثور", 15: "جوز", 16: "موبايل", 17: "لون", 18: "صوفا", 19: "بندورة", 20: "ملفوف", 21: "نمور", 22: "تنورة", 23: "صوص", 24: "جوعان", 25: "جوارب" },
+  last: { 1: "ضو", 2: "جو", 3: "دلو", 4: "جرو", 5: "كاكو", 6: "بهو", 7: "راديو", 8: "بدو", 9: "قبو", 10: "سطو", 11: "فرو", 12: "آلو", 13: "ميلو", 14: "مترو", 15: "جدو", 16: "حلو", 17: "بيانو", 18: "طوكيو", 19: "دومينو", 20: "سنونو", 21: "بلياردو", 22: "مانجو", 23: "شامبو", 24: "ستريو", 25: "بانيو" }
+},
+28: {
+  first: { 1: "يد", 2: "يدين", 3: "ياسمين", 4: "ينبوع", 5: "يمامة", 6: "يابسة", 7: "يم يم", 8: "يخت", 9: "ينفخ", 10: "ياقوت", 11: "يشلح", 12: "يوسف", 13: "يبحث", 14: "يسار", 15: "يمين", 16: "يطبخ", 17: "يقف", 18: "يركب", 19: "يضرب", 20: "يبدأ", 21: "يضحك", 22: "يشرب", 23: "يرسم", 24: "يرقة", 25: "يقطين" },
+  middle: { 1: "بيت", 2: "كبير", 3: "سيارة", 4: "عيون", 5: "ثياب", 6: "طيور", 7: "خيول", 8: "رياضة", 9: "سعيد", 10: "مخيم", 11: "خيار", 12: "سمين", 13: "مدير", 14: "عرباية", 15: "سريع", 16: "بيل", 17: "كبير", 18: "صغير", 19: "صبيان", 20: "جميل", 21: "ليمون", 22: "طريق", 23: "فريز", 24: "قريب", 25: "بعيد" },
+  last: { 1: "مي", 2: "بني", 3: "كرسي", 4: "في", 5: "يغلي", 6: "تجلي", 7: "شاي", 8: "جندي", 9: "باي", 10: "جني", 11: "يحكي", 12: "صبي", 13: "صحي", 14: "يمشي", 15: "انفي", 16: "فمي", 17: "عيني", 18: "شعري", 19: "يدي", 20: "قوي", 21: "قاضي", 22: "مغني", 23: "هندي", 24: "ادرسي", 25: "افتحي" }
+},
+50: {
+  first: { 1: "باب", 2: "نار", 3: "دار", 4: "طعام", 5: "ساعة", 6: "كتاب", 7: "قماش", 8: "فراش", 9: "حمار", 10: "عنب", 11: "نمر", 12: "ثعلب", 13: "حصان", 14: "جبل", 15: "بابا", 16: "بازار", 17: "كعك", 18: "سماء", 19: "غزال", 20: "طيور", 21: "عصافير", 22: "حديقة", 23: "طعام", 24: "فلاح", 25: "جدار" }
+},
+51: {
+  first: { 1: "نور", 2: "طيور", 3: "عجول", 4: "رسوم", 5: "صندوق", 6: "فول", 7: "كوب", 8: "ورود", 9: "بخور", 10: "جنون", 11: "عصفور", 12: "يسوق", 13: "بلوط", 14: "حذور", 15: "تمور", 16: "دروع", 17: "دروس", 18: "صابون", 19: "طيور", 20: "أسود", 21: "أصول", 22: "عطور", 23: "حبوب", 24: "لحوم", 25: "رسوم" }
+},
+52: {
+  first: { 1: "بيت", 2: "زيت", 3: "كرسي", 4: "حليب", 5: "تمساح", 6: "عصير", 7: "طريق", 8: "كبير", 9: "صغير", 10: "دمية", 11: "طيب", 12: "عريض", 13: "شريط", 14: "حديد", 15: "إنجيل", 16: "قلم رصاص", 17: "فتي", 18: "جميل", 19: "طويل", 20: "سريع", 21: "بعيد", 22: "قريب", 23: "كريم", 24: "فريق", 25: "وليد" }
+}
+            }
+        };
+
+        const translations = {
+            en: {
+                title_sub: "Make a Sound",
+                btn_start: "Start",
+                btn_info: "Info",
+                btn_resource: "Resource",
+                select_letter: "Select Sound",
+                dir: "ltr",
+                consonants: "Consonants",
+                vowels: "Vowels",
+                clusters: "Clusters"
+            },
+            ar: {
+                title_sub: "أصدر صوتاً",
+                btn_start: "ابدأ",
+                btn_info: "معلومات",
+                btn_resource: "مصادر",
+                select_letter: "اختر صوتاً",
+                dir: "rtl",
+                consonants: "حروف ساكنة",
+                vowels: "حروف العلة",
+                clusters: "عناقيد"
+            }
+        };
+
+        const parentGuideData = {
+            en: {
+                title: "How to Use the App",
+                content: `...`
+            },
+            ar: {
+                title: "دليل الاستخدام",
+                content: `...`
+            }
+        };
+
+        Object.assign(translations.en, {"ui_0": "Articulation - Word Workspace", "ui_1": "Articulation - Word", "ui_2": "Test", "ui_3": "Prac", "ui_4": "How many cards?", "ui_5": "Cancel", "ui_6": "Vowels", "ui_7": "Clusters", "ui_8": "Word Position", "ui_9": "Middle", "ui_10": "Last", "ui_11": "Back", "ui_12": "Select Rounds", "ui_13": "Rounds", "ui_14": "Rounds", "ui_15": "Cancel", "ui_16": "Info", "close_label": "Close"});
+        Object.assign(translations.ar, {"ui_0": "النطق — الكلمات", "ui_1": "النطق — الكلمات", "ui_2": "اختبار", "ui_3": "تدريب", "ui_4": "كم بطاقة؟", "ui_5": "إلغاء", "ui_6": "صوائت", "ui_7": "عناقيد", "ui_8": "موضع الصوت في الكلمة", "ui_9": "وسط الكلمة", "ui_10": "آخر الكلمة", "ui_11": "رجوع", "ui_12": "اختر عدد الجولات", "ui_13": "جولات", "ui_14": "جولات", "ui_15": "إلغاء", "ui_16": "معلومات", "close_label": "إغلاق"});
+
+        Object.assign(translations.en, {"extra_0": "Consonants", "extra_1": "First", "extra_2": "Select Word"});
+        Object.assign(translations.ar, {"extra_0": "صوامت", "extra_1": "أول الكلمة", "extra_2": "اختر كلمة"});
+        const state = {
+            lang: 'ar',
+            editMode: false,
+            stars: 0,
+            starPanelVisible: true,
+            sidePanelVisible: true,
+            templateSize: 2,
+            slotsData: [null, null],
+            activeSlotIndex: null,
+            selectedLetterId: null,
+            selectedLetterIpa: null,
+            selectedPosition: null,
+            activeFilter: 'consonants',
+            mode: 'free',
+            pendingMode: null,
+            targetSlotIndex: null,
+            rounds: 0,
+            currentRound: 0
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function init() {
+            renderStars();
+            setTemplate(2);
+            updateLanguageUI();
+        }
+
+        function toggleLanguage() {
+            state.lang = state.lang === 'en' ? 'ar' : 'en';
+            state.activeFilter = 'consonants';
+            updateLanguageUI();
+            clearSlots();
+        }
+
+        function updateLanguageUI() {
+            const t = translations[state.lang];
+            document.getElementById('lang-btn').innerText = state.lang === 'en' ? 'عربي' : 'English';
+            document.documentElement.lang = state.lang;
+            document.documentElement.dir = t.dir;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if(t[key]) el.innerText = t[key];
+            });
+
+            const clusterTab = document.querySelector('[data-filter="clusters"]');
+            if (state.lang === 'ar') clusterTab.style.display = 'none';
+            else clusterTab.style.display = 'block';
+
+            document.querySelector('[data-filter="consonants"]').innerText = t.consonants;
+            document.querySelector('[data-filter="vowels"]').innerText = t.vowels;
+            document.querySelector('[data-filter="clusters"]').innerText = t.clusters;
+        }
+
+        // --- STARS & AUDIO ---
+
+        function renderStars() {
+            const container = document.getElementById('star-slots');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const isFilled = i < state.stars;
+                const star = document.createElement('div');
+                star.className = `w-8 h-8 md:w-10 md:h-10 cursor-pointer transition transform hover:scale-110 flex items-center justify-center rounded-full ${isFilled ? 'text-yellow-400' : 'bg-gray-100 text-gray-300'}`;
+                star.innerHTML = `<i class="fas fa-star text-lg md:text-2xl ${isFilled ? 'star-pop' : ''}"></i>`;
+                star.onclick = () => toggleStar(i);
+                container.appendChild(star);
+            }
+        }
+
+        function toggleStar(index) {
+            const isFilled = index < state.stars;
+            const popSound = document.getElementById('sound-pop');
+            const clickSound = document.getElementById('sound-click');
+
+            if (!isFilled) {
+                state.stars++;
+                clickSound.currentTime = 0;
+                clickSound.play().catch(e => console.log(e));
+                renderStars();
+                if (state.stars === 10) setTimeout(celebrate, 300);
+            } else {
+                state.stars = index;
+                popSound.currentTime = 0;
+                popSound.play().catch(e => console.log(e));
+                renderStars();
+            }
+        }
+
+        function toggleStarPanel() {
+            state.starPanelVisible = !state.starPanelVisible;
+            const p = document.getElementById('star-panel-container');
+            if(state.starPanelVisible) p.style.marginTop = '0';
+            else p.style.marginTop = '-80px';
+        }
+
+        function celebrate() {
+            document.getElementById('sound-success').play().catch(e=>{});
+            launchFireworks();
+            setTimeout(() => {
+                state.stars = 0;
+                renderStars();
+            }, 6000);
+        }
+
+        // --- FIREWORKS ---
+        function launchFireworks() {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            const colors = ['#FAD2E1', '#C5D0E6', '#C1E1C1', '#FDFD96', '#E6E6FA'];
+
+            function createExplosion(x, y) {
+                for(let i=0; i<60; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 5 + 2;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        alpha: 1,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        decay: Math.random() * 0.02 + 0.01
+                    });
+                }
+            }
+
+            createExplosion(canvas.width/2, canvas.height/2);
+            setTimeout(() => createExplosion(canvas.width/3, canvas.height/3), 300);
+            setTimeout(() => createExplosion(2*canvas.width/3, canvas.height/2), 600);
+
+            function animate() {
+                if (particles.length === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                requestAnimationFrame(animate);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15; // Gravity
+                    p.alpha -= p.decay;
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                    } else {
+                        ctx.globalAlpha = p.alpha;
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+            }
+            animate();
+        }
+
+        // --- MODALS & UI LOGIC ---
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function showParentInfo() { openModal('info-modal'); }
+        function toggleSidePanel() {
+            state.sidePanelVisible = !state.sidePanelVisible;
+            document.getElementById('side-panel').classList.toggle('collapsed');
+        }
+
+        function toggleEditMode() {
+            state.editMode = !state.editMode;
+            const btn = document.getElementById('edit-mode-btn');
+            if (state.editMode) btn.classList.add('edit-btn-active');
+            else btn.classList.remove('edit-btn-active');
+            renderSlots();
+        }
+
+        function setTemplate(num) {
+            state.templateSize = num;
+            const newSlots = new Array(num).fill(null);
+            for(let i=0; i<Math.min(state.slotsData.length, num); i++) {
+                newSlots[i] = state.slotsData[i];
+            }
+            state.slotsData = newSlots;
+            closeModal('template-modal');
+            renderSlots();
+        }
+
+        function clearSlot(index) {
+            state.slotsData[index] = null;
+            renderSlots();
+        }
+
+        function clearSlots() {
+            state.slotsData = new Array(state.templateSize).fill(null);
+            renderSlots();
+        }
+
+        function shuffleSlots() {
+            let filtered = state.slotsData.filter(s => s !== null);
+            for (let i = filtered.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+            }
+            let newSlots = new Array(state.templateSize).fill(null);
+            for(let i=0; i<filtered.length; i++) newSlots[i] = filtered[i];
+            state.slotsData = newSlots;
+            renderSlots();
+        }
+
+        // --- LETTER & IMAGE SELECTION ---
+
+        function openLetterPicker(index) {
+            state.activeSlotIndex = index;
+            renderLetterGrid();
+            openModal('letter-modal');
+        }
+
+        function setLetterFilter(filter) {
+            state.activeFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            renderLetterGrid();
+        }
+
+        function renderLetterGrid() {
+            const grid = document.getElementById('letter-grid');
+            grid.innerHTML = '';
+            const letters = phoneticData[state.lang][state.activeFilter] || [];
+
+            letters.forEach(l => {
+                const btn = document.createElement('button');
+                btn.className = 'p-3 rounded-2xl bg-gray-50 hover:bg-pastel-blue text-slate-700 font-bold text-lg md:text-2xl shadow-sm border-2 border-transparent hover:border-blue-200 transition';
+                btn.innerHTML = `${l.char} <span class="block text-xs font-normal text-gray-400">${l.ipa}</span>`;
+                btn.onclick = () => selectLetter(l.id, l.ipa);
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectLetter(letterId, ipa) {
+            state.selectedLetterId = letterId;
+            state.selectedLetterIpa = ipa;
+
+            const isVowel = (state.activeFilter === 'vowels');
+            const firstBtn = document.getElementById('pos-first-btn');
+            const lastBtn = document.getElementById('pos-last-btn');
+            const container = document.getElementById('position-btn-container');
+
+            if (isVowel) {
+                firstBtn.classList.add('hidden');
+                lastBtn.classList.add('hidden');
+                container.classList.remove('grid-cols-3');
+                container.classList.add('grid-cols-1');
+            } else {
+                firstBtn.classList.remove('hidden');
+                lastBtn.classList.remove('hidden');
+                container.classList.add('grid-cols-3');
+                container.classList.remove('grid-cols-1');
+            }
+
+            closeModal('letter-modal');
+            openModal('position-modal');
+        }
+
+        function selectPosition(pos) {
+            state.selectedPosition = pos;
+            closeModal('position-modal');
+            openImagePicker();
+        }
+
+        function openImagePicker() {
+            const grid = document.getElementById('image-grid');
+            grid.innerHTML = '';
+
+            const maxImages = getMaxImagesForSlot({ letterId: state.selectedLetterId, pos: state.selectedPosition });
+
+            for(let i=1; i<=maxImages; i++) {
+                let imgPath = `images/${state.lang}/${state.selectedLetterId}/${state.selectedPosition}/${i}.png`;
+                let label = `${state.lang === 'ar' ? 'كلمة' : 'Word'} ${i}`;
+
+                if(vocabulary[state.lang] && vocabulary[state.lang][state.selectedLetterId] && vocabulary[state.lang][state.selectedLetterId][state.selectedPosition] && vocabulary[state.lang][state.selectedLetterId][state.selectedPosition][i]) {
+                    label = vocabulary[state.lang][state.selectedLetterId][state.selectedPosition][i];
+                }
+
+                const btn = document.createElement('button');
+                btn.className = 'bg-gray-50 rounded-2xl p-2 hover:bg-pastel-pink border-2 border-transparent hover:border-pink-200 transition flex flex-col items-center';
+                btn.innerHTML = `
+                    <div class="w-full aspect-square bg-white rounded-xl mb-2 flex items-center justify-center p-2">
+                        <img src="${imgPath}" onerror="this.src='https://placehold.co/150x150/F7FAFC/cbd5e0?text=img'" class="w-full h-full object-contain">
+                    </div>
+                    <span class="text-sm font-bold text-slate-600 truncate w-full text-center">${label}</span>
+                `;
+                btn.onclick = () => selectImage(i, label);
+                grid.appendChild(btn);
+            }
+            openModal('image-modal');
+        }
+
+        function selectImage(imgId, label) {
+            state.slotsData[state.activeSlotIndex] = {
+                letterId: state.selectedLetterId,
+                letterIpa: state.selectedLetterIpa,
+                pos: state.selectedPosition,
+                imgId: imgId,
+                label: label,
+                customAudio: null
+            };
+            closeModal('image-modal');
+            renderSlots();
+        }
+
+        // --- SLOT NAVIGATION & RENDERING ---
+
+        function getMaxImagesForSlot(slot) {
+            const langData = phoneticData[state.lang];
+            let letterObj = null;
+            ['consonants', 'vowels', 'clusters'].forEach(cat => {
+                if (langData[cat]) {
+                    const found = langData[cat].find(l => l.id === slot.letterId);
+                    if (found) letterObj = found;
+                }
+            });
+            if (!letterObj) return 25;
+            return (letterObj.counts && letterObj.counts[slot.pos]) ? letterObj.counts[slot.pos] : 25;
+        }
+
+        function navigateSlot(index, direction) {
+            const slot = state.slotsData[index];
+            if (!slot) return;
+
+            const maxCount = getMaxImagesForSlot(slot);
+            let newImgId = slot.imgId + direction;
+
+            if (newImgId > maxCount) newImgId = 1;
+            if (newImgId < 1) newImgId = maxCount;
+
+            slot.imgId = newImgId;
+
+            let newLabel = `${state.lang === 'ar' ? 'كلمة' : 'Word'} ${newImgId}`;
+            const langData = vocabulary[state.lang];
+            if (langData && langData[slot.letterId] && langData[slot.letterId][slot.pos] && langData[slot.letterId][slot.pos][newImgId]) {
+                newLabel = langData[slot.letterId][slot.pos][newImgId];
+            }
+            slot.label = newLabel;
+            slot.customAudio = null;
+
+            renderSlots();
+        }
+
+        function updateLabel(index, val) {
+            if(state.slotsData[index]) {
+                state.slotsData[index].label = val;
+                renderSlots();
+            }
+        }
+
+        function renderSlots() {
+            const container = document.getElementById('slots-container');
+
+            let gridClass = 'grid-cols-2';
+            let containerWidth = 'max-w-6xl';
+
+            if (state.templateSize === 1) { gridClass = 'grid-cols-1'; containerWidth = 'max-w-sm md:max-w-md'; }
+            else if (state.templateSize === 2) { gridClass = 'grid-cols-2'; containerWidth = 'max-w-3xl'; }
+            else if (state.templateSize === 3) gridClass = 'grid-cols-2 md:grid-cols-3';
+            else if (state.templateSize === 4) gridClass = 'grid-cols-2 md:grid-cols-4';
+            else if (state.templateSize === 5) gridClass = 'grid-cols-2 md:grid-cols-5';
+
+            container.className = `grid gap-6 w-full ${containerWidth} mx-auto transition-all duration-300 ${gridClass}`;
+            container.innerHTML = '';
+
+            state.slotsData.forEach((slot, index) => {
+                const div = document.createElement('div');
+                const isTarget = (state.mode === 'practice' && state.targetSlotIndex === index);
+
+                div.className = `bg-white rounded-3xl shadow-lg p-3 flex flex-col items-center relative transition-all duration-300 ${isTarget ? 'glow-target' : ''}`;
+
+                // Allow clicking in all modes
+                if (slot) {
+                    div.style.cursor = 'pointer';
+                    div.onclick = (e) => {
+                        if (state.editMode) return; // Don't trigger if editing
+
+                        if (state.mode === 'free') {
+                            playSlotAudio(index);
+                            div.classList.add('scale-105', 'border-2', 'border-pastel-pink');
+                            setTimeout(() => div.classList.remove('scale-105', 'border-2', 'border-pastel-pink'), 300);
+                        } else {
+                            // In Test or Practice modes, process the answer
+                            handleGameClick(index, div);
+                        }
+                    };
+                }
+
+                if (!slot) {
+                    div.innerHTML = `
+                        <button onclick="event.stopPropagation(); openLetterPicker(${index})" class="w-full aspect-[4/5] md:aspect-square border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center text-gray-300 hover:text-pastel-blue hover:border-pastel-blue transition p-4">
+                            <i class="fas fa-plus text-4xl mb-2 opacity-50"></i>
+                            <span class="font-bold">${state.lang === 'ar' ? 'إضافة بطاقة' : 'Add Card'}</span>
+                        </button>
+                    `;
+                } else {
+                    const imgPath = `images/${state.lang}/${slot.letterId}/${slot.pos}/${slot.imgId}.png`;
+
+                    const btnSize = state.templateSize === 1 ? 'w-12 h-12 text-2xl' : 'w-10 h-10 text-lg';
+                    const btnOpacity = state.templateSize === 1 ? 'opacity-100' : 'opacity-50 group-hover:opacity-100';
+
+                    div.innerHTML = `
+                        <div class="relative w-full aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-2 group flex items-center justify-center">
+                            <img src="${imgPath}" onerror="this.src='https://placehold.co/300x300/F7FAFC/cbd5e0?text=Image'" class="w-full h-full object-contain p-2">
+
+                            <!-- Left Arrow -->
+                            <button onclick="event.stopPropagation(); navigateSlot(${index}, -1)" class="absolute left-1 ${btnSize} bg-white/80 hover:bg-white text-gray-600 rounded-full shadow-md flex items-center justify-center transition-all duration-200 z-10 ${btnOpacity} ${state.mode !== 'free' ? 'hidden' : ''}">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+
+                            <!-- Right Arrow -->
+                            <button onclick="event.stopPropagation(); navigateSlot(${index}, 1)" class="absolute right-1 ${btnSize} bg-white/80 hover:bg-white text-gray-600 rounded-full shadow-md flex items-center justify-center transition-all duration-200 z-10 ${btnOpacity} ${state.mode !== 'free' ? 'hidden' : ''}">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+
+                            <div class="absolute bottom-0 right-0 bg-white/80 backdrop-blur px-2 py-1 text-[10px] rounded-tl-lg font-bold text-gray-500">
+                                ${slot.letterIpa}
+                            </div>
+                            <button onclick="event.stopPropagation(); clearSlot(${index})"
+                                class="absolute top-2 right-2 bg-red-100 text-red-500 w-8 h-8 rounded-full flex items-center justify-center shadow hover:bg-red-500 hover:text-white transition ${state.editMode ? 'block' : 'hidden'}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-700 mb-1 h-8 truncate w-full text-center">${slot.label}</h3>
+                        <div class="card-controls w-full flex flex-col gap-2 ${state.editMode ? 'visible' : ''}" onclick="event.stopPropagation()">
+                             <input type="text" value="${slot.label}" onchange="updateLabel(${index}, this.value)"
+                                class="w-full text-center border border-gray-200 rounded-lg p-1 text-sm bg-gray-50 focus:border-pastel-blue outline-none" placeholder="${state.lang === 'ar' ? 'تسمية البطاقة' : 'Rename'}">
+                            <div class="flex justify-center gap-3 mt-1">
+                                <button onclick="playSlotAudio(${index})" class="w-10 h-10 rounded-full bg-pastel-green hover:bg-green-300 text-green-800 flex items-center justify-center shadow transition">
+                                    <i class="fas fa-volume-up"></i>
+                                </button>
+                                <button onclick="recordAudio(${index})" id="rec-btn-${index}" class="w-10 h-10 rounded-full bg-pastel-pink hover:bg-pink-300 text-pink-800 flex items-center justify-center shadow transition relative">
+                                    <i class="fas fa-microphone"></i>
+                                    <span id="rec-dot-${index}" class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full hidden animate-pulse border-2 border-white"></span>
+                                </button>
+                                <button onclick="playRecording(${index})" id="play-rec-${index}" class="w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-300 text-blue-800 flex items-center justify-center shadow transition ${slot.customAudio ? '' : 'hidden'}">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        // --- AUDIO PLAYBACK & RECORDING ---
+
+        function playSlotAudio(index) {
+            const slot = state.slotsData[index];
+            if(!slot) return;
+
+            if(slot.customAudio) {
+                const audio = new Audio(slot.customAudio);
+                audio.play().catch(e=>console.log(e));
+                return;
+            }
+
+            const path = `sounds/${state.lang}/${slot.letterId}/${slot.pos}/${slot.imgId}.wav`;
+            const audio = new Audio(path);
+            audio.play().catch(e => {
+                console.log("Audio not found: ", path);
+                // Fallback to TTS if wav missing
+                if ('speechSynthesis' in window) {
+                    const u = new SpeechSynthesisUtterance(slot.label);
+                    u.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+                    window.speechSynthesis.speak(u);
+                }
+            });
+        }
+
+        function recordAudio(index) {
+            const slot = state.slotsData[index];
+            if(!slot) return;
+            const dot = document.getElementById(`rec-dot-${index}`);
+
+            dot.classList.remove('hidden');
+
+            // Mock recording delay
+            setTimeout(() => {
+                dot.classList.add('hidden');
+                // Mock setting a blob URL for demo
+                slot.customAudio = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
+                renderSlots();
+            }, 2000);
+        }
+
+        function playRecording(index) {
+            const slot = state.slotsData[index];
+            if(slot && slot.customAudio) {
+                new Audio(slot.customAudio).play();
+            }
+        }
+
+        // --- GAME MODES ---
+
+        function showModeSelect(mode) {
+            state.pendingMode = mode;
+            document.getElementById('mode-title').innerText = state.lang === 'ar' ? (mode === 'test' ? 'وضع الاختبار' : 'وضع التدريب') : (mode === 'test' ? 'Test Mode' : 'Practice Mode');
+            openModal('mode-modal');
+        }
+
+        function startMode(rounds) {
+            state.mode = state.pendingMode;
+            state.rounds = rounds;
+            state.currentRound = 0;
+            closeModal('mode-modal');
+            if(state.editMode) toggleEditMode();
+            nextRound();
+        }
+
+        function nextRound() {
+            if(state.currentRound >= state.rounds) {
+                endMode();
+                return;
+            }
+            state.currentRound++;
+            const filledIndexes = [];
+            state.slotsData.forEach((s, i) => { if(s) filledIndexes.push(i); });
+
+            if(filledIndexes.length === 0) {
+                endMode();
+                return;
+            }
+
+            state.targetSlotIndex = filledIndexes[Math.floor(Math.random() * filledIndexes.length)];
+            renderSlots();
+            setTimeout(() => {
+                playSlotAudio(state.targetSlotIndex);
+            }, 500);
+        }
+
+        function handleGameClick(index, divElement) {
+            if (index === state.targetSlotIndex) {
+                document.getElementById('sound-success').play();
+                divElement.classList.add('bg-green-100', 'border-4', 'border-green-400');
+                toggleStar(state.stars); // reward
+                setTimeout(() => nextRound(), 1000);
+            } else {
+                divElement.classList.add('bg-red-100', 'animate-shake');
+                setTimeout(() => divElement.classList.remove('bg-red-100', 'animate-shake'), 500);
+            }
+        }
+
+        function endMode() {
+            state.mode = 'free';
+            state.targetSlotIndex = null;
+            renderSlots();
+        }
+
+    </script>
+</body>
+</html>
