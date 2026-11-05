@@ -45,6 +45,7 @@ jobs:
           node tools/auditory-rehabilitation/tests/static.cjs
           node tools/follow-direction/tests/model.cjs
           node tools/follow-direction/tests/research.cjs
+          node tools/tests/one-way-links.cjs
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
