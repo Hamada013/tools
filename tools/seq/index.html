@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sequencing Fun</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNlcXVlbmNpbmcgQXBwIiwKICAic2hvcnRfbmFtZSI6ICJTZXF1ZW5jaW5nIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjNDMzOGNhIiwKICAiaWNvbnMiOiBbXQp9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4338ca">
+  
+    <style>
+        :root {
+            --card-border-radius: 1.5rem;
+            --primary-color: #6366f1;
+        }
+
+        body {
+            font-family: 'Readex Pro', sans-serif;
+            background: #f8fafc;
+            /* FIX 1: Removed 'overflow: hidden' and 'touch-action: none' to allow scrolling */
+            height: 100vh;
+            height: 100dvh; /* Helps with mobile bars */
+            width: 100vw;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Landscape optimization helpers */
+        .landscape-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* --- Card Interactions --- */
+        .card-slot {
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s;
+            user-select: none;
+            /* Keep touch-action: none HERE so dragging cards doesn't scroll the screen */
+            touch-action: none;
+            cursor: grab;
+            position: relative;
+            /* STRICT 1:1 RATIO */
+            aspect-ratio: 1 / 1;
+            /* Don't let flex crush them, we handle size in JS */
+            flex: 0 0 auto;
+            margin: 0 6px; 
+        }
+        
+        .card-slot:active { cursor: grabbing;
+        }
+
+        .card-slot.dragging {
+            opacity: 0.9;
+            transform: scale(1.05) rotate(2deg);
+            z-index: 100;
+            border-color: #6366f1;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- CONTROLS VISIBILITY --- */
+        .card-controls {
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.2s ease-in-out;
+            pointer-events: none; 
+        }
+
+        .card-slot:hover .card-controls { opacity: 1;
+        transform: translateY(0); pointer-events: auto; }
+        .card-slot.dragging .card-controls { opacity: 1; transform: translateY(0);
+        }
+        .card-slot.playing .card-controls { opacity: 1; transform: translateY(0);
+        }
+        .card-slot:active .card-controls { opacity: 1; transform: translateY(0); pointer-events: auto;
+        }
+        
+        /* Playing State Animation */
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4);
+            border-color: #6366f1; }
+            50% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0.2);
+            border-color: #818cf8; }
+            100% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4);
+            border-color: #6366f1; }
+        }
+
+        .card-slot.playing {
+            animation: glow-pulse 1.5s infinite;
+            transform: scale(1.05) translateY(-4px) !important;
+            z-index: 50;
+        }
+
+        /* Feedback Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0);
+            }
+            25% { transform: translateX(-4px) rotate(-2deg);
+            }
+            75% { transform: translateX(4px) rotate(2deg);
+            }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes pop-success {
+            0% { transform: scale(1);
+            }
+            50% { transform: scale(1.05);
+            }
+            100% { transform: scale(1);
+            }
+        }
+        .animate-success {
+            animation: pop-success 0.4s ease-out;
+            border-color: #22c55e !important;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.4);
+        }
+
+        /* Cover Mode */
+        .cover-overlay {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        /* When card is marked 'covered', show overlay */
+        .card-slot.covered .cover-overlay { opacity: 1;
+        pointer-events: auto; }
+        
+        /* Custom Scrollbar Hide */
+        .no-scrollbar::-webkit-scrollbar { display: none;
+        }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none;
+        }
+
+        /* Floating Dock / Toolbar Styles */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0;
+        } to { opacity: 1; } }
+        
+        .modal-content {
+            animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0;
+        } to { transform: scale(1); opacity: 1; } }
+
+        /* Rotate Device Prompt */
+        #rotate-prompt { display: none;
+        }
+        @media screen and (orientation: portrait) {
+            #page-workplace:not(.hidden) ~ #rotate-prompt { display: flex;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-700">
+
+    <div id="app-container" class="landscape-layout">
+        
+        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/60 z-30 flex-none h-14 md:h-16">
+            <div class="h-full px-4 md:px-6 flex justify-between items-center max-w-[1920px] mx-auto">
+                
+                <div class="flex items-center gap-3">
+                    <button id="btn-home-nav" class="hidden w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-indigo-50 hover:text-indigo-600 transition active:scale-95">
+                        <i class="fa-solid fa-house text-lg"></i>
+                    </button>
+                  
+                    <div class="flex items-center gap-2">
+                        <img src="images/logo.png" alt="Logo" class="w-8 h-8 md:w-10 md:h-10 object-contain rounded-lg" onerror="this.onerror=null;this.style.display='none';">
+                        <h1 class="font-bold text-lg md:text-xl tracking-tight text-slate-700 hidden sm:block" data-key="app_title">Sequencing</h1>
+                    </div>
+                </div>
+
+                <div id="workplace-header-controls" class="hidden flex items-center gap-2 md:gap-4 absolute left-1/2 -translate-x-1/2">
+                    <button id="btn-template" class="flex items-center gap-2 px-3 py-1.5 bg-indigo-50/50 text-indigo-700 rounded-lg font-bold hover:bg-indigo-100 border border-indigo-100 transition active:scale-95">
+                        <i class="fa-solid fa-grip"></i>
+                        <span id="template-count" class="text-lg ml-1">3</span>
+                    </button>
+                    <button id="btn-add-event" class="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 shadow-md shadow-indigo-200 transition active:scale-95">
+                        <i class="fa-solid fa-images"></i>
+                        <span class="hidden sm:inline" data-key="add_event">Events</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="btn-info" class="w-9 h-9 md:w-10 md:h-10 bg-white border border-slate-200 text-slate-400 rounded-full flex items-center justify-center hover:bg-yellow-50 hover:text-yellow-600 hover:border-yellow-200 transition">
+                         <i class="fa-solid fa-circle-info text-xl"></i>
+                    </button>
+                    <button id="btn-lang" class="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg font-bold text-xs md:text-sm hover:border-indigo-300 hover:text-indigo-600 transition">
+                       عربي
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow relative overflow-hidden flex flex-col w-full h-full">
+
+            <div id="page-home" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20 bg-[#f8fafc] transition-opacity duration-300">
+                <div class="w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-60"></div>
+                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-50 rounded-full blur-3xl opacity-60"></div>
+
+                    <div class="relative z-10">
+                        <div class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 bg-white rounded-3xl shadow-lg border border-slate-50 flex items-center justify-center animate-bounce">
+                             <span class="text-6xl md:text-7xl">🧩</span>
+                        </div>
+                        
+                        <h1 class="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight" data-key="welcome_title">Sequencing Fun</h1>
+                       
+                        <p class="text-slate-500 text-lg md:text-xl mb-10 leading-relaxed font-medium" data-key="welcome_desc">Learn the order of events!<br>Interactive stories for kids.</p>
+                        
+                        <button id="btn-start" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold text-xl md:text-2xl py-4 md:py-5 rounded-2xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
+                            
+                            <i class="fa-solid fa-circle-play text-3xl md:text-4xl"></i>
+                            <span data-key="start">Start Playing</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-workplace" class="absolute inset-0 hidden flex flex-col bg-slate-50/50 overflow-y-auto">
+                
+                <div class="shrink-0 pt-2 px-4 flex flex-col items-center z-20" id="toolbar-area">
+                    
+                    <div class="bg-white/90 backdrop-blur shadow-sm border border-slate-200/60 px-6 py-2 rounded-full max-w-[80%] text-center pointer-events-auto transition-all duration-300 mb-2">
+                        <p id="text-readout" class="text-lg md:text-xl font-bold text-slate-700 leading-snug dir-auto">
+                            <span class="text-slate-400 italic" data-key="select_msg">Select an event...</span>
+                        </p>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl px-4 py-2 flex flex-row items-center gap-3 shadow-md">
+                        
+                        <button id="btn-check" class="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all active:scale-90" title="Check">
+                            <i class="fa-solid fa-circle-check text-2xl"></i>
+                        </button>
+
+                        <button id="btn-solve" class="w-12 h-12 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center hover:bg-yellow-400 hover:text-white transition-all active:scale-90" title="Solve">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                        </button>
+                        
+                        <div class="w-px h-8 bg-slate-300 mx-1"></div>
+
+                        <button id="btn-play-all" class="w-12 h-12 rounded-xl hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 flex items-center justify-center transition-all active:scale-90" title="Play All">
+                            <i class="fa-solid fa-play text-xl"></i>
+                        </button>
+
+                        <button id="btn-sound-mode" class="w-12 h-12 rounded-xl hover:bg-orange-50 text-slate-500 hover:text-orange-600 flex items-center justify-center transition-all active:scale-90" title="Sound Mode">
+                            <i id="sound-icon" class="fa-solid fa-volume-high text-xl"></i>
+                        </button>
+
+                        <button id="btn-cover-mode" class="w-12 h-12 rounded-xl hover:bg-purple-50 text-slate-500 hover:text-purple-600 flex items-center justify-center transition-all active:scale-90" title="Cover Mode">
+                             <i id="cover-icon" class="fa-solid fa-eye text-xl"></i>
+                        </button>
+
+                        <div class="w-px h-8 bg-slate-300 mx-1"></div>
+
+                        <button id="btn-reset" class="w-12 h-12 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center transition-all active:scale-90" title="Reset">
+                            <i class="fa-solid fa-rotate-right text-xl"></i>
+                        </button>
+
+                    </div>
+                </div>
+
+                <div class="flex-grow flex items-center justify-center p-2 w-full h-full relative">
+                    <div id="slots-container" class="flex flex-row items-center justify-center w-full h-full transition-all duration-300">
+                        </div>
+                </div>
+
+            </div>
+            
+            <div id="rotate-prompt" class="absolute inset-0 z-50 bg-white/95 backdrop-blur flex-col items-center justify-center text-center p-8">
+   
+                <div class="w-24 h-24 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-5xl mb-6 animate-pulse">
+                     <i class="fa-solid fa-mobile-screen fa-rotate-90"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Please Rotate Your Phone</h2>
+                <p class="text-slate-500">This app is designed for landscape mode to see all cards at once!</p>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modal-template" class="modal">
+        <div class="modal-content bg-white rounded-[2rem] p-6 w-full max-w-sm m-4 shadow-2xl text-center">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6" data-key="select_slots">How many steps?</h3>
+            <div class="grid grid-cols-3 gap-3 mb-8">
+            </div>
+            <button class="w-full py-4 rounded-xl bg-slate-100 font-bold text-slate-500 hover:bg-slate-200 transition" onclick="closeModals()" data-key="cancel">Cancel</button>
+        </div>
+    </div>
+
+    <div id="modal-events" class="modal">
+        <div class="modal-content bg-white rounded-[2rem] p-6 w-full max-w-4xl m-4 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                <h3 class="text-2xl font-bold text-slate-800" data-key="choose_event">Choose Event</h3>
+                <button onclick="closeModals()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="events-grid" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto p-2 no-scrollbar">
+                </div>
+        </div>
+    </div>
+
+    <div id="modal-edit" class="modal">
+        <div class="modal-content bg-white rounded-[2rem] p-6 w-full max-w-md m-4 shadow-2xl text-center">
+             <h3 class="text-xl font-bold text-slate-800 mb-4" data-key="edit_card">Edit Card</h3>
+            
+            <textarea id="input-edit-text" class="w-full border-2 border-slate-200 rounded-2xl p-4 mb-4 focus:border-indigo-500 focus:ring-0 outline-none text-center text-lg resize-none bg-slate-50" rows="3"></textarea>
+            
+            <div class="bg-slate-50 rounded-2xl p-6 mb-6 border border-slate-100 relative overflow-hidden">
+                <div id="record-status-icon" class="w-20 h-20 bg-white border-4 border-slate-100 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl shadow-sm transition-colors duration-300">
+                    <i class="fa-solid fa-microphone"></i>
+                </div>
+                <div id="record-timer" class="font-mono font-bold text-slate-500 mb-4 text-xl">00:00</div>
+                
+                 <div class="flex gap-3 justify-center">
+                   <button id="btn-record-start" class="w-14 h-14 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg flex items-center justify-center text-2xl transition"><i class="fa-solid fa-microphone"></i></button>
+                    <button id="btn-record-stop" class="hidden w-14 h-14 bg-slate-800 text-white rounded-full hover:bg-slate-900 shadow-lg flex items-center justify-center text-2xl transition"><i class="fa-solid fa-stop"></i></button>
+                    <button id="btn-record-play" class="hidden w-14 h-14 bg-green-500 text-white rounded-full hover:bg-green-600 shadow-lg flex items-center justify-center text-2xl transition"><i class="fa-solid fa-play"></i></button>
+                    <button id="btn-record-delete" class="hidden w-14 h-14 bg-white text-red-500 border-2 border-red-100 rounded-full hover:bg-red-50 flex items-center justify-center text-2xl transition"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                 <button onclick="closeModals()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition" data-key="cancel">Cancel</button>
+                 <button id="btn-save-edit" class="flex-1 py-4 bg-indigo-600 rounded-xl font-bold text-white hover:bg-indigo-700 shadow-lg hover:shadow-xl transition" data-key="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-info" class="modal">
+        <div class="modal-content bg-white rounded-[2rem] p-8 w-full max-w-lg m-4 shadow-2xl relative">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-300 hover:text-slate-600 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+             <div class="text-center">
+                 <h3 class="text-2xl font-bold text-slate-800 mb-4" data-key="info_title">Parents Guide</h3>
+                 <p class="text-slate-600 mb-6" data-key="info_goal_desc">Drag and drop the cards to arrange the story. Use the top toolbar to Check, Solve, or switch modes.</p>
+                 <button onclick="closeModals()" class="w-full py-3 bg-indigo-600 rounded-xl font-bold text-white shadow-lg" data-key="got_it">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// ==========================================
+        // DATA: 12 Events with 10 Steps Each & Custom Logic
+        // ==========================================
+        const eventsDB = [
+            {
+                id: 1,
+                icon: "👐",
+                title: { en: "Washing Hands", ar: "غسل اليدين" },
+                logic: {
+                    2: [1, 10],
+                    3: [1, 6, 10],
+                    4: [1, 2, 6, 10],
+                    5: [1, 2, 6, 8, 10],
+                    6: [1, 2, 3, 6, 8, 10],
+                    7: [1, 2, 3, 4, 6, 8, 10],
+                    8: [1, 2, 3, 4, 6, 7, 8, 10],
+                    9: [1, 2, 3, 4, 5, 6, 7, 8, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The boy has dirty hands.", ar: "وَلَدْ إِيدَيْهْ وِسْخِينْ" },
+                    { en: "Next, the boy wants to wash his hands.", ar: "بَعْدَيْن، وَلَدْ بِدُّهْ يِغْسِلْ إِيدَيْهْ" },
+                    { en: "Next, the boy went to the sink.", ar: "بَعْدَيْن، الوَلَدْ رَاحْ عَلَى المَغْسَلَةِ" },
+                    { en: "Next, the boy opened the tap.", ar: "بَعْدَيْن، الوَلَدْ فَتَحْ الحَنَفِيَةْ" },
+                    { en: "Next, the boy held the soap.", ar: "بَعْدَيْن، الوَلَدْ مِسِكْ الصَّابُونَةْ" },
+                    { en: "Next, the boy washes his hands with water and soap.", ar: "بَعْدَيْن، الوَلَدْ يِغْسِلْ إِيدَيْهْ بِالمَيّ وَالصَّابُونْ" },
+                    { en: "Next, the boy closed the tap.", ar: "بَعْدَيْن، سَكَّرْ الوَلَدْ الحَنَفِيَةْ" },
+                    { en: "Next, the boy dries his hands with the towel.", ar: "بَعْدَيْن، الوَلَدْ يِنَشِّفْ إِيدَيْهْ بِالمَنْشَفَةْ" },
+                    { en: "Next, the boy hangs the towel.", ar: "بَعْدَيْن، الوَلَدْ يِعَلِّقْ المَنْشَفَةْ" },
+                    { en: "Finally, the boy's hands are clean.", ar: "آخِرْ شِي، إِيدَيْنْ الوَلَدْ نَظِيفَةْ" 
+}
+                ]
+            },
+            {
+                id: 2,
+                icon: "🦷",
+                title: { en: "Brushing Teeth", ar: "تنظيف الأسنان" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 6, 10],
+                    4: [1, 2, 6, 10],
+                    5: [1, 2, 4, 6, 10],
+                    6: [1, 2, 4, 6, 9, 10],
+                    7: [1, 2, 3, 4, 6, 9, 10],
+                    8: [1, 2, 3, 4, 6, 7, 9, 10],
+                    9: [1, 2, 3, 4, 6, 7, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The kid needs to brush their teeth.", ar: "الوَلَدْ لَازِمْ يْفَرِّشْ إِسْنَانُه."
+},
+                    { en: "Next, the kid goes to the bathroom.", ar: "بَعْدَيْن، الوَلَدْ بِيْرُوحْ عَلَى الحَمَّامْ."
+},
+                    { en: "Next, the kid takes the toothbrush and toothpaste.", ar: "بَعْدَيْن، الوَلَدْ بِيْأَخُدْ الفُرْشَاةْ وَالمَعْجُونْ."
+},
+                    { en: "Next, the kid puts toothpaste on the brush.", ar: "بَعْدَيْن، الوَلَدْ بِيْحُطّ مَعْجُونْ عَلَى الفُرْشَاةْ."
+},
+                    { en: "Next, the kid opens the tap and wets the brush.", ar: "بَعْدَيْن، الوَلَدْ بِيْفْتَحْ الحَنَفِيَةْ وَبِيْبِلّ الفُرْشَاةْ."
+},
+                    { en: "Next, the kid starts brushing their teeth.", ar: "بَعْدَيْن، الوَلَدْ بِيْبَلِّشْ يْفَرِّشْ إِسْنَانُه."
+},
+                    { en: "Next, the kid rinses and spits out the paste.", ar: "بَعْدَيْن، الوَلَدْ بِيْمَضْمِضْ وَبِيْطَلِّعْ المَعْجُونْ."
+},
+                    { en: "Next, the kid rinses the toothbrush with water.", ar: "بَعْدَيْن، الوَلَدْ بِيْغْسِلْ الفُرْشَاةْ بِالمَيّ."
+},
+                    { en: "Next, the kid puts the brush and paste back in place.", ar: "بَعْدَيْن، الوَلَدْ بِيْرَجِّعْ الفُرْشَاةْ وَالمَعْجُونْ مَكَانْهُمْ."
+},
+                    { en: "Finally, the kid's teeth are clean.", ar: "آخِرْ شِي، إِسْنَانُه صَارَتْ نَظِيفَةْ."
+}
+                ]
+            },
+            {
+                id: 3,
+                icon: "🥪",
+                title: { en: "Making Sandwich", ar: "صنع شطيرة" },
+                 logic: {
+                    2: [1, 9],
+                    3: [1, 7, 9],
+                    4: [1, 4, 7, 9],
+                    5: [1, 4, 6, 7, 9],
+                    6: [1, 2, 4, 6, 7, 9],
+                    7: [1, 2, 3, 4, 6, 9, 10],
+                    8: [1, 2, 3, 4, 6, 8, 9, 10],
+                    9: [1, 2, 3, 4, 5, 6, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The girl is hungry and wants to make a sandwich.", ar: "البِنْتْ جُوعَانَةْ وَبِدَّهَا تِعْمَلْ سَنْدْوِيشَةْ."
+},
+                    { en: "Next, the girl goes to the kitchen.", ar: "بَعْدَيْن، البِنْتْ بِتْرُوحْ عَلَى المَطْبَخْ."
+},
+                    { en: "Next, the girl gets a plate and takes out the bread.", ar: "بَعْدَيْن، البِنْتْ بِتْجِيبْ صَحْنْ وَبِتْطَلِّعْ الخُبْزْ."
+},
+                    { en: "Next, the girl gets the cheese and tomato.", ar: "بَعْدَيْن، البِنْتْ بِتْجِيبْ الجِبْنَةْ وَبَنْدُورَةْ."
+},
+                    { en: "Next, the girl puts a piece of bread on the plate.", ar: "بَعْدَيْن، البِنْتْ بِتْحُطّ خُبْزَةْ عَلَى الصَّحْنْ."
+},
+                    { en: "Next, she spreads cheese and on a slice of bread with a knife.", ar: "بَعْدَيْن، بِتْدَهِّنْ جِبْنَةْ عَلَى شَرِيحَةْ خُبْزْ بِالسِّكِّينَةْ."
+},
+                    { en: "Next, she folds the bread and makes a sandwich.", ar: "بَعْدَيْن، بِتْلِفّ الخُبْزَةْ وَبِتِعْمَلْ سَنْدْوِيشَةْ."
+},
+                    { en: "Next, she puts the ingredients back in their place in the fridge.", ar: "بَعْدَيْن، بِتْرَجِّعْ الأَغْرَاضْ مَكَانْهَا فِي الثَّلَّاجَةِ."
+},
+                    { en: "Next, the girl eats the sandwich.", ar: "بَعْدَيْن، البِنْتْ بْتَاكُلْ السَّنْدْوِيشَةْ."
+},
+                    { en: "Finally, the girl is full and happy.", ar: "آخِرْ شِي، البِنْتْ شِبْعَتْ وَمَبْسُوطَةْ."
+}
+                ]
+            },
+            {
+                id: 4,
+                icon: "👕",
+                title: { en: "Getting Dressed", ar: "ارتداء الملابس" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 9, 10],
+                    4: [1, 3, 9, 10],
+                    5: [1, 2, 3, 9, 10],
+                    6: [1, 2, 3, 8, 9, 10],
+                    7: [1, 2, 3, 6, 8, 9, 10],
+                    8: [1, 2, 3, 4, 6, 8, 9, 10],
+                    9: [1, 2, 3, 4, 5, 6, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The boy woke up and wants to get dressed.", ar: "الوَلَدْ فَاقْ مِنْ النَّوْمْ وَبِدُّهْ يِلْبَسْ."
+},
+                    { en: "Next, the boy goes to the closet to choose his clothes.", ar: "بَعْدَيْن، الوَلَدْ بِيْرُوحْ عَلَى الخِزَانَةِ عَشَانْ يِخْتَارْ ثِيَابُه."
+},
+                    { en: "Next, the boy takes out his pants, shirt, and socks.", ar: "بَعْدَيْن، الوَلَدْ بِيْطَلِّعْ بَنْطَلُونُه وَبْلُوزْتُه وَجْرَابَاتُه."
+},
+                    { en: "Next, the boy puts on his shirt.", ar: "بَعْدَيْن، الوَلَدْ بِيْلْبَسْ البْلُوزَةْ."
+},
+                    { en: "Next, the boy puts on his pants.", ar: "بَعْدَيْن، الوَلَدْ بِيْلْبَسْ بَنْطَلُونُه."
+},
+                    { en: "Next, the boy sits down to put on his socks.", ar: "بَعْدَيْن، الوَلَدْ بِيْقْعُدْ من شَانْ يِلْبَسْ جْرَابَاتُه."
+},
+                    { en: "Next, the boy looks for his boots/shoes.", ar: "بَعْدَيْن، الوَلَدْ بِيْدَوِّرْ عَلَى بُوطُه."
+},
+                    { en: "Next, the boy puts on his boots/shoes.", ar: "بَعْدَيْن، الوَلَدْ بِيْلْبَسْ بُوطُه."
+},
+                    { en: "Next, the boy looks in the mirror to see his clothes.", ar: "بَعْدَيْن، الوَلَدْ بِيْتْطَلَّعْ عَلَى المَرَايَةِ عَشَانْ يِشُوفْ ثِيَابُه."
+},
+                    { en: "Finally, the boy is dressed and ready.", ar: "آخِرْ شِي، الوَلَدْ لَابِسْ وَصَارْ جَاهِزْ."
+}
+                ]
+            },
+            {
+                id: 5,
+                icon: "🌻",
+                title: { en: "Planting a Flower", ar: "زراعة زهرة" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 9, 10],
+                    4: [1, 2, 9, 10],
+                    5: [1, 2, 8, 9, 10],
+                    6: [1, 2, 5, 8, 9, 10],
+                    7: [1, 2, 3, 5, 8, 9, 10],
+                    8: [1, 2, 3, 5, 6, 8, 9, 10],
+                    9: [1, 2, 3, 4, 5, 6, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The girl decided to plant a flower in a pot.", ar: "البِنْتْ قَرَّرَتْ تِزْرَعْ وَرْدَةْ فِي أَصِيصْ."
+},
+                    { en: "Next, the girl gets the pot, soil, and seed.", ar: "بَعْدَيْن، البِنْتْ بِتْجِيبْ الأَصِيصْ وَالتُّرَابْ وَالبِذْرَةْ."
+},
+                    { en: "Next, the girl puts some soil in the pot.", ar: "بَعْدَيْن، البِنْتْ بِتْحُطّ شْوَيِّةْ تُرَابْ فِي الأَصِيصْ."
+},
+                    { en: "Next, the girl makes a small hole in the soil with her finger.", ar: "بَعْدَيْن، البِنْتْ بِتِعْمَلْ حُفْرَةْ صْغِيرَةْ فِي التُّرَابْ بِإِصْبَعْهَا."
+},
+                    { en: "Next, she puts the seed into the hole gently.", ar: "بَعْدَيْن، بِتْحُطّ البِذْرَةْ فِي الحُفْرَةْ بِهُدُوءْ."
+},
+                    { en: "Next, she covers the seed with soil.", ar: "بَعْدَيْن، بِتْغَطِّي البِذْرَةْ بِتُرَابْ."
+},
+                    { en: "Next, she presses down on the soil gently so it settles.", ar: "بَعْدَيْن، بِتْضْغَطْ عَلَى التُّرَابْ شْوَيْ شْوَيْ عَشَانْ يِثْبَتْ."
+},
+                    { en: "Next, the girl gets the small watering can.", ar: "بَعْدَيْن، البِنْتْ بِتْجِيبْ مَرَّشَةْ المَيّ الصَّغِيرَةْ."
+},
+                    { en: "Next, the girl waters the flower she planted.", ar: "بَعْدَيْن، البِنْتْ بِتْسْقِي الوَرْدَةْ الَّلِي زَرَعَتْهَا مَيّ."
+},
+                    { en: "Finally, the flower grew and became very beautiful.", ar: "آخِرْ شِي، كِبْرَتْ الوَرْدَةْ وَصَارَتْ حِلْوَةْ كْتِيرْ."
+}
+                ]
+            },
+            {
+                id: 6,
+                icon: "🚦",
+                title: { en: "Crossing Street", ar: "عبور الشارع" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 2, 10],
+                    4: [1, 2, 9, 10],
+                    5: [1, 2, 8, 9, 10],
+                    6: [1, 2, 3, 8, 9, 10],
+                    7: [1, 2, 3, 5, 8, 9, 10],
+                    8: [1, 2, 3, 4, 5, 8, 9, 10],
+                    9: [1, 2, 3, 4, 5, 7, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The girl and Grandma arrived at the street.", ar: "وَصَلَتْ البِنْتْ وَتَاتَا عِنْدَ الشَّارِعِ."
+},
+                    { en: "Next, Teta stops and holds the girl's hand tightly.", ar: "بَعْدَيْن، تَاتَا بِتْوَقَّفْ وَبِتْمِسِكْ إِيدْ البِنْتِ مَنِيحْ."
+},
+                    { en: "Next, Teta looks to the left, and then to the right.", ar: "بَعْدَيْن، تَاتَا بِتِتْطَلَّعْ عَلَى الشِّمَالْ، وَبَعْدَهَا عَلَى اليَمِينِ."
+},
+                    { en: "Next, she looks back to the left one more time.", ar: "بَعْدَيْن، بِتْرَجِّعْ تِتْطَلَّعْ عَلَى الشِّمَالْ مَرَّةً ثَانِيَةً."
+},
+                    { en: "Next, they make sure the street is clear and there are no cars.", ar: "بَعْدَيْن، بِتْأَكَّدُوا إِنُّ الشَّارِعِ فَاضِي وَمَا فِي سَيَّارَاتْ."
+},
+                    { en: "Next, they step off the sidewalk to cross the street.", ar: "بَعْدَيْن، بِيْنْزَلُوا عَنْ الرَّصِيفْ لِيْقْطَعُوا الشَّارِعِ."
+},
+                    { en: "They walk in a straight line.", ar: "بِيْمْشُوا بِخَطٍّ مُسْتَقِيمٍ."
+},
+                    { en: "Next, they keep looking at the road while they are crossing.", ar: "بَعْدَيْن، بِيْضَلُّوا يِتْطَلَّعُوا عَلَى الطَّرِيقِ وَهُمْ بِيْقْطَعُوا."
+},
+                    { en: "Next, they arrive at the sidewalk.", ar: "بَعْدَيْن، بِيْوَصَلُوا لِلرَّصِيفِ."
+},
+                    { en: "Finally, they have crossed the street safely.", ar: "آخِرْ شِي، قَطَعُوا الشَّارِعَ بِأَمَانٍ."
+}
+                ]
+            },
+            {
+                id: 7,
+                icon: "🎂",
+                title: { en: "Baking Cake", ar: "خبز كعكة" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 7, 10],
+                    4: [1, 2, 7, 10],
+                    5: [1, 2, 4, 7, 10],
+                    6: [1, 2, 3, 4, 7, 10],
+                    7: [1, 2, 3, 4, 7, 8, 10],
+                    8: [1, 2, 3, 4, 7, 8, 9, 10],
+                    9: [1, 2, 3, 4, 5, 7, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "Mom and the boy decided to bake a cake.", ar: "الأُمّ وَالوَلَدْ قَرَّرُوا يِخْبِزُوا كِيكْ."
+},
+                    { en: "Next, they gather all the necessary ingredients (flour, eggs, and milk).", ar: "بَعْدَيْن، بِيْجَمِّعُوا كُلّ المَكَوِّنَاتِ اللَّازِمَةِ (طَحِينْ، بَيْضْ، وَحَلِيبْ)."
+},
+                    { en: "Next, Mom puts the flour into the mixing bowl.", ar: "بَعْدَيْن، الأُمّ بِتْحُطّ الطَّحِينْ فِي وِعَاءْ الخَلْطِ."
+},
+                    { en: "Next, the boy puts the eggs and milk into the bowl.", ar: "بَعْدَيْن، الوَلَدْ بِيْحُطّ البَيْضْ وَالحَلِيبْ فِي الوِعَاءْ."
+},
+                    { en: "Next, Mom helps the boy mix the batter well.", ar: "بَعْدَيْن، الأُمّ بِتْسَاعِدْ الوَلَدْ لِيَخْلُطُوا العَجِينَةَ مَنِيحْ."
+},
+                    { en: "Next, they grease the baking pan with butter.", ar: "بَعْدَيْن، بِيْدْهَنُوا صِينِيَّةَ الخَبْزِ بِالزِّبْدَةِ."
+},
+                    { en: "Next, they pour the cake batter into the pan.", ar: "بَعْدَيْن، بِيْصُبُّوا خَلِيطَ الكِيكْ فِي الصِّينِيَّةِ."
+},
+                    { en: "Next, Mom carefully puts the pan into the hot oven.", ar: "بَعْدَيْن، الأُمّ بِتْحُطّ الصِّينِيَّةَ بِحَذَرْ فِي الفُرْنْ السُّخُنْ."
+},
+                    { en: "Next, they wait until the cake is baked and ready.", ar: "بَعْدَيْن، بِيْسْتَنُّوا لَحَدّ مَا الكِيكْ يِسْتَوِي وَيْجَهَزْ."
+},
+                    { en: "Finally, the cake is baked and ready to eat.", ar: "آخِرْ شِي، الكِيكْ انْخَبَزْ وَصَارَ جَاهِزْ لِلْأَكْلِ."
+}
+                ]
+            },
+            {
+                id: 8,
+                icon: "🐕",
+                title: { en: "Dog Bath", ar: "حمام الكلب" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 6, 10],
+                    4: [1, 5, 6, 10],
+                    5: [1, 4, 5, 6, 10],
+                    6: [1, 3, 4, 5, 6, 10],
+                    7: [1, 2, 3, 4, 5, 6, 10],
+                    8: [1, 2, 3, 4, 5, 6, 8, 10],
+                    9: [1, 2, 3, 4, 5, 6, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The boy decided that the dog needs to take a bath.", ar: "الوَلَدْ قَرَّرْ إِنُّ الكَلْبْ لَازِمْ يِتْحَمَّمْ."
+},
+                    { en: "Next, the boy gets the dog shampoo and towels.", ar: "بَعْدَيْن، الوَلَدْ بِيْجِيبْ شَامْبُو الكِلَابْ وَالمَنَاشِفْ."
+},
+                    { en: "Next, the boy takes the dog to the bathtub.", ar: "بَعْدَيْن، الوَلَدْ بِيْأَخُدْ الكَلْبْ عَلَى حَوْضِ الإِسْتِحْمَامِ."
+},
+                    { en: "Next, the boy fills the tub with warm water.", ar: "بَعْدَيْن، الوَلَدْ بِيْعَبِّي الحَوْضْ مَيّ دَافِيَة."
+},
+                    { en: "Next, the boy pours the water over the dog.", ar: "بَعْدَيْن، الوَلَدْ بِيْكُبّ عَلَى الكَلْبْ المَيّ."
+},
+                    { en: "Next, he puts on the shampoo and scrubs the dog's body well.", ar: "بَعْدَيْن، بِيْحُطّ الشَّامْبُو وَبِيْفْرُكْ جِسْمْ الكَلْبْ مَنِيحْ."
+},
+                    { en: "Next, he pours water on the dog again until the dog is clean.", ar: "بَعْدَيْن، بِيْرْجَعْ يْكُبّ عَلَى الكَلْبْ مَيّ لَحَدْ مَا يَنْضَفْ الكَلْبْ."
+},
+                    { en: "Next, the boy takes the dog out (of the tub).", ar: "بَعْدَيْن، الوَلَدْ بِيْطَلِّعْ الكَلْبْ."
+},
+                    { en: "Next, the boy wraps the dog in a towel and dries it well.", ar: "بَعْدَيْن، الوَلَدْ بِيْلُفّ الكَلْبْ بِمَنْشَفَةْ وَبِيْنِشِّفْهُ مَنِيحْ."
+},
+                    { en: "Finally, the dog is clean, dry, and happy.", ar: "آخِرْ شِي، الكَلْبْ صَارْ نِظِيفْ، نَاشِفْ، وَمَبْسُوطْ."
+}
+                ]
+            },
+            {
+                id: 9,
+                icon: "🛌",
+                title: { en: "Bedtime", ar: "وقت النوم" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 8, 10],
+                    4: [1, 8, 9, 10],
+                    5: [1, 3, 8, 9, 10],
+                    6: [1, 3, 6, 8, 9, 10],
+                    7: [1, 3, 4, 6, 8, 9, 10],
+                    8: [1, 3, 4, 6, 7, 8, 9, 10],
+                    9: [1, 3, 4, 5, 6, 7, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "It is bedtime, and the boy feels like he is tired.", ar: "صَارْ وَقْتْ النَّوْمْ، وَالوَلَدْ حَاسِسْ إِنُّه تَعْبَانْ."
+},
+                    { en: "Next, the boy stops playing and tidies up his toys.", ar: "بَعْدَيْن، الوَلَدْ بِيْوَقِّفْ لَعِبْ وَبِيْرَتِّبْ أَلْعَابُه."
+},
+                    { en: "Next, the boy says goodnight to his family members.", ar: "بَعْدَيْن، الوَلَدْ بِيْقُولْ تَصْبَحْ عَلَى خَيْرْ لِعَائِلْتُه."
+},
+                    { en: "Next, the boy goes to the bathroom to brush his teeth.", ar: "بَعْدَيْن، الوَلَدْ بِيْرُوحْ عَلَى الحَمَّامْ لِيْفَرِّشْ إِسْنَانُه."
+},
+                    { en: "Next, the boy washes his face and hands with water.", ar: "بَعْدَيْن، الوَلَدْ بِيْغْسِلْ وَجْهُه وَإِيدَيْه بِالمَيّ."
+},
+                    { en: "Next, the boy takes off his clothes and puts on his pajamas.", ar: "بَعْدَيْن، الوَلَدْ بِيْشْلَحْ ثِيَابُه وَبِيْلْبَسْ بِيْجَامْتُه."
+},
+                    { en: "Next, the boy goes to his bed and covers himself well.", ar: "بَعْدَيْن، الوَلَدْ بِيْرُوحْ عَلَى سَرِيرُه وَبِيْتْغَطَّى مَنِيحْ."
+},
+                    { en: "Next, Mom reads a bedtime story to him.", ar: "بَعْدَيْن، مَامَا بِتِقْرَأْ لُه قِصَّةْ قَبْلْ النَّوْمْ."
+},
+                    { en: "Next, the boy turns off the light.", ar: "بَعْدَيْن، الوَلَدْ بِيْطَفِّي الضَّوْ."
+},
+                    { en: "Finally, the boy closes his eyes and falls asleep.", ar: "آخِرْ شِي، الوَلَدْ بِيْغَمِّضْ عِينَيْه وَبِيْنَامْ."
+}
+                ]
+            },
+            {
+                id: 10,
+                icon: "🛒",
+                title: { en: "Shopping", ar: "التسوق" },
+                 logic: {
+                    2: [1, 10],
+                    3: [1, 3, 10],
+                    4: [1, 3, 4, 10],
+                    5: [1, 3, 4, 7, 10],
+                    6: [1, 3, 4, 7, 9, 10],
+                    7: [1, 3, 4, 7, 8, 9, 10],
+                    8: [1, 3, 4, 5, 7, 8, 9, 10],
+                    9: [1, 2, 3, 4, 5, 7, 8, 9, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "Dad and the girl decided to go shopping at the store.", ar: "الأَبْ وَالبِنْتْ قَرَّرُوا يِرُوحُوا يِشْتْرُوا مِنْ السُّوقْ."
+},
+                    { en: "Next, they take the money.", ar: "بَعْدَيْن، بِيْأَخْدُوا المَصَارِي."
+},
+                    { en: "Next, they go to the supermarket in the car.", ar: "بَعْدَيْن، بِيْرُوحُوا عَلَى السُوبَرْمَارْكِتْ فِي السَّيَّارَةِ."
+},
+                    { en: "Next, the girl takes a shopping cart.", ar: "بَعْدَيْن، البِنْتْ بِتْأَخُدْ عَرَبَايَةَ التَّسَوُّقِ."
+},
+                    { en: "Next, they start choosing the items.", ar: "بَعْدَيْن، بِيْبَلِّشُوا يِخْتَارُوا الأَغْرَاضْ."
+},
+                    { en: "Next, the girl helps Dad find the tissues.", ar: "بَعْدَيْن، البِنْتْ بِتْسَاعِدْ الأَبْ لِيْلَاقِي المَحَارِمْ."
+},
+                    { en: "Next, they finish and go to the cash register.", ar: "بَعْدَيْن، بِيْخَلْصُوا وَبِيْرُوحُوا عَلَى صُنْدُوقْ الحِسَابْ."
+},
+                    { en: "Next, Dad pays the cashier for all the items.", ar: "بَعْدَيْن، الأَبْ بِيْدْفَعْ حَقّ الأَغْرَاضْ كُلِّهَا لِلْكَاشِيرْ."
+},
+                    { en: "Next, they put the groceries and the bags into the car.", ar: "بَعْدَيْن، بِيْحُطُّوا الأَغْرَاضْ وَالأَكْيَاسْ فِي السَّيَّارَةِ."
+},
+                    { en: "Finally, they arrive home with the groceries.", ar: "آخِرْ شِي، بِيْوَصَلُوا البَيْتْ وَمَعَهُمْ الأَغْرَاضْ."
+}
+                ]
+            },
+            {
+                id: 11,
+                icon: "💇‍♀️",
+                title: { en: "Brushing Hair", ar: "تمشيط الشعر" },
+                 logic: {
+                    2: [1, 8],
+                    3: [1, 7, 8],
+                    4: [1, 2, 7, 8],
+                    5: [1, 2, 7, 8, 10],
+                    6: [1, 2, 3, 5, 8, 10],
+                    7: [1, 2, 3, 4, 5, 8, 10],
+                    8: [1, 2, 3, 4, 5, 6, 8, 10],
+                    9: [1, 2, 3, 4, 5, 6, 7, 8, 10],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The girl saw her hair was tangled and needs to brush it.", ar: "البِنْتْ شَافَتْ شَعْرَهَا مْنْكُوشْ وَلَازِمْ تْمَشِّطُه."
+},
+                    { en: "Next, the girl goes to the mirror to get the comb/brush.", ar: "بَعْدَيْن، البِنْتْ بِتْرُوحْ عَلَى المَرَايَةِ عَشَانْ تِجِيبْ المِشْطْ."
+},
+                    { en: "The girl did not find the comb in its place.", ar: "البِنْتْ مَا لَاقَتْ المِشْطْ فِي مَكَانُه."
+},
+                    { en: "Next, she looked for the comb on the table and on the bed.", ar: "بَعْدَيْن، دَوَّرَتْ عَلَى المِشْطْ عَلَى الطَّاوْلَةِ وَعَلَى التَّخْتْ."
+},
+                    { en: "Next, she went to look for it in the bathroom and found it.", ar: "بَعْدَيْن، رَاحَتْ دَوَّرَتْ عَلَيْهْ بِالحَمَّامْ وَلَاقَتْهُ."
+},
+                    { en: "Next, she goes back to the mirror again.", ar: "بَعْدَيْن، بِتْرُوحْ عَلَى المَرَايَةِ مَرَّةْ ثَانِيَةْ."
+},
+                    { en: "Next, she holds the comb and starts brushing her hair.", ar: "بَعْدَيْن، بِتْمَسِّكْ المِشْطْ وَبِتْبَلِّشْ تْمَشِّطْ الشَّعَر."
+},
+                    { en: "Next, she brushes all the hair and removes all the tangles.", ar: "بَعْدَيْن، بِتْمَشِّطْ الشَّعَر كُلُّه وَبِتْشِيلْ كُلّ العُقَدْ."
+},
+                    { en: "Next, she puts the comb back in its place next to the mirror.", ar: "بَعْدَيْن، بِتْرَجِّعْ المِشْطْ عَلَى مَكَانُه جَنْبْ المَرَايَةِ."
+},
+                    { en: "Finally, the girl's hair is beautiful and tidy.", ar: "آخِرْ شِي، شَعْرْ البِنْتْ صَارْ حِلْو وَمُرَتَّبْ."
+}
+                ]
+            },
+            {
+                id: 12,
+                icon: "🐶",
+                title: { en: "Dog & Cat", ar: "الكلب والقطة" },
+                 logic: {
+                    2: [1, 5],
+                    3: [1, 2, 5],
+                    4: [1, 2, 4, 5],
+                    5: [1, 2, 3, 4, 5],
+                    6: [1, 2, 3, 4, 5, 7],
+                    7: [1, 2, 3, 4, 5, 6, 7],
+                    8: [1, 2, 3, 4, 5, 6, 7, 8],
+                    9: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    10: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                steps: [
+                    { en: "The dog is sleeping on the floor.", ar: "الكَلْبْ نَايِمْ عَلَى الأَرْضْ."
+},
+                    { en: "Next, the cat walks slowly next to the dog.", ar: "بَعْدَيْن، القِطَّةْ بْتِمْشِي شْوَيْ شْوَيْ جَنْبْ الكَلْبْ."
+},
+                    { en: "Next, the small mouse comes out of its home.", ar: "بَعْدَيْن، الفَارْ الصَّغِيرْ بِيْطْلَعْ مِنْ بَيْتْهَا."
+},
+                    { en: "Next, the cat saw the mouse and starts chasing it quickly.", ar: "بَعْدَيْن، القِطَّةْ شَافَتْ الفَارْ وَبِتْبَلِّشْ تِلْحَقُه بِسُرْعَةْ."
+},
+                    { en: "Next, the sound of the cat wakes the dog from his sleep.", ar: "بَعْدَيْن، صَوْتْ القِطَّةْ بِيْفَيِّقْ الكَلْبْ مِنْ نَوْمُه."
+},
+                    { en: "Next, the dog sees the cat running.", ar: "بَعْدَيْن، الكَلْبْ بِيْشُوفْ القِطَّةْ عَمْ تِرْكُضْ."
+},
+                    { en: "Next, the dog starts chasing the cat quickly.", ar: "بَعْدَيْن، الكَلْبْ بِيْبَلِّشْ يِلْحَقْ القِطَّةْ بِسُرْعَةْ."
+},
+                    { en: "Next, the mouse runs and hides inside its home.", ar: "بَعْدَيْن، الفَارَةْ بِتْرْكُضْ وَبِتْتْخَبَّى جُوَّا بَيْتْهَا."
+},
+                    { en: "Next, the cat climbs the tree to escape from the dog.", ar: "بَعْدَيْن، القِطَّةْ بِتْطْلَعْ عَلَى الشَّجَرَةِ لِتَهْرُبْ مِنْ الكَلْبْ."
+},
+                    { en: "Finally, the dog is left alone and sleepy.", ar: "آخِرْ شِي، الكَلْبْ بِضَلّْ لَحَالُه نَعْسَانْ."
+}
+                ]
+            }
+        ];
+        // Translation Map
+        const translations = {
+            en: {
+                app_title: "Sequencing",
+                welcome_title: "Sequencing Fun",
+                welcome_desc: "Drag, drop, and learn! Master the order of events.",
+                start: "Start Playing",
+                add_event: "Events",
+                btn_play: "Play",
+                btn_cover: "Cover",
+                btn_reset: "Reset",
+                btn_check: "Check",
+                btn_solve: "Solve",
+                btn_sound: "Sound",
+                select_slots: "How many steps?",
+                choose_event: "Choose Event",
+                edit_card: "Edit Card",
+                cancel: "Cancel",
+                save: "Save",
+                select_msg: "Tap 'Events' to choose a story...",
+                info_title: "Parents Guide",
+                info_goal_desc: "Drag and drop the cards to arrange the story in the correct order. Use the toolbar above the cards.",
+                got_it: "Got it!"
+            },
+            ar: {
+                app_title: "التسلسل",
+                welcome_title: "متعة التسلسل",
+                welcome_desc: "اسحب، أفلت، وتعلم! رتب الأحداث بشكل صحيح.",
+                start: "ابدأ اللعب",
+                add_event: "قصص",
+                btn_play: "تشغيل",
+                btn_cover: "تغطية",
+                btn_reset: "إعادة",
+                btn_check: "تحقق",
+                btn_solve: "حل",
+                btn_sound: "صوت",
+                select_slots: "عدد الخطوات؟",
+                choose_event: "اختر قصة",
+                edit_card: "تعديل",
+                cancel: "إلغاء",
+                save: "حفظ",
+                select_msg: "اختر قصة للبدء...",
+                info_title: "دليل الأهل",
+                info_goal_desc: "رتب البطاقات بالتسلسل الصحيح. استخدم القائمة العلوية للمساعدة.",
+                got_it: "فهمت!"
+            }
+        };
+
+        // ==========================================
+        // APP LOGIC
+        // ==========================================
+        let state = {
+            lang: 'en',
+            slotCount: 3,
+            currentEventId: null,
+            coverMode: false,
+            soundMode: false,
+            cards: [],
+            editingIndex: -1,
+            isPlaying: false
+        };
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let tempRecordingBlob = null;
+        let recordInterval = null;
+        let dragSrcEl = null;
+        let touchStartItem = null;
+
+        // --- DOM REFERENCES ---
+        const els = {
+            pages: { home: document.getElementById('page-home'), workplace: document.getElementById('page-workplace') },
+            slotsContainer: document.getElementById('slots-container'),
+            templateCount: document.getElementById('template-count'),
+            textReadout: document.querySelector('#text-readout'),
+            modals: {
+                template: document.getElementById('modal-template'),
+                events: document.getElementById('modal-events'),
+                edit: document.getElementById('modal-edit'),
+                info: document.getElementById('modal-info')
+            },
+            btns: {
+                template: document.getElementById('btn-template'),
+                 addEvent: document.getElementById('btn-add-event'),
+                playAll: document.getElementById('btn-play-all'),
+                coverMode: document.getElementById('btn-cover-mode'),
+                soundMode: document.getElementById('btn-sound-mode'),
+                reset: document.getElementById('btn-reset'),
+                homeNav: document.getElementById('btn-home-nav'),
+                lang: document.getElementById('btn-lang'),
+                check: document.getElementById('btn-check'),
+                solve: document.getElementById('btn-solve'),
+                info: document.getElementById('btn-info')
+            },
+            controlsHeader: document.getElementById('workplace-header-controls')
+        };
+
+        // --- INIT ---
+        function init() {
+            renderTemplateOptions();
+            setupListeners();
+            // Start with empty slots state
+            state.cards = new Array(state.slotCount).fill(null);
+            renderSlots();
+            
+            // Re-calc on resize
+            window.addEventListener('resize', () => {
+                if(!els.pages.workplace.classList.contains('hidden')) {
+                    renderSlots();
+                }
+            });
+        }
+
+        function setupListeners() {
+            document.getElementById('btn-start').onclick = () => showPage('workplace');
+            els.btns.homeNav.onclick = () => showPage('home');
+            
+            els.btns.lang.onclick = toggleLang;
+            
+            els.btns.template.onclick = () => openModal('template');
+            els.btns.addEvent.onclick = () => { openModal('events'); renderEventsGrid();
+            };
+            
+            els.btns.reset.onclick = resetSlots;
+            els.btns.coverMode.onclick = toggleCoverMode;
+            els.btns.soundMode.onclick = toggleSoundMode;
+            els.btns.playAll.onclick = playSequence;
+            els.btns.check.onclick = checkOrder;
+            els.btns.solve.onclick = autoSolve;
+            els.btns.info.onclick = () => openModal('info');
+
+            // Recording
+            document.getElementById('btn-record-start').onclick = startRecording;
+            document.getElementById('btn-record-stop').onclick = stopRecording;
+            document.getElementById('btn-record-play').onclick = playTempRecording;
+            document.getElementById('btn-record-delete').onclick = deleteTempRecording;
+            document.getElementById('btn-save-edit').onclick = saveCardEdit;
+        }
+
+        function showPage(page) {
+            if (page === 'workplace') {
+                els.pages.home.classList.add('opacity-0', 'pointer-events-none');
+                els.pages.workplace.classList.remove('hidden');
+                els.controlsHeader.classList.remove('hidden');
+                els.btns.homeNav.classList.remove('hidden');
+                // Wait for layout transition then render to get correct sizes
+                setTimeout(renderSlots, 100);
+            } else {
+                els.pages.home.classList.remove('opacity-0', 'pointer-events-none');
+                els.pages.workplace.classList.add('hidden');
+                els.controlsHeader.classList.add('hidden');
+                els.btns.homeNav.classList.add('hidden');
+            }
+        }
+
+        function toggleLang() {
+            state.lang = state.lang === 'en' ?
+            'ar' : 'en';
+            document.documentElement.lang = state.lang;
+            document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+            els.btns.lang.textContent = state.lang === 'en' ? 'عربي' : 'English';
+            
+            // UI Text Update
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (translations[state.lang][key]) el.innerHTML = translations[state.lang][key];
+            });
+            // Card Text Update
+            if (state.cards.some(c => c)) {
+                state.cards.forEach(card => {
+                    if (card && !card.isEdited) {
+                        const ev = eventsDB.find(e => e.id === state.currentEventId);
+                        if(ev) {
+                            const stepIdx = parseInt(card.id.split('-')[1]) - 1;
+                            if(ev.steps[stepIdx]) card.text = ev.steps[stepIdx][state.lang];
+                         }
+                    }
+                });
+                renderSlots(); 
+            }
+            renderEventsGrid();
+        }
+
+        // --- CORE LOGIC ---
+        function setTemplate(n) {
+            state.slotCount = n;
+            els.templateCount.textContent = n;
+            if(state.currentEventId) {
+                const ev = eventsDB.find(e => e.id === state.currentEventId);
+                if(ev) selectEvent(ev);
+                else resetSlots();
+            } else {
+                resetSlots();
+            }
+            closeModals();
+        }
+
+        function resetSlots() {
+            if(state.currentEventId) {
+                 const ev = eventsDB.find(e => e.id === state.currentEventId);
+                selectEvent(ev); 
+            } else {
+                state.cards = new Array(state.slotCount).fill(null);
+                renderSlots();
+            }
+            // Reset states
+            document.querySelectorAll('.card-slot').forEach(s => s.classList.remove('playing', 'covered', 'animate-success', 'animate-shake'));
+            state.coverMode = false;
+            updateCoverUI();
+        }
+
+        // --- DYNAMIC SIZING CALCULATOR ---
+        function calculateSlotSize(count) {
+            const container = els.slotsContainer;
+            if(!container) return 100;
+            
+            // Get available Dimensions
+            // Safety margin subtraction to ensure no scrollbars (-40px for padding)
+            const availableWidth = container.clientWidth - 20;
+            const availableHeight = container.clientHeight - 20;
+            
+            const gapPerCard = 12; 
+            // 6px * 2 margins
+            
+            // 1. Calculate Max possible size if limited by WIDTH
+            // (Width - (TotalGaps)) / Count
+            const widthBasedSize = (availableWidth - (count * gapPerCard)) / count;
+            // 2. Calculate Max possible size if limited by HEIGHT
+            const heightBasedSize = availableHeight;
+            // 3. Return the smaller of the two to fit BOTH dimensions
+            return Math.floor(Math.min(widthBasedSize, heightBasedSize));
+        }
+
+        function renderSlots() {
+            els.slotsContainer.innerHTML = '';
+            // Calculate exact pixel size to force fit
+            const slotSize = calculateSlotSize(state.slotCount);
+            state.cards.forEach((card, i) => {
+                const slot = document.createElement('div');
+                slot.className = `card-slot bg-white rounded-3xl border-4 border-white shadow-lg relative overflow-hidden group`;
+                
+                // FORCE SIZE INLINE
+                slot.style.width = `${slotSize}px`;
+                slot.style.height = `${slotSize}px`;
+                
+                slot.setAttribute('data-index', i);
+                
+                if (!card) {
+                    // Empty State
+                    slot.classList.add('border-dashed', 'border-slate-300', 'flex', 'items-center', 'justify-center', 'opacity-60', 'hover:opacity-100');
+                    slot.classList.remove('border-white');
+                    slot.innerHTML = `<div class="text-center"><i class="fa-solid fa-circle-plus text-slate-300 mb-1" style="font-size: ${slotSize/3}px"></i></div>`;
+                    slot.onclick = () => { openModal('events'); renderEventsGrid(); };
+                } else {
+                    // Filled State
+                    slot.setAttribute('draggable', 'true');
+                    slot.setAttribute('data-id', card.id);
+                    
+                    if (card.isCovered) slot.classList.add('covered');
+                    
+                    const safeImg = `https://placehold.co/400x400/e0e7ff/6366f1?text=${encodeURIComponent(card.fallbackIcon)}`;
+                    
+                    slot.innerHTML = `
+                        <div class="card-controls absolute top-2 left-2 bg-white/60 backdrop-blur text-slate-500 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs z-10">
+                             ${i + 1}
+                        </div>
+                        
+                        <div class="card-controls absolute top-2 right-2 bg-white/80 hover:bg-white text-slate-600 rounded-full w-8 h-8 flex items-center justify-center shadow-sm z-10 cursor-pointer transition" onclick="openEditModal(event, ${i})">
+                             <i class="fa-solid fa-ellipsis"></i>
+                        </div>
+
+                        <div class="cover-overlay absolute inset-0 flex items-center justify-center text-white font-black z-20 transition-all duration-300" style="font-size: ${slotSize/2}px">
+                            ?
+                        </div>
+                        
+                        <img src="${card.img}" onerror="this.src='${safeImg}'" class="w-full h-full object-cover pointer-events-none select-none">
+                    `;
+                    addDnDHandlers(slot);
+                    
+                    slot.onclick = (e) => {
+                        if (e.target.closest('.card-controls')) return;
+                        handleSlotClick(i, slot);
+                    };
+                }
+                els.slotsContainer.appendChild(slot);
+            });
+        }
+
+        // --- DRAG & DROP ---
+        function addDnDHandlers(slot) {
+            slot.addEventListener('dragstart', handleDragStart);
+            slot.addEventListener('dragover', handleDragOver);
+            slot.addEventListener('dragenter', handleDragEnter);
+            slot.addEventListener('dragleave', handleDragLeave);
+            slot.addEventListener('drop', handleDrop);
+            slot.addEventListener('dragend', handleDragEnd);
+            slot.addEventListener('touchstart', handleTouchStart, {passive: false});
+            slot.addEventListener('touchmove', handleTouchMove, {passive: false});
+            slot.addEventListener('touchend', handleTouchEnd);
+        }
+
+        // Desktop
+        function handleDragStart(e) {
+            if (state.coverMode || state.isPlaying) { e.preventDefault();
+            return; }
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            this.classList.add('dragging');
+        }
+        function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false;
+        }
+        function handleDragEnter(e) { this.classList.add('scale-105', 'z-50');
+        }
+        function handleDragLeave(e) { this.classList.remove('scale-105', 'z-50');
+        }
+        function handleDrop(e) {
+            e.stopPropagation();
+            if (dragSrcEl !== this) updateStateFromDOMSwap(dragSrcEl, this);
+            return false;
+        }
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.card-slot').forEach(col => col.classList.remove('scale-105', 'z-50'));
+        }
+
+        // Mobile
+        function handleTouchStart(e) {
+            if (state.coverMode || state.isPlaying) return;
+            touchStartItem = this;
+            this.classList.add('dragging');
+        }
+        function handleTouchMove(e) {
+            if (!touchStartItem) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const slot = target ? target.closest('.card-slot') : null;
+            if (slot && slot !== touchStartItem && slot.parentElement === els.slotsContainer) {
+                updateStateFromDOMSwap(touchStartItem, slot);
+                touchStartItem = slot; 
+            }
+        }
+        function handleTouchEnd(e) {
+            if (touchStartItem) touchStartItem.classList.remove('dragging');
+            touchStartItem = null;
+        }
+
+        function updateStateFromDOMSwap(el1, el2) {
+            const id1 = el1.getAttribute('data-id');
+            const id2 = el2.getAttribute('data-id');
+            const idx1 = state.cards.findIndex(c => c && c.id === id1);
+            const idx2 = state.cards.findIndex(c => c && c.id === id2);
+            if (idx1 > -1 && idx2 > -1) {
+                const temp = state.cards[idx1];
+                state.cards[idx1] = state.cards[idx2];
+                state.cards[idx2] = temp;
+                renderSlots();
+                document.querySelectorAll('.animate-shake, .animate-success').forEach(el => el.classList.remove('animate-shake', 'animate-success'));
+            }
+        }
+
+        // --- GRID & SELECTION ---
+        function renderEventsGrid() {
+            const grid = document.getElementById('events-grid');
+            grid.innerHTML = '';
+            eventsDB.forEach(ev => {
+                const btn = document.createElement('button');
+                btn.className = "flex flex-col items-center gap-2 p-3 rounded-2xl bg-slate-50 hover:bg-indigo-50 border-2 border-transparent hover:border-indigo-200 transition group aspect-square";
+                const menuImg = `images/base_events/image${ev.id}.png`;
+                
+                btn.innerHTML = `
+                    <div class="flex-1 w-full rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
+                        <img src="${menuImg}" onerror="this.parentElement.innerHTML='<span class=\\'text-4xl\\'>${ev.icon}</span>'" class="w-full h-full object-contain">
+                    </div>
+                     <span class="font-bold text-slate-600 text-xs md:text-sm truncate w-full">${ev.title[state.lang]}</span>
+                `;
+                btn.onclick = () => selectEvent(ev);
+                grid.appendChild(btn);
+            });
+        }
+
+        function renderTemplateOptions() {
+            const grid = els.modals.template.querySelector('.grid');
+            grid.innerHTML = '';
+            for (let i = 2; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.className = "aspect-square rounded-2xl bg-slate-100 font-bold text-xl text-slate-600 hover:bg-indigo-600 hover:text-white transition";
+                btn.textContent = i;
+                btn.onclick = () => setTemplate(i);
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectEvent(ev) {
+            state.currentEventId = ev.id;
+            state.cards = [];
+            
+            // Logic to choose steps based on slot count
+            let indices = [];
+            if (ev.logic && ev.logic[state.slotCount]) {
+                indices = ev.logic[state.slotCount];
+            } else {
+                const totalSteps = 10;
+                for (let i = 0; i < state.slotCount; i++) {
+                    const step = (totalSteps - 1) / (state.slotCount - 1);
+                    indices.push(Math.round(1 + (step * i)));
+                }
+            }
+
+            indices.forEach(stepIndex => {
+                const stepData = ev.steps[stepIndex - 1] || { en: "Step " + stepIndex, ar: "خطوة " + stepIndex };
+                state.cards.push({
+                    id: `${ev.id}-${stepIndex}`,
+                    img: `images/${ev.id}/image${stepIndex}.png`,
+                    fallbackIcon: `${ev.icon} ${stepIndex}`,
+                    text: stepData[state.lang],
+                    audio: null,
+                    isEdited: false,
+                    isCovered: false 
+                });
+            });
+            state.cards.sort(() => Math.random() - 0.5);
+            renderSlots();
+            closeModals();
+            updateReadout(ev.title[state.lang]);
+        }
+
+        // --- FEATURES: Check, Solve, Play, Sound ---
+        function checkOrder() {
+            if (state.cards.some(c => !c)) return;
+            const currentSteps = state.cards.map(c => parseInt(c.id.split('-')[1]));
+            const correctSteps = [...currentSteps].sort((a, b) => a - b);
+            const isCorrect = JSON.stringify(currentSteps) === JSON.stringify(correctSteps);
+            const slots = document.querySelectorAll('.card-slot');
+            if (isCorrect) {
+                slots.forEach(slot => {
+                    slot.classList.add('animate-success');
+                    setTimeout(() => slot.classList.remove('animate-success'), 1200);
+                });
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                playTTS(state.lang === 'ar' ? "ممتاز!" : "Excellent!");
+                updateReadout("🎉 Correct! 🎉");
+            } else {
+                slots.forEach((slot, i) => {
+                    if (currentSteps[i] !== correctSteps[i]) {
+                        slot.classList.add('animate-shake');
+                        setTimeout(() => slot.classList.remove('animate-shake'), 600);
+                     }
+                });
+                playTTS(state.lang === 'ar' ? "حاول مرة أخرى" : "Try again");
+            }
+        }
+
+        function autoSolve() {
+            if (state.cards.some(c => !c)) return;
+            // 1. Sort the Data
+            state.cards.sort((a, b) => {
+                const idA = parseInt(a.id.split('-')[1]);
+                const idB = parseInt(b.id.split('-')[1]);
+                return idA - idB;
+            });
+            // 2. Re-render immediately
+            renderSlots();
+            // 3. Add success animation to new DOM elements
+            setTimeout(() => {
+                document.querySelectorAll('.card-slot').forEach(s => {
+                    s.classList.add('animate-success');
+                    setTimeout(() => s.classList.remove('animate-success'), 1000);
+                });
+                 playTTS(state.lang === 'ar' ? "تم الترتيب!" : "Sorted!");
+            }, 50);
+        }
+
+        // --- AUDIO ENGINE & CLICK HANDLING ---
+        
+        function handleSlotClick(index, slot) {
+            const card = state.cards[index];
+            if (!card) return;
+
+            // COVER MODE LOGIC: Toggle the cover manually
+            if (state.coverMode) {
+                card.isCovered = !card.isCovered;
+                if(card.isCovered) slot.classList.add('covered');
+                else slot.classList.remove('covered');
+            } 
+            // NORMAL MODE: Play sound
+            else {
+                playCard(index);
+            }
+        }
+
+        function playCard(index) {
+            const card = state.cards[index];
+            const slot = els.slotsContainer.children[index];
+            
+            // Add playing class which now includes glow animation
+            slot.classList.add('playing');
+            updateReadout(card.text);
+
+            const donePlaying = () => { slot.classList.remove('playing'); };
+
+            if (card.audio) {
+                new Audio(URL.createObjectURL(card.audio)).play().onended = donePlaying;
+                return;
+            }
+
+            if (state.soundMode) {
+                const parts = card.id.split('-');
+                const mp3Path = `sounds/${state.lang}/${parts[0]}/${parts[1]}.mp3`;
+                const a = new Audio(mp3Path);
+                a.onended = donePlaying;
+                a.onerror = () => {
+                    // Fallback to TTS if file missing
+                    playTTS(card.text, slot);
+                };
+                a.play();
+                return;
+            }
+            
+            playTTS(card.text, slot);
+        }
+
+        function playTTS(text, slotEl = null) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+            u.rate = 0.9;
+            if(slotEl) u.onend = () => slotEl.classList.remove('playing');
+            window.speechSynthesis.speak(u);
+        }
+
+        async function playSequence() {
+            if (state.isPlaying || state.coverMode) return;
+            state.isPlaying = true;
+            els.btns.playAll.classList.add('bg-indigo-100', 'text-indigo-600');
+            
+            for (let i = 0; i < state.cards.length; i++) {
+                if (!state.cards[i]) continue;
+                const slot = els.slotsContainer.children[i];
+                const card = state.cards[i];
+                
+                slot.classList.add('playing');
+                updateReadout(card.text);
+                await new Promise(resolve => {
+                    const done = () => { resolve(); };
+                    
+                    if (card.audio) {
+                        const a = 
+                        new Audio(URL.createObjectURL(card.audio));
+                        a.onended = done;
+                        a.play();
+                    } else if (state.soundMode) {
+                        const 
+                        parts = card.id.split('-');
+                        const a = new Audio(`sounds/${state.lang}/${parts[0]}/${parts[1]}.mp3`);
+                        a.onended = done;
+                        a.onerror = () => {
+                
+                            const u = new SpeechSynthesisUtterance(card.text);
+                            u.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+                            u.onend = done;
+                  
+                            window.speechSynthesis.speak(u);
+                        };
+                        a.play();
+                    } else {
+                    
+                        const u = new SpeechSynthesisUtterance(card.text);
+                        u.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+                        u.onend = done;
+                        window.speechSynthesis.speak(u);
+                    }
+                });
+                slot.classList.remove('playing');
+                await new Promise(r => setTimeout(r, 400));
+            }
+            
+            state.isPlaying = false;
+            els.btns.playAll.classList.remove('bg-indigo-100', 'text-indigo-600');
+        }
+
+        // --- UPDATED MODES ---
+        function toggleCoverMode() {
+            if (state.cards.every(c => !c)) return;
+            state.coverMode = !state.coverMode;
+            updateCoverUI();
+        }
+
+        function toggleSoundMode() {
+            state.soundMode = !state.soundMode;
+            updateSoundUI();
+            const msg = state.soundMode ? (state.lang === 'ar' ? "الصوت: ملفات" : "Sound: Files") : (state.lang === 'ar' ? "الصوت: قراءة" : "Sound: TTS");
+            updateReadout(msg);
+        }
+
+        // --- UI UPDATERS ---
+        function updateReadout(text) { els.textReadout.innerHTML = text;
+        }
+        
+        function updateCoverUI() {
+            const btn = els.btns.coverMode;
+            const icon = document.getElementById('cover-icon');
+            
+            // Remove previous icons
+            icon.classList.remove('fa-eye', 'fa-eye-slash');
+            if (state.coverMode) {
+                // Active State (Purple)
+                btn.className = "w-12 h-12 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-md active:scale-95 transition-all";
+                icon.classList.add('fa-eye-slash');
+            } else {
+                // Inactive State
+                btn.className = "w-12 h-12 rounded-xl hover:bg-purple-50 text-slate-500 hover:text-purple-600 flex items-center justify-center transition-all active:scale-90 group";
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function updateSoundUI() {
+            const btn = els.btns.soundMode;
+            if (state.soundMode) {
+                btn.className = "w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-md active:scale-95 transition-all";
+            } else {
+                btn.className = "w-12 h-12 rounded-xl hover:bg-orange-50 text-slate-500 hover:text-orange-600 flex items-center justify-center transition-all active:scale-90 group";
+            }
+        }
+
+        // --- EDITING / RECORDING ---
+        function openEditModal(e, index) {
+            e.stopPropagation();
+            state.editingIndex = index;
+            const card = state.cards[index];
+            document.getElementById('input-edit-text').value = card.text;
+            tempRecordingBlob = card.audio;
+            updateRecordUI();
+            openModal('edit');
+        }
+
+        function saveCardEdit() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.addEventListener('stop', () => commitSave(), { once: true });
+                mediaRecorder.stop();
+            } else commitSave();
+        }
+
+        function commitSave() {
+            const card = state.cards[state.editingIndex];
+            card.text = document.getElementById('input-edit-text').value;
+            card.audio = tempRecordingBlob;
+            card.isEdited = true;
+            closeModals();
+        }
+
+        function openModal(id) { els.modals[id].style.display = 'flex';
+        }
+        function closeModals() { 
+            Object.values(els.modals).forEach(m => m.style.display = 'none');
+            stopRecording();
+        }
+
+        // --- MIC HANDLING ---
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.addEventListener('dataavailable', e => { if (e.data.size > 0) audioChunks.push(e.data); });
+                mediaRecorder.addEventListener('stop', () => {
+                    tempRecordingBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    updateRecordUI();
+                    stream.getTracks().forEach(track => track.stop());
+                });
+                mediaRecorder.start();
+                document.getElementById('record-status-icon').classList.add('bg-red-50', 'text-red-500', 'animate-pulse');
+                document.getElementById('btn-record-start').classList.add('hidden');
+                document.getElementById('btn-record-stop').classList.remove('hidden');
+                let sec = 0;
+                recordInterval = setInterval(() => {
+                    sec++;
+                    document.getElementById('record-timer').textContent = `00:${sec.toString().padStart(2,'0')}`;
+                }, 1000);
+            } catch (err) { alert("Mic access denied"); }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+            clearInterval(recordInterval);
+            document.getElementById('record-status-icon').classList.remove('bg-red-50', 'text-red-500', 'animate-pulse');
+            document.getElementById('btn-record-stop').classList.add('hidden');
+            document.getElementById('btn-record-start').classList.remove('hidden');
+        }
+
+        function updateRecordUI() {
+            const has = !!tempRecordingBlob;
+            document.getElementById('btn-record-play').classList.toggle('hidden', !has);
+            document.getElementById('btn-record-delete').classList.toggle('hidden', !has);
+            if(!has) document.getElementById('record-timer').textContent = "00:00";
+        }
+        function playTempRecording() { if(tempRecordingBlob) new Audio(URL.createObjectURL(tempRecordingBlob)).play();
+        }
+        function deleteTempRecording() { tempRecordingBlob = null; updateRecordUI();
+        }
+
+        init();
+    </script>
+</body>
+</html>

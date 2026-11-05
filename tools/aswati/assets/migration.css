@@ -1,0 +1,184 @@
+/* Taffaha home-screen pattern, adapted for the standalone sound app. */
+.app-home-shell {
+    --home-ink: #22445a;
+    --home-muted: #5c7285;
+    --home-line: #dceaf4;
+    color: var(--home-ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    background: radial-gradient(ellipse at 10% 25%, #e9f8ed 0, transparent 42%), radial-gradient(ellipse at 90% 50%, #edf7ff 0, transparent 45%), #f8fafc;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+}
+.app-home-shell [hidden], .app-home-shell.hidden, .app-home-shell .hidden { display: none !important; }
+.app-home-shell .app-home-topbar {
+    flex-shrink: 0;
+    padding: 0;
+    background: #ffffffeb;
+    border-bottom: 1px solid var(--home-line);
+    box-shadow: none;
+}
+.app-home-shell .app-home-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 12px;
+    width: 100%;
+    max-width: none;
+    padding: max(12px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 12px max(18px, env(safe-area-inset-left));
+}
+.app-home-shell .app-home-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--home-ink);
+    text-decoration: none;
+    cursor: pointer;
+}
+.app-home-shell .app-home-brand > img,
+.app-home-shell .app-home-brand-logo { width: 52px; height: 52px; flex-shrink: 0; object-fit: contain; }
+.app-home-shell .app-home-brand strong,
+.app-home-shell .app-home-brand h1 { display: block; margin: 0; font-size: 24px; font-weight: 800; line-height: 1.3; letter-spacing: normal; color: inherit; }
+.app-home-shell .app-home-brand small,
+.app-home-shell .app-home-brand p { display: block; margin: 0; font-size: 12px; font-weight: 500; color: var(--home-muted); line-height: 1.6; }
+.app-home-shell .app-home-tools { display: flex; align-items: center; justify-content: flex-end; gap: 8px; width: auto; flex-shrink: 0; }
+.app-home-shell .app-home-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 11px;
+    border: 0;
+    border-radius: 15px;
+    background: #edf5fa;
+    color: #0278b4;
+    cursor: pointer;
+}
+.app-home-shell .app-home-icon svg { display: block; width: 23px; height: 23px; }
+.app-home-shell .app-home-main,
+.app-home-shell #workspace.app-home-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 10px max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
+    gap: 0;
+    overflow-y: auto;
+}
+#workspace.app-home-main > :first-child { margin-top: 0; }
+#workspace.app-home-main > :last-child { margin-bottom: 0; }
+#workspace .app-home-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1 0 auto; width: 100%; max-width: 720px; padding: 12px 4px; text-align: center; }
+#workspace .app-home-logo { width: clamp(70px, 17dvh, 150px); height: clamp(70px, 17dvh, 150px); object-fit: contain; margin: 0 0 8px; flex-shrink: 0; }
+#workspace .app-home-title { font-size: clamp(26px, 4.8dvh, 40px); font-weight: 800; line-height: 1.3; letter-spacing: normal; margin: 0 0 4px; color: var(--home-ink); }
+#workspace .app-home-description { font-size: 14px; font-weight: 400; line-height: 1.6; color: var(--home-muted); margin: 0 0 clamp(10px, 2.8dvh, 26px); }
+#workspace .app-home-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; width: 100%; max-width: 520px; }
+#workspace .app-home-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 1.8dvh, 16px);
+    min-width: 0;
+    min-height: 48px;
+    padding: clamp(12px, 2.7dvh, 26px);
+    border: 1px solid var(--home-line);
+    border-radius: 28px;
+    background: white;
+    color: var(--home-ink);
+    font: inherit;
+    font-size: clamp(18px, 3dvh, 24px);
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 12px 40px #276b8f0c;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform .15s, background .15s, border-color .15s;
+}
+#workspace .app-home-action > span:last-child { font-size: inherit; line-height: inherit; }
+#workspace .app-home-action:hover { border-color: #92cce6; background: #fbfeff; }
+#workspace .app-home-action:active { transform: scale(.96); }
+#workspace .app-home-action-icon { display: grid; place-items: center; width: clamp(48px, 8dvh, 72px); height: clamp(48px, 8dvh, 72px); flex-shrink: 0; border-radius: 25px; background: #e4f5ff; color: #0284c7; }
+#workspace .app-home-action-icon svg { display: block; width: 36px; height: 36px; stroke-width: 1.6; }
+#workspace .app-home-action:nth-child(2) .app-home-action-icon { background: #e7f7ed; color: #418c60; }
+#workspace .app-home-action:nth-child(3) .app-home-action-icon { background: #fff3d5; color: #a66a00; }
+#workspace .app-home-action:nth-child(4) .app-home-action-icon { background: #f1eafb; color: #8660ad; }
+#workspace .app-home-screen--four .app-home-logo { width: clamp(64px, 11dvh, 112px); height: clamp(64px, 11dvh, 112px); }
+#workspace .app-home-screen--four .app-home-action { padding: clamp(10px, 1.8dvh, 18px); font-size: clamp(16px, 2.5dvh, 21px); gap: 8px; }
+#workspace .app-home-screen--four .app-home-action-icon { width: clamp(40px, 6dvh, 56px); height: clamp(40px, 6dvh, 56px); border-radius: 18px; }
+#workspace .app-home-footer { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; width: 100%; margin: 0; border: 0; padding: 10px 0 max(12px, env(safe-area-inset-bottom)); color: var(--home-muted); font-size: 12px; line-height: 1.6; text-align: center; }
+#workspace .app-home-footer p { margin: 0; }
+#workspace .app-home-footer p:first-child { font-size: 11px; letter-spacing: 1px; }
+#workspace .app-home-footer strong { font-size: 16px; font-weight: 700; color: var(--home-ink); }
+#workspace .app-home-footer a { color: #176d98; text-decoration: none; overflow-wrap: anywhere; }
+#workspace .app-home-footer a:hover { text-decoration: underline; }
+.app-home-shell :is(button, a, [role="button"]):focus-visible { outline: 3px solid #0284c7; outline-offset: 4px; }
+@media (max-width: 720px) {
+    .app-home-shell .app-home-bar { gap: 8px; }
+    .app-home-shell .app-home-brand { gap: 8px; }
+    .app-home-shell .app-home-brand > img, .app-home-shell .app-home-brand-logo { width: 44px; height: 44px; }
+    .app-home-shell .app-home-brand strong, .app-home-shell .app-home-brand h1 { font-size: 20px; }
+    .app-home-shell .app-home-tools { gap: 6px; }
+    .app-home-shell .app-home-icon { width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 10px; }
+    #workspace .app-home-screen { padding: 8px 4px; }
+    #workspace .app-home-actions { gap: 14px; }
+    #workspace .app-home-action-icon { border-radius: 18px; }
+}
+@media (max-width: 380px) {
+    .app-home-shell .app-home-bar { padding-inline: 12px; }
+    .app-home-shell .app-home-brand > img, .app-home-shell .app-home-brand-logo { width: 36px; height: 36px; }
+    .app-home-shell .app-home-brand strong, .app-home-shell .app-home-brand h1 { font-size: 17px; }
+    .app-home-shell .app-home-brand small, .app-home-shell .app-home-brand p { font-size: 10px; }
+    #workspace .app-home-actions { gap: 10px; }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+    .app-home-shell .app-home-bar { padding-block: 8px; }
+    .app-home-shell .app-home-brand small, .app-home-shell .app-home-brand p { display: none; }
+    #workspace .app-home-screen { display: grid; grid-template-columns: 100px minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: 20px; max-width: 650px; padding: 0; }
+    #workspace .app-home-screen .app-home-logo { grid-column: 1; grid-row: 1 / 4; width: 90px; height: 90px; margin: 0; align-self: center; }
+    #workspace .app-home-title { grid-column: 2; font-size: 25px; margin: 0; }
+    #workspace .app-home-description { grid-column: 2; font-size: 12px; margin: 0; }
+    #workspace .app-home-actions { grid-column: 2; align-self: center; gap: 10px; }
+    #workspace .app-home-screen .app-home-action { flex-direction: row; padding: 8px; gap: 10px; font-size: 16px; border-radius: 18px; }
+    #workspace .app-home-screen .app-home-action-icon { width: 36px; height: 36px; border-radius: 12px; }
+    #workspace .app-home-action-icon svg { width: 28px; height: 28px; }
+    #workspace .app-home-footer { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 4px 14px; padding-block: 6px; font-size: 11px; }
+    #workspace .app-home-footer strong { font-size: 13px; }
+}
+@media (max-height: 650px) and (max-width: 599px) {
+    #workspace .app-home-screen--four { padding-block: 4px; }
+    #workspace .app-home-screen--four .app-home-logo { width: 54px; height: 54px; margin-bottom: 4px; }
+    #workspace .app-home-screen--four .app-home-title { font-size: 26px; }
+    #workspace .app-home-screen--four .app-home-description { margin-bottom: 10px; }
+    #workspace .app-home-screen--four .app-home-action { padding: 8px; gap: 6px; font-size: 16px; line-height: 1.4; border-radius: 22px; }
+    #workspace .app-home-screen--four .app-home-action-icon { width: 36px; height: 36px; border-radius: 12px; }
+    #workspace .app-home-screen--four .app-home-action-icon svg { width: 28px; height: 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #workspace .app-home-action { transition: none; }
+}
+
+#workspace .app-home-screen--many .app-home-logo{width:clamp(54px,10dvh,100px);height:clamp(54px,10dvh,100px)}
+#workspace .app-home-screen--many .app-home-title{font-size:clamp(26px,4dvh,36px)}
+#workspace .app-home-screen--many .app-home-description{margin-bottom:clamp(10px,2dvh,18px)}
+#workspace .app-home-screen--many .app-home-actions{max-width:580px;gap:12px}
+#workspace .app-home-screen--many .app-home-action{padding:clamp(8px,1.5dvh,16px);gap:8px;font-size:clamp(16px,2.2dvh,20px);line-height:1.4}
+#workspace .app-home-screen--many .app-home-action-icon{width:clamp(36px,5.5dvh,56px);height:clamp(36px,5.5dvh,56px);border-radius:16px}
+#workspace .app-home-screen--many .app-home-action-icon svg{width:30px;height:30px}
+#workspace .app-home-action:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc((100% - 12px)/2)}
+@media(max-height:650px) and (max-width:599px){#workspace .app-home-screen--many{padding-block:4px}#workspace .app-home-screen--many .app-home-logo{width:48px;height:48px;margin-bottom:4px}#workspace .app-home-screen--many .app-home-action{padding:6px;gap:5px;font-size:15px;border-radius:22px}#workspace .app-home-screen--many .app-home-action-icon{width:32px;height:32px;border-radius:11px}#workspace .app-home-screen--many .app-home-action-icon svg{width:25px;height:25px}}
+@media(max-height:500px) and (min-width:600px){#workspace .app-home-screen--many{max-width:850px}#workspace .app-home-screen--many .app-home-actions{grid-template-columns:repeat(3,minmax(0,1fr));max-width:none;gap:8px}#workspace .app-home-screen--many .app-home-action{padding:6px;gap:6px;font-size:14px}#workspace .app-home-screen--many .app-home-action-icon{width:30px;height:30px}#workspace .app-home-action:last-child:nth-child(odd){grid-column:auto;width:100%}}

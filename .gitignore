@@ -1,0 +1,12 @@
+# Generated publication files and downloadable release archives.
+/output/
+
+# Local dependencies are restored from package-lock.json when needed.
+node_modules/
+
+# macOS folder metadata.
+.DS_Store
+
+# Generated screenshots, test reports and local assistant settings.
+/tmp/
+/.kilo/

@@ -1,0 +1,20 @@
+.parent-gate {box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:20px;border:1px solid #dceaf4;border-radius:28px;background:#fff;color:#22445a;font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif;box-shadow:0 20px 80px #22445a33;}
+.parent-gate::backdrop {background:#e9f3f6aa;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);}
+.parent-gate * {box-sizing:border-box;}
+.parent-gate header {display:flex;align-items:center;gap:10px;}
+.parent-gate h2 {margin:0;font-size:22px;font-weight:800;color:#22445a;}
+.parent-gate svg {width:24px;height:24px;}
+.parent-gate-lock {display:grid;place-items:center;width:44px;height:44px;border-radius:15px;background:#e8f7ef;color:#169765;}
+.parent-gate button {font:inherit;cursor:pointer;min-width:44px;min-height:44px;display:grid;place-items:center;border:1px solid #dceaf4;border-radius:15px;background:#f5faff;color:#286588;}
+.parent-gate-close {margin-inline-start:auto;background:#fff!important;}
+.parent-gate #parent-gate-help {font-size:14px;line-height:1.6;margin:14px 0;color:#5c7285;}
+.parent-gate-equation {display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0;font-size:34px;font-weight:850;}
+.parent-gate-equation span:first-child {color:#0787c0;}.parent-gate-equation span[data-right] {color:#169765;}.parent-gate-equation strong {color:#b77a24;}
+.parent-gate-choices {display:grid;grid-template-columns:repeat(3,1fr);gap:10px;direction:ltr;}
+.parent-gate-choices button {height:60px;font-size:26px;font-weight:750;}
+.parent-gate-choices button:nth-child(2) {background:#f0faf5;color:#167c58;}
+.parent-gate-choices button:nth-child(3) {background:#fff7e9;color:#a16b18;}
+.parent-gate-choices button[aria-invalid=true] {border-color:#da8b67;}
+.parent-gate #parent-gate-error {min-height:22px;font-size:13px;color:#a04a25;margin:10px 0 0;text-align:center;}
+.parent-gate button:focus-visible {outline:3px solid #e7a83c;outline-offset:2px;}
+@media(max-height:560px){.parent-gate {padding:14px;}.parent-gate-equation {margin:10px 0;font-size:28px;}.parent-gate #parent-gate-help {margin:8px 0;}.parent-gate-choices button {height:48px;}.parent-gate #parent-gate-error {margin-top:5px;}}

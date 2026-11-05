@@ -1,0 +1,29 @@
+{
+  "name": "hamada-vocabulary",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:account-deletion": "node ../../tests/account-deletion.cjs",
+    "test:account-deletion:browser": "node ../../tests/account-deletion-browser.cjs",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i assets/tailwind.css -o assets/utilities.css --minify",
+    "build:icons": "node scripts/build-icons.cjs",
+    "build:games": "node scripts/build-game-pages.cjs && node scripts/build-game-data.cjs",
+    "build:pwa": "node scripts/build-pwa.cjs",
+    "build": "npm run build:css && npm run build:pwa",
+    "test:delete:browser": "node ../../tests/delete-mode-browser.cjs",
+    "test:report-charts": "node ../../tests/acquisition-reports.cjs",
+    "test:report-charts:browser": "node ../../tests/acquisition-reports-browser.cjs",
+    "test": "node tests/static.cjs && node tests/games-model.cjs && node tests/progress.cjs && node tests/admin-report.cjs && node tests/word-levels.cjs",
+    "test:browser": "node tests/games-browser.cjs && node tests/pwa-browser.cjs",
+    "test:progress:browser": "node tests/progress-browser.cjs && node tests/guided-browser.cjs",
+    "test:admin:browser": "node tests/admin-browser.cjs",
+    "test:accounts:browser": "node ../../tests/accounts-browser.cjs",
+    "test:suite:browser": "node ../../tests/suite-navigation-browser.cjs",
+    "test:levels:browser": "node tests/word-levels-browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "sharp": "0.34.5",
+    "tailwindcss": "3.4.17"
+  }
+}

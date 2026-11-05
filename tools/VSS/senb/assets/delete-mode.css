@@ -1,0 +1,17 @@
+/* A deliberate, temporary edit mode shared by the two workplaces. */
+#btn-clear.delete-mode-active,#clearBoardBtn.delete-mode-active {
+    background:#df4b55!important;border-color:#df4b55!important;color:#fff!important;
+    box-shadow:0 0 0 3px #ffe3e6;
+}
+#workplace-view .workplace-delete-card,#workplaceView .workplace-delete-card {
+    border-color:#e9848b;box-shadow:0 0 0 2px #f9d4d8;
+    transform-origin:50% 60%;animation:workplace-delete-wiggle .23s ease-in-out infinite;
+    animation-delay:var(--delete-delay,0s);
+}
+@keyframes workplace-delete-wiggle {
+    0%,100% {transform:scale(.985) rotate(-.9deg);}
+    50% {transform:scale(.985) rotate(.9deg);}
+}
+@media(prefers-reduced-motion:reduce) {
+    #workplace-view .workplace-delete-card,#workplaceView .workplace-delete-card {animation:none;transform:none;}
+}

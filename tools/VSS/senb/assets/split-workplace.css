@@ -1,0 +1,18 @@
+.split-workplaces{width:100%;min-height:0;margin-block:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.sentence-workplace{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.sentence-workplace[hidden]{display:none}
+.sentence-workplace-controls{display:none}
+.split-workplaces.is-split{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;margin-block:8px}
+.is-split .sentence-workplace{padding:10px;border:2px solid #dceaf4;border-radius:24px;background:#fff}
+.is-split .sentence-workplace-controls{display:flex;width:100%;justify-content:space-between;gap:8px;align-items:center}
+.sentence-workplace-select{min-width:44px;min-height:44px;border:1px solid #dceaf4;border-radius:14px;background:#f0f7fc;color:#22445a;font:800 18px system-ui;cursor:pointer}
+.is-split .workplace-content{--workplace-card-size:clamp(44px,16dvh,120px);--workplace-card-gap:4px;--workplace-frame-pad:6px}
+.is-split .workplace-navigation-stage[data-navigation=true]{--nav-space:46px}
+.is-split [id$=advancedImageStage]{width:min(100%,calc(min(38dvh,360px) + 2 * var(--nav-space)))}
+.split-rotate-dialog{width:min(360px,calc(100% - 32px));padding:24px;border:1px solid #dceaf4;border-radius:28px;background:#fff;color:#22445a;text-align:center;font-family:system-ui,sans-serif}
+.split-rotate-dialog::backdrop{background:#f3f9fc99;backdrop-filter:blur(8px)}
+.split-rotate-dialog>svg{width:72px;height:72px;margin:auto;color:#0284c7}
+.split-rotate-dialog h2{font-size:22px;margin:12px 0}.split-rotate-dialog p{font-size:16px;line-height:1.7}
+.split-rotate-dialog button{min-height:44px;padding:10px 24px;border:1px solid #b6d9c3;border-radius:14px;background:#e6f5ed;color:#286a46;font:700 16px system-ui;cursor:pointer}
+@media(max-width:600px) and (orientation:portrait){.split-workplaces.is-split{grid-template-columns:minmax(0,1fr)}}
+@media(max-height:500px) and (orientation:landscape){.is-split .sentence-workplace{padding:6px;gap:4px}.is-split .workplace-content{gap:4px}.is-split [id$=featuredTitle]{margin:0;font-size:11px}.is-split .sentence-workplace-controls button{height:44px}}

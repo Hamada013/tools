@@ -1,0 +1,100 @@
+/* Shared compact navigation; local copies keep every PWA self-contained. */
+[data-suite-settings][hidden],.suite-settings-panel[hidden]{display:none!important}
+.suite-settings-panel{position:fixed;inset-inline:12px;z-index:80;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;max-width:760px;margin-inline:auto;padding:14px;border:1px solid #dceaf4;border-radius:22px;background:white;box-shadow:0 15px 40px #22445a26;overflow:auto;overscroll-behavior:contain;font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif}
+.suite-settings-panel>div:not(.hidden){display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;overflow:visible}
+.suite-settings-panel button{min-width:44px;min-height:44px;flex-shrink:0}
+.suite-settings-panel #workplaceHeaderToolbar{flex-basis:auto}
+.suite-settings-panel #templateControl{display:block}
+.suite-settings-panel #templateDropdown{position:static;margin-top:8px}
+.suite-settings-panel #templateDropdown>div:last-child{display:grid;grid-template-columns:repeat(5,minmax(44px,1fr))}
+.suite-settings-panel #templateDropdown{width:auto;min-width:260px}
+.suite-settings-panel button:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
+.suite-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;min-width:44px;width:44px;min-height:44px;height:44px;padding:10px;border:0;border-radius:12px;background:transparent;color:#22445a;cursor:pointer;box-sizing:border-box}.suite-icon svg{width:23px;height:23px}.suite-icon:focus-visible,.suite-dialog button:focus-visible,.suite-activity-menu button:focus-visible,.suite-report-links button:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
+.suite-dialog{box-sizing:border-box;width:min(560px,calc(100% - 24px));max-height:85dvh;margin:auto;padding:20px;border:1px solid #dceaf4;border-radius:28px;background:white;color:#22445a;font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif;box-shadow:0 24px 90px #22445a33;overflow:auto}.suite-dialog[open]{animation:suite-pop .3s ease-out}.suite-dialog::backdrop{background:#22445a66;backdrop-filter:blur(5px)}.suite-dialog header{display:flex;justify-content:space-between;align-items:center;gap:12px}.suite-dialog h2{font-size:21px;margin:0}.suite-dialog p{font-size:15px;line-height:1.9}.suite-app-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}.suite-app-grid button{min-width:0;display:flex;flex-direction:column;align-items:center;gap:12px;background:#f8fbfd;border:1px solid #dceaf4;border-radius:22px;padding:18px 8px;color:#22445a;font:700 14px/1.6 system-ui;cursor:pointer}.suite-app-grid button:nth-child(2){background:#f0faf4}.suite-app-grid button:nth-child(3){background:#fff8eb}.suite-app-grid button[aria-current]{box-shadow:inset 0 0 0 2px #80b7d2}.suite-app-grid img{width:72px;height:72px;object-fit:contain}.suite-app-grid button:hover img{transform:translateY(-4px) rotate(-5deg);transition:transform .2s}
+.suite-activity-menu{position:fixed;inset-inline:12px;z-index:80;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px auto 0;padding:12px;max-width:960px;max-height:60dvh;overflow:auto;border:1px solid #dceaf4;border-radius:20px;background:#fff;box-shadow:0 15px 40px #22445a26;animation:suite-drop .22s ease-out;font-family:system-ui, sans-serif}.suite-activity-menu[hidden]{display:none}.suite-activity-menu button,.suite-create{min-height:44px;padding:10px 16px;border:1px solid #dceaf4;border-radius:13px;background:#f0f7fc;color:#22445a;font:700 14px system-ui;cursor:pointer}.suite-activity-menu button:hover{background:#e3f3ea}
+.suite-report-links{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.suite-report-links button{display:flex;align-items:center;justify-content:center;gap:8px;flex:1 1 120px;min-width:44px;min-height:48px;padding:8px;border:1px solid #dceaf4;border-radius:14px;background:#f8fbfd;font:700 12px/1.5 system-ui;color:#22445a;cursor:pointer}.suite-report-links img{width:30px;height:30px;object-fit:contain}.suite-report-links button[aria-current]{background:#e8f5ee;border-color:#badbc9;opacity:1}.suite-report-links button span{min-width:0}
+.suite-transition{width:min(420px,calc(100% - 32px));max-width:none;text-align:center;overflow:hidden;padding:24px}.suite-transition::backdrop{background:#f3f9fc99;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}.suite-transition-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:20px;direction:ltr;min-height:180px}.suite-transition-app{min-width:0}.suite-transition img{display:block;width:112px;max-width:100%;height:112px;object-fit:contain;margin:0 auto}.suite-transition p{margin:10px 0 0;font-weight:700;line-height:1.5}.suite-arrival>main,.suite-arrival>#home-view,.suite-arrival>#homeView{animation:suite-pop .5s ease-out}
+.suite-transition .suite-count{animation-name:suite-transition-count}
+.suite-transition:focus{outline:none}
+body.suite-transition-active>:not(#suite-transition):not(script):not(style):not(link){filter:blur(8px)}
+@keyframes suite-transition-count{0%{opacity:0;transform:scale(.65)}25%,100%{opacity:1;transform:scale(1)}}
+@keyframes suite-pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}@keyframes suite-drop{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}@keyframes suite-hop{50%{transform:translateY(-15px) rotate(-7deg)}}
+.app-home-bar:has([data-suite-menu]){flex-wrap:wrap;gap:8px}.app-home-tools:has([data-suite-menu]){flex-wrap:wrap;justify-content:flex-end}.game-header:has([data-suite-menu]){flex-wrap:wrap}.topbar:has([data-suite-menu]){flex-wrap:wrap}.topbar nav:has([data-suite-menu]){flex-wrap:wrap;justify-content:flex-end;gap:5px}
+#workplace-view>header:has([data-suite-menu]){height:auto;min-height:68px;flex-wrap:wrap}#workplace-view>header>.overflow-x-auto{flex:1 1 220px}
+@media(max-width:480px){.suite-dialog{padding:16px}.suite-app-grid{gap:6px}.suite-app-grid img{width:52px;height:52px}.suite-app-grid button{font-size:12px;padding:14px 5px}.app-home-tools:has([data-suite-menu]){gap:5px}.topbar:has([data-suite-menu]){padding:8px 10px}.topbar:has([data-suite-menu]) .brand{font-size:17px}.topbar:has([data-suite-menu]) .brand img{width:36px;height:36px}.topbar nav:has([data-suite-menu]){flex:1}.topbar nav:has([data-suite-menu]) .icon{width:44px;height:44px;min-width:44px;min-height:44px;padding:10px}}
+@media(prefers-reduced-motion:reduce){.suite-dialog[open],.suite-activity-menu,.suite-transition img,.suite-transition .suite-count,.suite-arrival>main,.suite-arrival>#home-view,.suite-arrival>#homeView{animation:none}.suite-app-grid button:hover img{transform:none;transition:none}}
+
+/* Physical left controls and centered rewards, independent of RTL text. */
+#workplace-view>header:has([data-suite-menu]){display:grid;direction:ltr;grid-template-columns:44px 44px 44px minmax(0,1fr) 148px;gap:8px;align-items:center}
+#workplace-view>header>[data-suite-settings]{grid-column:1;grid-row:1}
+#workplace-view>header>[data-suite-menu]{grid-column:2;grid-row:1}
+#workplace-view>header>[data-suite-apps]{grid-column:3;grid-row:1}
+#workplace-view>header>#stars-container{grid-column:1/-1;grid-row:1;justify-self:center;direction:rtl;pointer-events:none}
+@media(max-width:680px){#workplace-view>header>#stars-container{grid-row:2;margin:0 auto 4px;max-width:100%;flex-wrap:wrap;justify-content:center}}
+
+/* Plain action icons throughout the suite. Keep colored artwork, learning
+   cues, answer feedback and selected cards in their app-specific styles. */
+:is(.app-home-action-icon,.home-action-icon,.hub-icon,.home-menu-symbol,.category-symbol,.word-category-symbol,.word-category-chevron,.word-level-mark,.level-mark){background:transparent!important;border-radius:0!important;box-shadow:none!important}
+:is(.suite-icon,[data-suite-control],.app-home-icon,.activity-icon-button,.icon-button,.voc-icon,.icon,.icon-action,.suite-settings-panel button[title]){background:transparent!important;border-color:transparent!important;box-shadow:none!important;color:#22445a!important;touch-action:manipulation}
+/* Header toggles expose their state to assistive technology without a sticky underline. */
+:is(.suite-toolbar,.suite-settings-panel) :is(button,a,[role=button]){box-shadow:none!important;text-decoration:none!important;-webkit-tap-highlight-color:transparent}
+:is(.suite-toolbar,.suite-settings-panel) :is(button,a,[role=button]):not(:active){transform:none!important}
+.suite-toolbar{direction:ltr}
+.suite-toolbar [data-suite-control]{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;max-width:44px;padding:10px;border:0;border-radius:12px;gap:0;text-decoration:none;cursor:pointer}
+.suite-toolbar [data-suite-control][hidden],.suite-toolbar [data-suite-control].hidden{display:none!important}
+.suite-toolbar [data-suite-control]>svg{display:block;width:23px;height:23px;flex-shrink:0}
+.suite-toolbar [data-suite-control]>i,.suite-settings-panel .child-button>i{display:block;background:transparent!important;border-radius:0;padding:0;font-size:21px;color:inherit}
+.suite-toolbar [data-suite-control=profile]>span,.suite-toolbar .game-back>span{display:none}
+.suite-toolbar [data-suite-control]:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
+.game-header.suite-toolbar{justify-content:flex-start;gap:8px;font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif}
+.game-header.suite-toolbar .game-brand{order:2;margin-left:auto;margin-right:0;min-width:0}
+.game-header.suite-toolbar .game-brand h1{color:#22445a;font-size:24px;font-weight:800}
+.suite-toolbar #homeHeaderTools{gap:8px;direction:ltr}
+.suite-settings-panel :is(.child-button,.senb-child-button){border-color:transparent;background:transparent;color:#22445a}
+.test-mode-grid .home-menu-card{border:1px solid #dceaf4;border-radius:28px;background:white;color:#22445a;box-shadow:0 12px 40px #276b8f0c}
+.test-mode-grid .home-menu-symbol{display:grid;place-items:center;color:#0284c7}
+.test-mode-grid .home-menu-symbol svg{width:36px;height:36px;stroke-width:1.6}
+.test-mode-grid .home-menu-card:nth-child(2) .home-menu-symbol{color:#418c60}
+@media(max-width:480px){.game-header.suite-toolbar .game-brand{flex:1 0 100%}.game-header.suite-toolbar .game-brand h1{font-size:20px}.suite-toolbar #homeHeaderTools{gap:5px}}
+
+/* Keep SENB's controls together instead of distributing them across grid tracks. */
+.app-header .header-actions.suite-toolbar{display:flex;flex:0 0 auto;align-items:center;justify-content:flex-start;gap:6px;flex-wrap:wrap}
+.app-header .header-inner:has(.suite-toolbar){display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.app-header .home-header-tools{display:flex;align-items:center;gap:6px}
+.suite-toolbar :is(#homeHeaderTools,.home-header-tools).hidden{display:none!important}
+.suite-toolbar .game-brand{direction:rtl}
+.suite-settings-panel{direction:ltr}
+.suite-settings-panel>div{direction:ltr}
+/* The logo itself opens the existing download dialog. */
+button.app-logo-download{display:block;flex-shrink:0;padding:0;border:0;border-radius:20px;background:transparent;box-shadow:none;color:inherit;cursor:pointer;min-width:44px;min-height:44px}
+button.app-logo-download>img{display:block;width:100%;height:100%;object-fit:contain;margin:0}
+button.app-logo-download:focus-visible{outline:3px solid #0284c7;outline-offset:4px}
+.app-home-brand [data-logo-download],.topbar .brand [data-logo-download]{display:block;box-sizing:border-box;border:0;padding:0;background:transparent;box-shadow:none;cursor:pointer;flex-shrink:0;overflow:hidden;border-radius:12px}
+@media(max-width:480px){.app-header .header-actions.suite-toolbar{gap:4px}}
+
+.app-home-brand [data-logo-download],.topbar .brand [data-logo-download]{width:52px;height:52px;min-width:44px;min-height:44px}
+.app-home-brand [data-logo-download] img,.topbar .brand [data-logo-download] img{display:block;width:100%;height:100%;object-fit:contain;margin:0}
+@media(max-width:480px){.app-home-brand [data-logo-download],.topbar .brand [data-logo-download]{width:44px;height:44px}}
+
+.suite-brand-home{border:0;background:transparent;color:inherit;padding:0;min-height:44px;text-align:start;font:inherit}
+
+#workplace-view .workspace-container{padding-top:var(--voc-settings-space,12px);transition:padding-top .15s}
+@media(prefers-reduced-motion:reduce){#workplace-view .workspace-container{transition:none}}
+
+@media(max-width:600px){.game-header.suite-toolbar .game-brand{order:-1;flex:1 0 100%;margin-left:0;margin-right:0;justify-content:flex-start}}
+
+/* One app picker across all five shells and both child groups. */
+#suite-app-picker{line-height:1.6;text-align:start}
+#suite-app-picker>header{margin:0;padding:0;border:0;background:transparent}
+#suite-app-picker h2{font:700 21px/1.4 system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif}
+#suite-app-picker .suite-app-grid img{border:0 solid transparent;border-radius:0;background:transparent;padding:0}
+#suite-app-picker .suite-app-grid[data-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* Keep controls at the physical left, including when they wrap below the brand. */
+.app-home-shell .app-home-bar:has(.suite-toolbar),.app-header .header-inner:has(.suite-toolbar),.topbar:has(.suite-toolbar){direction:rtl}
+.app-home-shell .app-home-tools.suite-toolbar,.app-header .header-actions.suite-toolbar,.topbar nav.suite-toolbar{direction:ltr;justify-content:flex-start;margin-right:auto;margin-left:0;max-width:100%}
+.app-home-logo>img{display:block;width:100%;height:100%;object-fit:contain;margin:0}
+@media(max-width:600px){
+ .app-home-shell .app-home-tools.suite-toolbar,.app-header .header-actions.suite-toolbar,.topbar nav.suite-toolbar{flex:1 1 100%;justify-content:flex-start}
+ .game-header.suite-toolbar .game-brand{justify-content:flex-end}
+}

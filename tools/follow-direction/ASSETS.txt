@@ -1,0 +1,10 @@
+FOLLOW DIRECTION — OPTIONAL MEDIA
+
+The app already works with built-in drawings and adult-read prompts.
+Images: assets/images/001.webp … 020.webp (square, clear isolated object; no text).
+Audio: assets/audio/001.mp3 … 253.mp3 (one Arabic direction per file; no answer/cue/music).
+See MAPPING.txt in each folder. Numbers are stable; do not renumber.
+After adding files run: node tools/follow-direction/scripts/build-pwa.cjs
+Then publish the rebuilt folder. Newly added media becomes available offline only after that release is installed.
+
+Logo: waiting for the original yellow attached image's saved file path; assets/logo.webp currently contains the existing repository mascot.

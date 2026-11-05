@@ -1,0 +1,26 @@
+OPTIONAL OBJECT PICTURES — UTF-8
+Square isolated recognizable objects, uncluttered background, no letters or numbers. Built-in SVGs remain available if absent.
+
+001.webp | ball | كرة
+002.webp | cup | كوب
+003.webp | spoon | ملعقة
+004.webp | car | سيارة
+005.webp | bear | دب
+006.webp | box | صندوق
+007.webp | cat | قطة
+008.webp | banana | موزة
+009.webp | apple | تفاحة
+010.webp | chair | كرسي
+011.webp | shoe | حذاء
+012.webp | book | كتاب
+013.webp | plate | طبق
+014.webp | comb | مشط
+015.webp | toothbrush | فرشاة أسنان
+016.webp | towel | منشفة
+017.webp | bed | سرير
+018.webp | door | باب
+019.webp | soap | صابونة
+020.webp | hat | قبعة
+
+Shapes, colors, sizes and sets of 1–3 objects are drawn in code and need no external media.
+Use real toys for spatial, play and conditional tasks; materials are shown in the book-icon dialog.

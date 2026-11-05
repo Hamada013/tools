@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#22445a">
+ <meta name="description" content="تدريب المقاطع العربية واختبارات الاستماع والإنتاج مع حمادة.">
+ <title>مطابقة المقاطع — مع حمادة</title>
+ <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16.png">
+ <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+ <link rel="stylesheet" href="syllables.css">
+ <script type="module" src="syllables.js"></script>
+</head>
+<body data-entry="matching">
+ <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+ <header class="app-header">
+  <a class="brand" href="syllable.html" aria-label="المقاطع — الرئيسية"><img src="../assets/logo.webp" width="44" height="44" alt=""><span>المقاطع <small>مع حمادة</small></span></a>
+  <nav aria-label="التنقل">
+   <button id="rewards-button" class="icon" data-icon="star" aria-label="نجوم التشجيع" title="نجوم التشجيع" hidden></button>
+   <button id="history-button" class="icon" data-icon="chart" aria-label="نتائج الاختبارات" title="نتائج الاختبارات"></button>
+   <button id="home-button" class="icon" data-icon="home" aria-label="الرئيسية" title="الرئيسية"></button>
+  </nav>
+ </header>
+ <p id="error" class="error" role="alert" hidden></p>
+ <main id="main" tabindex="-1">
+  <section id="home-view" class="view home-view" aria-labelledby="home-title">
+   <div class="home-intro"><img src="../assets/logo.webp" width="112" height="112" alt=""><h1 id="home-title">نلعب بالمقاطع</h1><p>نستمع، نطابق، وننطق.</p></div>
+   <div class="activity-grid">
+    <button class="activity-card" data-open="practice"><span data-icon="play" aria-hidden="true"></span><strong>تدريب</strong></button>
+    <a class="activity-card" href="matching.html"><span data-icon="match" aria-hidden="true"></span><strong>مطابقة</strong></a>
+    <button class="activity-card" data-open="listening"><span data-icon="ear" aria-hidden="true"></span><strong>اختبار الاستماع</strong></button>
+    <button class="activity-card" data-open="production"><span data-icon="speak" aria-hidden="true"></span><strong>اختبار الإنتاج</strong></button>
+   </div>
+   <button id="resume-button" class="resume-card" hidden><span data-icon="resume" aria-hidden="true"></span><span id="resume-label">متابعة الاختبار المحفوظ</span></button>
+  </section>
+  <section id="activity-view" class="view activity-view" hidden aria-label="مساحة العمل">
+   <div class="activity-toolbar">
+    <div class="activity-meta"><h1 id="activity-title"></h1><span id="activity-meta"></span></div>
+    <div class="toolbar-controls">
+     <button id="settings-button" class="icon" data-icon="settings" aria-label="اختيار الحروف ونوع المقطع" title="اختيار الحروف ونوع المقطع"></button>
+     <button id="replay-button" class="icon" data-icon="volume" aria-label="إعادة تشغيل المقطع" title="إعادة تشغيل المقطع" hidden></button>
+     <button id="pause-button" class="icon" data-icon="pause" aria-label="إيقاف الاختبار مؤقتاً" title="إيقاف مؤقت" hidden></button>
+     <button id="restart-button" class="icon" data-icon="restart" aria-label="جولة مطابقة جديدة" title="جولة جديدة" hidden></button>
+    </div>
+   </div>
+   <div id="assessment-status" class="assessment-status" hidden><progress id="test-progress" value="0" max="1" aria-label="تقدم الاختبار"></progress><span id="trial-count"></span></div>
+   <div id="practice-filters" class="practice-filters" hidden><div id="practice-modes" class="segments" role="group" aria-label="نوع المقطع"></div><div id="vowel-filters" class="segments" role="group" aria-label="الحركة الأولى"></div></div>
+   <p id="audio-status" class="status" role="status" aria-live="polite"></p>
+   <div id="practice-grid" class="practice-grid" hidden></div>
+   <div id="choice-grid" class="choice-grid" role="group" aria-label="اختر المقطع المسموع" hidden></div>
+   <div id="production-stage" class="production-stage" hidden></div>
+   <div id="matching-board" class="matching-board" hidden>
+    <div class="matching-column"><h2>اختر المقطع</h2><div id="matching-sources" class="matching-list" role="group" aria-label="المقاطع المكشوفة"></div></div>
+    <div class="matching-column"><h2>استمع وطابق</h2><div id="matching-targets" class="matching-list" role="group" aria-label="المقاطع المغطاة"></div></div>
+   </div>
+   <div id="production-grades" class="grade-controls" role="group" aria-label="تسجيل إنتاج الطفل" hidden>
+    <button class="grade score-0" data-grade="0" aria-label="تقدير إنتاج الطفل 0%" title="تقدير إنتاج الطفل 0%"><span data-icon="cross" aria-hidden="true"></span><bdi dir="ltr">0%</bdi></button>
+    <button class="grade score-20" data-grade="20" aria-label="تقدير إنتاج الطفل 20%" title="تقدير إنتاج الطفل 20%"><span data-icon="speak" aria-hidden="true"></span><bdi dir="ltr">20%</bdi></button>
+    <button class="grade score-40" data-grade="40" aria-label="تقدير إنتاج الطفل 40%" title="تقدير إنتاج الطفل 40%"><span data-icon="speak" aria-hidden="true"></span><bdi dir="ltr">40%</bdi></button>
+    <button class="grade score-60" data-grade="60" aria-label="تقدير إنتاج الطفل 60%" title="تقدير إنتاج الطفل 60%"><span data-icon="speak" aria-hidden="true"></span><bdi dir="ltr">60%</bdi></button>
+    <button class="grade score-80" data-grade="80" aria-label="تقدير إنتاج الطفل 80%" title="تقدير إنتاج الطفل 80%"><span data-icon="speak" aria-hidden="true"></span><bdi dir="ltr">80%</bdi></button>
+    <button class="grade score-100" data-grade="100" aria-label="تقدير إنتاج الطفل 100%" title="تقدير إنتاج الطفل 100%"><span data-icon="check" aria-hidden="true"></span><bdi dir="ltr">100%</bdi></button>
+   </div>
+   <div class="activity-bottom">
+    <div id="pagination" class="pagination" hidden><button id="previous-page" class="icon" data-icon="previous" aria-label="المقاطع السابقة"></button><span id="page-count"></span><button id="next-page" class="icon" data-icon="next" aria-label="المقاطع التالية"></button></div>
+    <span id="matching-count" hidden></span>
+    <button id="skip-button" class="icon" data-icon="skip" aria-label="تخطي — لم يُقيّم" title="تخطي — لم يُقيّم" hidden></button>
+    <span id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></span>
+   </div>
+  </section>
+  <section id="paused-view" class="view paused-view" hidden><div class="panel pause-card"><span data-icon="pause" aria-hidden="true"></span><h1>تم حفظ الاختبار</h1><p id="paused-summary"></p><div class="pause-actions"><button id="continue-button" class="icon" data-icon="resume" aria-label="متابعة الاختبار" title="متابعة"></button><button id="finish-button" class="icon" data-icon="flag" aria-label="إنهاء بتقرير جزئي" title="تقرير جزئي"></button><button id="paused-home" class="icon" data-icon="home" aria-label="العودة للرئيسية" title="الرئيسية"></button></div></div></section>
+  <section id="results-view" class="view results-view" hidden aria-labelledby="results-title"><div class="result-heading"><h1 id="results-title">نتائج الاختبار</h1><button id="print-button" class="icon" data-icon="print" aria-label="طباعة أو حفظ PDF" title="طباعة أو حفظ PDF"></button></div><div id="result-content"></div><button id="repeat-button" class="primary">اختبار جديد</button></section>
+ </main>
+ <footer id="contact-footer" class="contact-footer" dir="ltr"><span>SPEECH AND LANGUAGE PATHOLOGY</span><strong>Ahmad Ghanem</strong><span>Latakia - Syria</span><a href="mailto:slp.ahmadghanem@gmail.com">slp.ahmadghanem@gmail.com</a></footer>
+ <dialog id="setup-dialog" aria-labelledby="setup-title"><form id="setup-form">
+  <div class="dialog-heading"><h2 id="setup-title">إعداد التدريب</h2><button type="button" class="icon" data-icon="close" data-close aria-label="إغلاق"></button></div>
+  <fieldset><legend>الحروف <span class="muted">حتى ٣</span></legend><div id="letter-picker" class="letter-picker"></div></fieldset>
+  <fieldset><legend>نوع المقطع</legend><div id="setup-modes" class="segments" role="group" aria-label="نوع المقطع"></div></fieldset>
+  <p id="setup-note" class="setup-note"></p>
+  <button id="start-button" class="primary" type="submit"><span data-icon="play" aria-hidden="true"></span><span>ابدأ</span></button>
+ </form></dialog>
+ <dialog id="history-dialog" aria-labelledby="history-title"><div class="dialog-heading"><h2 id="history-title">نتائج الاختبارات</h2><button type="button" class="icon" data-icon="close" data-close aria-label="إغلاق"></button></div><p class="muted">محفوظة على هذا الجهاز.</p><div id="history-list"></div></dialog>
+ <dialog id="rewards-dialog" aria-labelledby="rewards-title"><div class="dialog-heading"><h2 id="rewards-title">نجوم التشجيع</h2><button type="button" class="icon" data-icon="close" data-close aria-label="إغلاق"></button></div><div class="reward-controls"><button id="reward-target" class="secondary">٥ نجوم</button><button id="clear-rewards" class="icon" data-icon="restart" aria-label="إعادة النجوم"></button></div><div id="reward-stars" class="reward-stars"></div><p id="reward-message" class="status" aria-live="polite"></p></dialog>
+ <audio id="syllable-audio" preload="none"></audio>
+ <noscript><p>يرجى تفعيل JavaScript لعرض المقاطع.</p></noscript>
+</body>
+</html>

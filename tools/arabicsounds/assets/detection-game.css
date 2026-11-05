@@ -1,0 +1,17 @@
+.detect-game{display:grid;grid-template-columns:minmax(100px,.65fr) minmax(200px,1.5fr);align-items:center;gap:clamp(16px,5vw,70px);direction:ltr;width:min(100%,850px);height:100%;max-height:540px;margin:auto}
+.detect-ear{display:grid;place-items:center;justify-self:center;width:clamp(72px,15vw,150px);height:clamp(72px,15vw,150px);border:0;border-radius:24px;background:transparent;color:#3387ad;padding:12px}
+.detect-ear svg{width:90%;height:90%;stroke-width:1.5}.detect-ear:disabled{opacity:1}
+.detect-playground{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,3vh,28px);height:100%;min-height:0}
+.detect-toys{display:flex;align-items:center;justify-content:center;gap:clamp(16px,4vw,40px);width:100%}
+.detect-token{display:grid;place-items:center;flex-shrink:0;touch-action:none;user-select:none;-webkit-user-select:none;border:0;background:transparent;padding:8px;min-width:44px;min-height:44px;cursor:grab;border-radius:22px}
+.detect-token:disabled{opacity:1;cursor:default}.detect-toy{width:clamp(96px,22vw,168px);height:clamp(96px,22vw,168px)}
+.detect-toy svg{width:100%;height:100%;fill:var(--toy-color);stroke:#22445a;stroke-width:2;filter:drop-shadow(0 6px 0 #22445a12)}
+.detect-toy .toy-shine{fill:none;stroke:#ffffffa8;stroke-width:6;stroke-linecap:round}.detect-no{width:64px;height:64px;color:#cc6f70}.detect-no svg{width:38px;height:38px;stroke-width:2.4}
+.detect-bucket{display:grid;place-items:center;flex-shrink:0;width:clamp(140px,28vw,230px);height:clamp(100px,20vw,166px);padding:0;border:0;border-radius:20px;background:transparent;color:#4b8f91}
+.detect-bucket:disabled{opacity:1}.detect-bucket svg{width:100%;height:100%;fill:#e4f4ef;stroke:currentColor;stroke-width:3}.detect-bucket ellipse{fill:#fff}.detect-bucket.drop-ready{outline:3px dashed #439b78;outline-offset:5px}
+.detect-ghost{position:fixed;z-index:150;transform:translate(-50%,-50%) scale(.8);pointer-events:none;width:100px!important;height:100px!important;opacity:.95}
+.detect-game[data-playing=true] .detect-ear svg{animation:detect-listen 1s ease-in-out infinite}
+@keyframes detect-listen{50%{transform:scale(1.05);opacity:.65}}
+@media(max-width:600px){.detect-game{grid-template-columns:1fr;grid-template-rows:64px minmax(0,1fr);gap:6px;max-height:430px}.detect-ear{width:64px;height:64px;padding:6px}.detect-playground{gap:clamp(8px,2vh,20px)}.detect-toy{width:clamp(88px,27vw,132px);height:clamp(88px,27vw,132px)}.detect-bucket{width:160px;height:116px}}
+@media(max-height:450px){.detect-game{grid-template-columns:90px minmax(0,1fr);grid-template-rows:1fr;max-width:650px;gap:16px}.detect-ear{width:70px;height:70px}.detect-playground{flex-direction:row;gap:12px}.detect-toys{width:auto;gap:12px}.detect-toy{width:80px;height:80px}.detect-no{width:48px;height:48px}.detect-bucket{width:130px;height:100px}}
+@media(prefers-reduced-motion:reduce){.detect-game[data-playing=true] .detect-ear svg{animation:none}}

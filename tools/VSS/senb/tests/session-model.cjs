@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const M=require('../assets/session-model.js');
+const s={key:'s:2/1/1',title:'ولد يأكل',presentation:'advanced',imgPath:'img.webp',soundPath:'audio.m4a',slots:[{categoryId:'01 subject',id:1},{categoryId:'02 verbs',id:2}],slotContexts:[{title:'ولد',segments:[{path:'a.m4a'}]},{title:'يأكل',segments:[{path:'b.m4a'}]}]};
+const stages=M.stages([s,{...s,key:'s:2/1/2'}]);
+assert.deepEqual(stages.map(stage=>stage.id),['repetition','missing','receptive-advanced','receptive-slots','expressive-advanced','expressive-slots']);
+assert.ok(stages.every(stage=>stage.indices.length===2));assert.equal(stages[0].repeats,10);
+assert.deepEqual(M.stages([{...s,imgPath:null}]).map(stage=>stage.id),['repetition','missing','receptive-slots','expressive-slots']);
+const targets=M.targets(s);assert.equal(targets.length,3);assert.equal(targets[0].entity,'sentence');assert.equal(targets[2].key,'w:02 verbs/2');
+assert.equal(M.targets({...s,presentation:'slots'}).length,2);
+assert.equal(M.record(s,'receptive','slots',false).correct,0);
+assert.deepEqual(M.record(s,'expressive','advanced',1,2),{key:s.key,title:s.title,entity:'sentence',domain:'expressive',presentation:'advanced',correct:1,total:2});
+console.log('PASS: exact worked-sentence plan, ten repetitions, both assessment formats, and independent word targets.');

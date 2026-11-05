@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="stylesheet" href="assets/welcome.css">
+    <script defer src="assets/welcome.js" data-app="voc"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{TITLE}} - كلمة</title>
+    <link rel="manifest" href="../manifest.webmanifest">
+    <meta name="theme-color" content="#0284C7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="احكي حلو">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="../icons/icon-192.png">
+    <link rel="stylesheet" href="assets/utilities.css">
+    <link rel="stylesheet" href="assets/vendor/fontawesome.css">
+    <link rel="stylesheet" href="assets/vendor/cairo.css">
+    <link rel="stylesheet" href="assets/pwa.css">
+    <link rel="stylesheet" href="assets/games.css">
+    <link rel="stylesheet" href="assets/updates.css">
+    <script defer src="../assets/updates.js"></script>
+    <script defer src="../assets/pwa.js"></script>
+    <script defer src="assets/game-data.js"></script>
+    <script defer src="assets/game-model.js"></script>
+    <link rel="stylesheet" href="assets/progress.css">
+    <script defer src="assets/progress.js"></script>
+    <script defer src="assets/countdown.js"></script>
+    <link rel="stylesheet" href="assets/acquisition-charts.css">
+    <script defer src="assets/acquisition-charts.js"></script>
+    <script defer src="assets/reports.js"></script>
+    <link rel="stylesheet" href="assets/parent-gate.css">
+    <script defer src="assets/parent-gate.js"></script>
+    <script defer src="assets/progress-ui.js"></script>
+    <script defer src="assets/games.js"></script>
+    <link rel="stylesheet" href="assets/flow-ui.css">
+    <script defer src="assets/flow-ui.js"></script>
+    <script defer src="assets/accounts.js"></script>
+    <link rel="stylesheet" href="assets/session-homework.css">
+    <script defer src="assets/session-homework.js" data-app="voc"></script>
+    <link rel="stylesheet" href="assets/app-navigation.css">
+    <script defer src="assets/app-navigation.js" data-app="voc"></script>
+</head>
+<body class="game-page" data-game="{{MODE}}">
+    <a class="skip-link" href="#game-main">انتقل إلى اللعبة</a>
+    <header class="game-header">
+        <div class="game-brand"><img src="images/logo.webp" alt="" width="54" height="54"><h1>{{TITLE}}</h1></div>
+        <button id="rapid-autoplay" class="game-button icon-button" type="button" aria-label="عرض البطاقات تلقائياً دون تقييم" title="عرض البطاقات تلقائياً دون تقييم" aria-pressed="false" hidden><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M19 17c-1-5 0-12 3-13 3-1 2 8 1 12 2-5 5-10 7-8 2 2-2 7-5 11 3 4 1 9-4 10H10c-5 0-8-3-8-7 0-5 5-8 9-6 3-3 6-2 8 1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="21" r="1.3" fill="currentColor"/><path d="M13 22c-3 0-4 3-1 5M3 20l-2-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <a class="game-back" href="games.html" aria-label="العودة إلى قائمة الألعاب"><i class="fas fa-arrow-right" aria-hidden="true"></i><span>الألعاب</span></a>
+    </header>
+    <main id="game-main" class="game-shell">
+        <div id="game-alert" class="game-alert" role="status" aria-live="polite" hidden></div>
+        <section id="setup-view" aria-labelledby="setup-title">
+            <div class="game-intro"><h2 id="setup-title">اختر الكلمات، ثم ابدأ اللعب</h2><p>{{DESCRIPTION}}</p></div>
+            <section id="resume-card" class="game-panel game-resume" hidden><div><h2>لديك جلسة محفوظة</h2><p id="resume-description" class="game-note"></p></div><button id="resume-saved" class="game-button green">استكمال الجلسة</button></section>
+            <section class="game-panel" aria-labelledby="options-title">
+                <h2 id="options-title">إعدادات تناسب الطفل</h2>
+                <div class="game-settings">
+                    <fieldset id="level-field" class="choice-field"><legend id="level-title">عدد الصور</legend><div class="choice-options">
+                        <label class="setting-choice"><input type="radio" name="game-level" value="2"><span><strong>٢</strong><small data-level-unit>صور · بداية سهلة</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-level" value="4" checked><span><strong>٤</strong><small data-level-unit>صور · تحدٍّ أكبر</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-level" value="6"><span><strong>٦</strong><small data-level-unit>صور · متقدم</small></span></label>
+                    </div></fieldset>
+                    <fieldset id="length-field" class="choice-field"><legend>طول الجلسة</legend><div class="choice-options">
+                        <label class="setting-choice"><input type="radio" name="game-length" value="6"><span><strong>٦</strong><small>كلمات · قصيرة</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-length" value="10" checked><span><strong>١٠</strong><small>كلمات · متوسطة</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-length" value="20"><span><strong>٢٠</strong><small>كلمة · مطوّلة</small></span></label>
+                    </div></fieldset>
+                    <fieldset id="duration-field" class="choice-field" hidden><legend>وقت ملاحظة الصورة</legend><div class="choice-options four-options">
+                        <label class="setting-choice"><input type="radio" name="game-duration" value="0"><span><strong>∞</strong><small>بلا مؤقت</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-duration" value="2" checked><span><strong>٢</strong><small>ثانية</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-duration" value="4"><span><strong>٤</strong><small>ثوانٍ</small></span></label>
+                        <label class="setting-choice"><input type="radio" name="game-duration" value="6"><span><strong>٦</strong><small>ثوانٍ</small></span></label>
+                    </div></fieldset>
+                </div>
+                <div class="game-checks"><label id="labels-field" class="check-label"><input id="show-labels" type="checkbox" checked>إظهار أسماء الصور</label><label id="sound-field" class="check-label"><input id="sound-hint" type="checkbox" checked>تشغيل صوت الكلمة للتعلّم</label></div>
+                <p id="settings-help" class="game-note"></p>
+            </section>
+            <section class="game-panel" aria-labelledby="word-bank-title">
+                <div class="selection-heading"><h2 id="word-bank-title">بطاقات الجلسة</h2><span id="selected-count" class="game-note"></span></div>
+                <section class="category-browser" aria-labelledby="category-title">
+                    <div class="category-heading"><div><h3 id="category-title">استكشف الفئات</h3><p id="current-category" class="game-note"></p></div><button id="toggle-categories" class="game-button soft" aria-expanded="false" aria-controls="category-panel">كل الفئات <i class="fas fa-th-large" aria-hidden="true"></i></button></div>
+                    <div id="category-rail" class="category-rail" role="group" aria-label="فئات الكلمات؛ مرّر لعرض المزيد"></div>
+                    <div id="category-panel" class="category-panel" hidden><label>ابحث عن فئة<input id="category-search" type="search" placeholder="مثلاً: الحيوانات…" autocomplete="off"></label><div id="category-grid" class="category-grid" role="group" aria-label="كل فئات الكلمات"></div><p id="category-empty" class="game-note" hidden>لا توجد فئة بهذا الاسم.</p></div>
+                </section>
+                <label class="word-search-field">ابحث عن كلمة في كل الفئات<input id="word-search" type="search" placeholder="اكتب كلمة…" autocomplete="off"></label>
+                <div class="game-buttons"><button id="select-category" class="game-button soft" aria-pressed="false">تحديد</button><button id="select-everything" class="game-button" aria-pressed="false">تحديد الكل</button></div>
+                <div id="selection-grid" class="selection-grid" role="group" aria-label="اختيار بطاقات الجلسة"></div>
+                <div class="game-pagination"><button id="page-previous" class="game-button" aria-label="صفحة البطاقات السابقة">السابق</button><span id="page-info" class="game-note" aria-live="polite"></span><button id="page-next" class="game-button" aria-label="صفحة البطاقات التالية">التالي</button></div>
+                <div class="game-footer"><span id="session-preview" class="game-note" aria-live="polite">جاري تجهيز البطاقات…</span><button id="start-game" class="game-button primary" disabled>ابدأ جلسة جديدة</button></div>
+            </section>
+        </section>
+        <section id="play-view" hidden aria-labelledby="play-title">
+            <div class="game-play-header"><h2 id="play-title" tabindex="-1">{{DESCRIPTION}}</h2><div class="game-buttons"><button id="pause-game" class="game-button">إيقاف مؤقت</button><button id="finish-game" class="game-button">إنهاء الجلسة</button></div></div>
+            <progress id="session-progress" value="0" max="1" aria-label="تقدم الجلسة"></progress>
+            <div class="game-stats"><span id="session-counter"></span><span id="attempt-counter"></span><span id="mistake-counter"></span></div>
+            <div class="game-buttons"><button id="play-word" class="game-button primary icon-button" aria-label="أعد سماع الكلمة" title="أعد سماع الكلمة"><i class="fas fa-play" aria-hidden="true"></i></button><button id="reload-media" class="game-button" hidden>إعادة تحميل الصور</button><button id="skip-word" class="game-button" hidden>تجاوز هذه الكلمة</button></div>
+            <p id="game-feedback" class="game-status" role="status" aria-live="polite" aria-atomic="true"></p>
+            <div class="game-workspace"><div id="game-board" class="game-board" role="group" aria-label="مساحة اللعب"></div><div id="active-match"></div></div>
+            <section id="rapid-controls" hidden aria-label="تقييم الاستجابة"><progress id="observation-progress" value="0" max="1" aria-label="وقت ملاحظة الصورة"></progress><div class="game-buttons"><button id="show-grading" class="game-button">أظهر التقييم الآن</button></div><div id="production-rhythm" class="production-rhythm"><button id="play-production-beats" class="production-frame-play" type="button" aria-label="تشغيل إيقاع المقاطع بالترتيب" title="تشغيل إيقاع المقاطع بالترتيب" aria-busy="false"></button><div id="production-beats" class="production-beats" role="group" aria-label="إيقاع مقاطع الكلمة"></div></div><div id="rapid-grading" class="rapid-toolbar"><button type="button" data-grade="notMastered" data-rating="0" class="production-rating" aria-label="0: لم تحدث استجابة تعبيرية" title="0: لم تحدث استجابة تعبيرية" disabled><img src="images/41/1.webp" alt="" width="56" height="56"></button><button type="button" data-grade="learning" data-rating="1" class="production-rating" aria-label="1: استجابة جزئية مع أخطاء في المقاطع والنطق" title="1: استجابة جزئية مع أخطاء في المقاطع والنطق" disabled><img src="images/41/2.webp" alt="" width="56" height="56"></button><button type="button" data-grade="syllables" data-rating="2" class="production-rating" aria-label="2: المقاطع صحيحة مع بعض أخطاء النطق" title="2: المقاطع صحيحة مع بعض أخطاء النطق" disabled><img src="images/41/3.webp" alt="" width="56" height="56"></button><button type="button" data-grade="mastered" data-rating="3" class="production-rating" aria-label="3: نطق صحيح" title="3: نطق صحيح" disabled><img src="images/41/4.webp" alt="" width="56" height="56"></button></div></section>
+            <div class="game-buttons"><button id="next-round" class="game-button green" hidden>الجولة التالية</button></div>
+        </section>
+        <section id="pause-view" class="game-panel paused-panel" hidden aria-labelledby="pause-title"><h2 id="pause-title">استراحة قصيرة</h2><p id="pause-description" class="game-note"></p><div class="game-buttons"><button id="continue-game" class="game-button green">متابعة اللعب</button><button id="change-cards" class="game-button">تغيير البطاقات والإعدادات</button><button id="finish-paused" class="game-button">عرض نتيجة الجلسة الحالية</button></div></section>
+        <section id="results-view" class="game-panel results-panel" hidden aria-labelledby="results-title"><h2 id="results-title" tabindex="-1">أحسنت! انتهت الجلسة</h2><p id="results-description" class="game-note"></p><div id="result-metrics" class="result-metrics"></div><p id="result-details" class="game-note"></p><div class="game-buttons"><button id="review-missed" class="game-button green" hidden>مراجعة الكلمات التي تحتاج تدريباً</button><button id="play-again" class="game-button primary">جلسة جديدة بنفس البطاقات</button><button id="return-setup" class="game-button">اختيار بطاقات أخرى</button><a class="game-back" href="games.html">قائمة الألعاب</a></div></section>
+        <audio id="game-audio" preload="none"></audio>
+        <noscript><p class="game-alert">فعّل JavaScript لتشغيل الألعاب وحفظ التقدم على الجهاز.</p></noscript>
+    </main>
+</body>
+</html>

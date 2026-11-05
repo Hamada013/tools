@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="stylesheet" href="assets/welcome.css">
+    <script defer src="assets/welcome.js" data-app="taffaha"></script>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#0284c7"><meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+ <meta name="apple-mobile-web-app-title" content="احكي حلو"><meta name="description" content="نلعب بالمقاطع ونستمع للكلمات — تدريب عربي للأطفال">
+ <title>مقطع — نلعب بالمقاطع</title><link rel="manifest" href="../manifest.webmanifest">
+ <link rel="icon" type="image/png" href="../icons/icon-192.png"><link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+ <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="assets/profile.css"><link rel="stylesheet" href="assets/parent-gate.css"><script defer src="assets/parent-gate.js"></script><link rel="stylesheet" href="assets/updates.css"><script type="module" src="app.js"></script>
+    <link rel="stylesheet" href="assets/flow-ui.css">
+    <script defer src="assets/flow-ui.js"></script>
+    <script defer src="assets/accounts.js"></script>
+    <link rel="stylesheet" href="assets/session-homework.css">
+    <script defer src="assets/session-homework.js" data-app="taffaha"></script>
+    <link rel="stylesheet" href="assets/app-navigation.css">
+    <script defer src="assets/app-navigation.js" data-app="taffaha"></script>
+</head>
+<body>
+ <header class="topbar"><a href="./" class="brand"><img src="assets/icons/logo.webp" width="52" height="52" alt=""><span>مقطع<small>نلعب بالمقاطع</small></span></a>
+  <nav aria-label="أدوات التطبيق">
+   <button id="open-profile" class="icon" data-icon="profile" aria-label="ملف الطفل" title="ملف الطفل"></button>
+   <button id="open-report" class="icon" data-icon="report" aria-label="تقرير الطفل" title="تقرير الطفل"></button>
+   <button id="go-home" class="icon" data-icon="home" aria-label="الصفحة الرئيسية" title="الصفحة الرئيسية" hidden></button>
+   <button id="open-library" class="icon" data-icon="library" aria-label="اختيار كلمة حسب عدد المقاطع" title="اختيار كلمة" hidden></button>
+   <button id="toggle-rhythm" class="icon" data-icon="music" aria-label="تدريب الإيقاع" title="تدريب الإيقاع" aria-pressed="false" hidden></button>
+   <button id="open-mode" class="icon test-tool" data-icon="count" aria-label="نوع الاختبار" title="نوع الاختبار" aria-haspopup="dialog" hidden></button>
+   <button id="open-level" class="icon test-tool" data-icon="level" aria-label="المستوى: سهل" title="المستوى: سهل" hidden></button>
+  </nav>
+ </header>
+ <main aria-label="نلعب بالمقاطع">
+  <section id="home-screen" class="home-screen" aria-labelledby="home-title">
+   <div class="home-logo app-home-logo"><img src="assets/icons/logo.webp" width="180" height="180" alt=""></div>
+   <h1 id="home-title">مقطع</h1><p>نلعب بالمقاطع <span id="profile-name"></span></p>
+   <div class="home-actions">
+    <button id="start-practice" class="home-action" disabled><span class="home-action-icon" data-icon="sequence"></span><span>ابدأ</span></button>
+    <button id="start-test" class="home-action" disabled><span class="home-action-icon" data-icon="test"></span><span>اختبار</span></button>
+   </div>
+  </section>
+  <div id="practice-screen" class="workspace" hidden>
+   <section class="word-card" aria-label="بطاقة الكلمة"><div class="card-top"><span id="category" class="pill"></span><span id="position" class="muted"></span></div>
+    <button id="original" class="image-play" aria-label="استمع للكلمة" title="استمع للكلمة" disabled><img id="word-image" src="assets/placeholder.svg" width="300" height="240" alt="" fetchpriority="high"></button>
+    <h2 id="word-label">جارٍ التحميل…</h2>
+   </section>
+   <section id="syllable-frame" class="practice playback-frame" aria-label="المقاطع الصوتية">
+    <button id="sequence" class="frame-play" aria-label="تشغيل المقاطع بالترتيب" title="تشغيل المقاطع بالترتيب" disabled></button>
+    <div id="syllables" class="syllables" aria-label="المقاطع بالترتيب من اليمين إلى اليسار"></div>
+   </section>
+   <section id="rhythm-frame" class="practice playback-frame" aria-label="إيقاع المقاطع" hidden>
+    <button id="rhythm-sequence" class="frame-play" aria-label="تشغيل إيقاع المقاطع بالترتيب" title="تشغيل إيقاع المقاطع بالترتيب" disabled></button>
+    <div id="practice-beats" class="syllables" aria-label="نبضات المقاطع من اليمين إلى اليسار"></div>
+   </section>
+  </div>
+  <section id="test-screen" class="test-screen" aria-labelledby="test-title" hidden>
+   <div class="test-heading"><h1 id="test-title">اختر الصورة</h1><span id="test-position" class="muted"></span></div>
+   <button id="test-prompt" class="test-prompt" aria-label="تشغيل صوت السؤال" title="استمع للكلمة" disabled>
+    <span id="test-syllables" class="syllables blank-syllables" aria-hidden="true"></span>
+    <span id="test-picture" class="prompt-picture" hidden><img id="test-word-image" src="assets/placeholder.svg" width="300" height="220" alt="صورة الكلمة"></span>
+   </button>
+   <div id="test-answers" class="test-answers" aria-label="اختر الإجابة"></div>
+  </section>
+  <p id="status" role="status" aria-live="polite" class="status"></p>
+  <div id="word-navigation" class="word-nav" hidden><button id="previous" class="soft icon-action" data-icon="previous" aria-label="الكلمة السابقة" title="الكلمة السابقة" disabled></button><button id="random" class="soft icon-action" data-icon="shuffle" aria-label="كلمة عشوائية" title="كلمة عشوائية" disabled></button><button id="next" class="soft icon-action" data-icon="next" aria-label="الكلمة التالية" title="الكلمة التالية" disabled></button></div>
+ </main>
+ <footer class="contact-footer" dir="ltr"><span>SPEECH AND LANGUAGE PATHOLOGY</span><strong>Ahmad Ghanem</strong><span>Latakia - Syria</span><a href="mailto:slp.ahmadghanem@gmail.com">slp.ahmadghanem@gmail.com</a></footer>
+ <dialog id="test-category-dialog" aria-labelledby="test-category-title"><div class="dialog-title"><h2 id="test-category-title">اختر عدد المقاطع</h2><button data-close class="icon" data-icon="close" aria-label="إغلاق"></button></div><div id="test-categories" class="test-categories" role="group" aria-label="عدد المقاطع"></div></dialog>
+ <dialog id="mode-dialog" aria-labelledby="mode-title"><div class="dialog-title"><h2 id="mode-title">اختر نوع الاختبار</h2><button data-close class="icon" data-icon="close" aria-label="إغلاق"></button></div>
+  <div class="mode-options" role="group" aria-label="نوع الاختبار">
+   <button data-mode="count" aria-label="الصورة وعدد المقاطع" aria-pressed="false"><span class="mode-preview" aria-hidden="true"><span class="mode-preview-frame" data-icon="picture"></span><span class="mode-preview-answers"><span class="mini-card"><i></i><i></i></span><span class="mini-card"><i></i><i></i><i></i></span></span></span><strong>الصورة وعدد المقاطع</strong></button>
+   <button data-mode="picture" aria-label="المقاطع والصورة" aria-pressed="true"><span class="mode-preview" aria-hidden="true"><span class="mode-preview-frame mini-circles"><i></i><i></i><i></i></span><span class="mode-preview-answers"><span class="mini-card" data-icon="picture"></span><span class="mini-card" data-icon="picture"></span></span></span><strong>المقاطع والصورة</strong></button>
+  </div>
+ </dialog>
+ <dialog id="level-dialog" aria-labelledby="level-title"><div class="dialog-title"><h2 id="level-title">اختر المستوى</h2><button data-close class="icon" data-icon="close" aria-label="إغلاق"></button></div>
+  <div class="level-options" role="group" aria-label="مستوى الصعوبة">
+   <button data-level="easy" aria-pressed="true"><span class="level-mark" data-icon="easy"></span><strong>سهل</strong><small></small></button>
+   <button data-level="moderate" aria-pressed="false"><span class="level-mark" data-icon="moderate"></span><strong>متوسط</strong><small></small></button>
+   <button data-level="hard" aria-pressed="false"><span class="level-mark" data-icon="hard"></span><strong>صعب</strong><small></small></button>
+  </div>
+ </dialog>
+ <dialog id="answer-feedback" class="answer-feedback" aria-labelledby="feedback-text" tabindex="-1"><div class="feedback-content"><div id="feedback-symbol" class="feedback-symbol" aria-hidden="true"></div><p id="feedback-text" role="status" aria-live="assertive"></p></div></dialog>
+ <dialog id="library-dialog" aria-labelledby="library-title"><div class="dialog-title"><h2 id="library-title">اختر عدد المقاطع</h2><div class="learned-controls" role="group" aria-label="الكلمات المكتسبة">
+ <button class="icon" data-learned-mode="count" data-icon="picture" aria-label="المكتسب: الصورة وعدد المقاطع" title="المكتسب: الصورة وعدد المقاطع" aria-pressed="false"></button>
+ <button class="icon" data-learned-mode="picture" data-icon="count" aria-label="المكتسب: المقاطع والصورة" title="المكتسب: المقاطع والصورة" aria-pressed="false"></button></div><button data-close class="icon" data-icon="close" aria-label="إغلاق"></button></div><label for="search">ابحث عن كلمة</label><input id="search" type="search" placeholder="تفاحة، موزة…"><div id="category-filters" class="filters" aria-label="عدد المقاطع"></div><div id="word-library" class="word-library"></div></dialog>
+ <dialog id="taffaha-child-dialog" aria-labelledby="taffaha-child-title"><div class="dialog-title"><h2 id="taffaha-child-title">ملف الطفل</h2><button class="icon" data-icon="close" data-close aria-label="إغلاق"></button></div><form><label for="taffaha-child-name">اسم الطفل</label><input id="taffaha-child-name" name="name" autocomplete="off" maxlength="60" required><div id="taffaha-saved-children" class="filters"></div><button class="primary" type="submit">دخول</button></form></dialog>
+ <dialog id="taffaha-report" aria-labelledby="taffaha-report-title"><header class="dialog-title"><h2 id="taffaha-report-title">تقرير التقدم</h2><button id="taffaha-report-download" class="icon" data-icon="download" aria-label="تنزيل تقرير PDF" title="تنزيل تقرير PDF"></button><button class="icon" data-icon="close" data-close aria-label="إغلاق"></button></header><nav id="taffaha-report-apps"></nav><nav id="taffaha-report-periods" aria-label="فترة التقرير"></nav><div id="taffaha-report-body"></div><p id="taffaha-report-error" role="alert"></p></dialog>
+ <p id="profile-error" role="alert" hidden>تعذّر حفظ التقدم على الجهاز. تحقق من مساحة التخزين وإعدادات المتصفح.</p>
+ <noscript><p>يرجى تفعيل JavaScript للاستماع للمقاطع.</p></noscript>
+</body></html>

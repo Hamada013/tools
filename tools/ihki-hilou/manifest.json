@@ -1,0 +1,7 @@
+{
+ "id":"./", "name":"احكي حلو", "short_name":"احكي حلو", "lang":"ar", "dir":"rtl",
+ "description":"مساحة للعب بالكلام، والمحاولة بثقة، والاستماع إلى صوتك.",
+ "start_url":"./index.html", "scope":"./", "display":"standalone", "display_override":["standalone"],
+ "orientation":"any", "background_color":"#ffffff", "theme_color":"#0284c7", "categories":["education","kids"],
+ "icons":[{"src":"assets/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"assets/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"assets/icons/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "./",
+  "name": "أصوات من حولي",
+  "short_name": "أصوات من حولي",
+  "description": "أصوات من حولي: اكتشاف الصوت والتمييز والتعرف والذاكرة السمعية.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0284c7",
+  "categories": [
+    "education",
+    "kids"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "اكتشاف الصوت",
+      "url": "./index.html#/around/detection"
+    },
+    {
+      "name": "التمييز السمعي",
+      "url": "./index.html#/around/discrimination"
+    },
+    {
+      "name": "التعرف على الصوت",
+      "url": "./index.html#/around/identification"
+    },
+    {
+      "name": "الذاكرة",
+      "url": "./index.html#/around/memory"
+    },
+    {
+      "name": "مكتبة الأصوات",
+      "url": "./index.html#/around/library"
+    }
+  ],
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "screenshots": [
+    {
+      "src": "screenshots/home-narrow.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "أصوات من حولي — الرئيسية"
+    },
+    {
+      "src": "screenshots/home-wide.png",
+      "sizes": "1280x640",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "أصوات من حولي — الرئيسية"
+    }
+  ]
+}

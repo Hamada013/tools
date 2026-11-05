@@ -1,0 +1,18 @@
+{
+  "name": "arabicsounds",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-pwa.cjs",
+    "build:icons": "python3 scripts/build-icons.py",
+    "test": "node tests/static.cjs && node tests/ling-report.cjs",
+    "test:browser": "node ../tests/split-sounds-browser.cjs",
+    "test:activities": "node tests/browser.cjs",
+    "test:audio": "node tests/pair-native.cjs",
+    "test:suite": "node ../tests/sound-suite.cjs",
+    "test:suite:browser": "node ../tests/sound-suite-browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

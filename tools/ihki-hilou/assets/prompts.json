@@ -1,0 +1,424 @@
+{
+  "prompts": [
+    {
+      "id": "voc-6-3",
+      "label": "موزة",
+      "games": [
+        "turtle",
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/6/3.webp"
+        },
+        {
+          "library": "senb",
+          "path": "images/03 object/5.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/6/3.m4a"
+        },
+        {
+          "library": "senb",
+          "path": "sounds/object/5.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-6-1",
+      "label": "تفاحة",
+      "games": [
+        "turtle",
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/6/1.webp"
+        },
+        {
+          "library": "senb",
+          "path": "images/03 object/3.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/6/1.m4a"
+        },
+        {
+          "library": "senb",
+          "path": "sounds/object/3.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-6-12",
+      "label": "ليمون",
+      "games": [
+        "turtle",
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/6/12.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/6/12.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-5-21",
+      "label": "حليب",
+      "games": [
+        "turtle",
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/5/21.webp"
+        },
+        {
+          "library": "senb",
+          "path": "images/03 object/67.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/5/21.m4a"
+        },
+        {
+          "library": "senb",
+          "path": "sounds/object/67.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-7-9",
+      "label": "خيار",
+      "games": [
+        "turtle",
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/7/9.webp"
+        },
+        {
+          "library": "senb",
+          "path": "images/03 object/141.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/7/9.m4a"
+        },
+        {
+          "library": "senb",
+          "path": "sounds/object/141.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-7-17",
+      "label": "بصل",
+      "games": [
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/7/17.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/7/17.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-5-25",
+      "label": "بوظة",
+      "games": [
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/5/25.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/5/25.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-5-4",
+      "label": "كعكة",
+      "games": [
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/5/4.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/5/4.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-5-34",
+      "label": "تونا",
+      "games": [
+        "feather"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/5/34.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/5/34.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-1-17",
+      "label": "انا",
+      "games": [
+        "breeze"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/1/17.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/1/17.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-1-5",
+      "label": "اكل",
+      "games": [
+        "breeze"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/1/5.webp"
+        },
+        {
+          "library": "senb",
+          "path": "images/03 object/162.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/1/5.m4a"
+        },
+        {
+          "library": "senb",
+          "path": "sounds/object/162.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-15-10",
+      "label": "ارنب",
+      "games": [
+        "breeze"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/15/10.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/15/10.m4a"
+        }
+      ]
+    },
+    {
+      "id": "voc-3-12",
+      "label": "اذن",
+      "games": [
+        "breeze"
+      ],
+      "images": [
+        {
+          "library": "voc",
+          "path": "images/3/12.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "voc",
+          "path": "sounds/3/12.m4a"
+        }
+      ]
+    },
+    {
+      "id": "senb-2-1-1",
+      "label": "ولد ياكل",
+      "games": [
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "senb",
+          "path": "images/advanced/6/1/1.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "senb",
+          "path": "sounds/advanced/2/1/1.m4a"
+        }
+      ]
+    },
+    {
+      "id": "senb-2-1-2",
+      "label": "بنت تاكل",
+      "games": [
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "senb",
+          "path": "images/advanced/6/1/2.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "senb",
+          "path": "sounds/advanced/2/1/2.m4a"
+        }
+      ]
+    },
+    {
+      "id": "senb-2-1-3",
+      "label": "بابا يسوق",
+      "games": [
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "senb",
+          "path": "images/advanced/6/1/3.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "senb",
+          "path": "sounds/advanced/2/1/3.m4a"
+        }
+      ]
+    },
+    {
+      "id": "senb-3-1-1",
+      "label": "ولد ياكل تفاحة",
+      "games": [
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "senb",
+          "path": "images/advanced/6/1/1.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "senb",
+          "path": "sounds/advanced/3/1/1.m4a"
+        }
+      ]
+    },
+    {
+      "id": "senb-3-1-2",
+      "label": "بنت تاكل بيتزا",
+      "games": [
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "senb",
+          "path": "images/advanced/6/1/2.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "senb",
+          "path": "sounds/advanced/3/1/2.m4a"
+        }
+      ]
+    },
+    {
+      "id": "senb-3-1-3",
+      "label": "بابا يسوق سيارة",
+      "games": [
+        "bridge"
+      ],
+      "images": [
+        {
+          "library": "senb",
+          "path": "images/advanced/6/1/3.webp"
+        }
+      ],
+      "audio": [
+        {
+          "library": "senb",
+          "path": "sounds/advanced/3/1/3.m4a"
+        }
+      ]
+    },
+    {
+      "id": "breath",
+      "label": "نفس لطيف… على راحتك",
+      "games": [
+        "balloon"
+      ],
+      "images": [
+        {
+          "library": "local",
+          "path": "breathing.svg"
+        }
+      ],
+      "audio": []
+    }
+  ]
+}

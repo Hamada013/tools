@@ -1,0 +1,20 @@
+/* Home header download control and the single-action download dialog. */
+.home-header-tools { display: flex; align-items: center; gap: 8px; }
+.home-header-tools.hidden { display: none; }
+.pwa-header-button { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 10px; border: 1px solid #bae6fd; border-radius: 12px; background: #e0f2fe; color: #075985; }
+.pwa-header-button svg { width: 25px; height: 25px; }
+[hidden] { display: none !important; }
+.offline-panel { width: min(600px, calc(100% - 24px)); max-height: 85dvh; overflow: auto; padding: 24px; border: 1px solid #dceaf4; border-radius: 24px; background: white; color: #22445a; font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif; box-shadow: 0 24px 100px #13385233; }
+.offline-panel::backdrop { background: #163d5366; backdrop-filter: blur(5px); }
+.offline-panel h2 { margin: 0; font-size: 22px; font-weight: 800; }
+.offline-panel #offlineDownloadBtn { width: 100%; margin-top: 24px; min-height: 48px; padding: 10px 18px; border: 0; border-radius: 15px; background: #0284c7; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+.offline-panel #offlineDownloadBtn:disabled { opacity: .4; cursor: default; }
+.offline-panel #offlineStatus { margin: 14px 0 8px; text-align: center; font-size: 13px; }
+.offline-panel progress { width: 100%; height: 14px; accent-color: #0284c7; }
+.offline-panel #offlineError { margin-top: 12px; font-size: 14px; line-height: 1.8; }
+.offline-panel button:focus-visible { outline: 3px solid #0284c7; outline-offset: 4px; }
+
+.offline-panel progress { appearance: none; -webkit-appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: #eaf5ff; }
+.offline-panel progress::-webkit-progress-bar { background: #eaf5ff; border-radius: 999px; }
+.offline-panel progress::-webkit-progress-value { background: #0284c7; border-radius: 999px; }
+.offline-panel progress::-moz-progress-bar { background: #0284c7; border-radius: 999px; }

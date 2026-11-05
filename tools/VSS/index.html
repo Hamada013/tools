@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="احكي حلو">
+  <meta name="description" content="احكي حلو — مع حمادة">
+  <title>احكي حلو</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/home.css">
+  <link rel="stylesheet" href="assets/pwa.css">
+  <link rel="stylesheet" href="assets/updates.css">
+  <link rel="stylesheet" href="assets/welcome.css">
+  <link rel="stylesheet" href="voc/assets/flow-ui.css">
+  <link rel="stylesheet" href="voc/assets/parent-gate.css">
+  <script defer src="assets/welcome.js" data-app="vss"></script>
+  <script defer src="voc/assets/parent-gate.js"></script>
+  <script defer src="voc/assets/progress.js"></script>
+  <script defer src="senb/assets/child-progress.js"></script>
+  <script defer src="voc/assets/accounts.js"></script>
+  <script type="module" src="assets/home.js"></script>
+  <script defer src="assets/updates.js"></script>
+  <script defer src="assets/pwa.js"></script>
+</head>
+<body>
+  <header class="vss-header"><a class="vss-brand" href="./" aria-label="الرئيسية — احكي حلو"><img src="voc/images/logo.webp" width="48" height="48" alt=""><strong>احكي حلو</strong></a><nav aria-label="أدوات التطبيق"><button class="vss-icon" data-open-download type="button" aria-label="تنزيل محتوى التطبيقات الثلاثة" title="تنزيل محتوى التطبيقات الثلاثة" aria-haspopup="dialog" aria-controls="offline-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></button></nav></header>
+  <main>
+    <div class="vss-logo"><img src="voc/images/logo.webp" width="180" height="180" alt=""></div>
+    <h1>احكي حلو</h1>
+    <p class="vss-subtitle">مع حمادة</p>
+    <button class="vss-account" type="button" data-open-accounts aria-haspopup="dialog" aria-controls="vss-accounts-dialog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>
+      <strong data-account-name>اسم الطفل</strong><span>الحسابات</span>
+    </button>
+    <p class="vss-account-error" data-account-error role="alert" hidden></p>
+    <nav class="vss-activities" aria-label="اختر النشاط">
+      <a href="voc/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m3 16 5-5 5 5 3-3 5 5"/><circle cx="15" cy="8" r="1.5"/></svg><span>كلمة</span></a>
+      <a href="senb/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-8l-6 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M7 9h10M7 13h7"/></svg><span>جملة</span></a>
+      <a href="taffaha/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="3"/><circle cx="12" cy="12" r="3"/><circle cx="19" cy="12" r="3"/></svg><span>مقطع</span></a>
+    </nav>
+  </main>
+  <footer dir="ltr"><span>SPEECH AND LANGUAGE PATHOLOGY</span><strong>Ahmad Ghanem</strong><span>Latakia - Syria</span><a href="mailto:slp.ahmadghanem@gmail.com">slp.ahmadghanem@gmail.com</a></footer>
+  <dialog id="vss-accounts-dialog" class="suite-dialog vss-accounts-dialog" aria-labelledby="vss-accounts-title">
+    <h2 id="vss-accounts-title">الحسابات</h2>
+    <form>
+      <label for="vss-child-name">اسم الطفل</label>
+      <input id="vss-child-name" name="name" autocomplete="off" maxlength="60" required>
+      <div data-saved-accounts></div>
+      <p class="vss-account-error" data-dialog-error role="alert" hidden></p>
+      <div class="suite-text-actions"><button type="submit">دخول</button><button type="button" data-accounts-close>إغلاق</button></div>
+    </form>
+  </dialog>
+  <dialog id="offline-dialog" class="offline-dialog" data-offline-dialog aria-labelledby="offline-title"><h2 id="offline-title">تنزيل</h2><section data-offline-card data-state="idle"><svg data-offline-complete hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m7.5 12 3 3 6-6"/></svg><button type="button" data-offline-download>تنزيل</button><p data-offline-status dir="ltr" role="status" aria-live="polite">0%</p><progress max="100" value="0" aria-label="تقدم التنزيل"></progress><p data-offline-error role="alert" hidden></p></section></dialog>
+</body>
+</html>

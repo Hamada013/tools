@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="stylesheet" href="assets/welcome.css">
+    <script defer src="assets/welcome.js" data-app="voc"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>ألعاب الكلمات - كلمة</title>
+    
+    <!-- PWA: keep these relative URLs inside tools/voc on subpath hosting. -->
+    <link rel="manifest" href="../manifest.webmanifest">
+    <meta name="theme-color" content="#0284C7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="احكي حلو">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
+    <link rel="stylesheet" href="assets/utilities.css">
+    <link rel="stylesheet" href="assets/vendor/fontawesome.css">
+    <link rel="stylesheet" href="assets/vendor/cairo.css">
+    <link rel="stylesheet" href="assets/pwa.css">
+    <link rel="stylesheet" href="assets/updates.css">
+    <script defer src="../assets/updates.js"></script>
+    <script defer src="../assets/pwa.js"></script>
+
+    <link rel="stylesheet" href="assets/games.css">
+    <script defer src="assets/game-model.js"></script>
+    <link rel="stylesheet" href="assets/progress.css">
+    <script defer src="assets/progress.js"></script>
+    <script defer src="assets/countdown.js"></script>
+    <script defer src="assets/game-data.js"></script>
+    <link rel="stylesheet" href="assets/acquisition-charts.css">
+    <script defer src="assets/acquisition-charts.js"></script>
+    <script defer src="assets/reports.js"></script>
+    <link rel="stylesheet" href="assets/parent-gate.css">
+    <script defer src="assets/parent-gate.js"></script>
+    <script defer src="assets/progress-ui.js"></script>
+    <script defer src="assets/games.js"></script>
+    <link rel="stylesheet" href="assets/flow-ui.css">
+    <script defer src="assets/flow-ui.js"></script>
+    <script defer src="assets/accounts.js"></script>
+    <link rel="stylesheet" href="assets/session-homework.css">
+    <script defer src="assets/session-homework.js" data-app="voc"></script>
+    <link rel="stylesheet" href="assets/app-navigation.css">
+    <script defer src="assets/app-navigation.js" data-app="voc"></script>
+</head>
+<body class="game-page" data-game="hub">
+    <a class="skip-link" href="#game-main">انتقل إلى الألعاب</a>
+    <header class="game-header"><div class="game-brand"><img src="images/logo.webp" width="54" height="54" alt=""><h1>كلمة</h1></div><a class="game-back" href="index.html"><i class="fas fa-home" aria-hidden="true"></i><span>الرئيسية</span></a></header>
+    <main id="game-main" class="game-shell">
+        <section class="hub-grid" aria-label="اختيار لعبة">
+            <a class="hub-card" href="matching.html" data-game-link="matching"><span class="hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H4v6h1a3 3 0 1 1 0 6H4v6h6v-1a3 3 0 1 1 6 0v1h5v-6h-1a3 3 0 1 1 0-6h1V3h-6v1a3 3 0 1 1-6 0Z"/></svg></span><h2>المطابقة</h2></a>
+            <a class="hub-card" href="memory.html" data-game-link="memory"><span class="hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 6V3h13v15h-5M7 11h5m-5 4h5"/></svg></span><h2>الذاكرة</h2></a>
+            <a class="hub-card" href="rapid.html" data-game-link="rapid"><span class="hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg></span><h2>البطاقات السريعة</h2></a>
+            <a class="hub-card" href="test.html" data-game-link="test"><span class="hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 12H3v7h4v-7zm16 0h1v7h-4v-7z"/></svg></span><h2>استمع واختر</h2></a>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "taffaha-speech-practice",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:account-deletion": "node ../../tests/account-deletion.cjs",
+    "test:account-deletion:browser": "node ../../tests/account-deletion-browser.cjs",
+    "build": "node scripts/build-data.cjs && node scripts/build-pwa.cjs",
+    "build:icons": "node scripts/build-icons.cjs",
+    "test": "node tests/static.cjs && node tests/test-model.cjs && node tests/progress.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "test:updates": "node tests/update-browser.cjs",
+    "test:activities": "node tests/activities-browser.cjs",
+    "test:practice": "node tests/practice-browser.cjs",
+    "test:suite:browser": "node ../../tests/suite-navigation-browser.cjs"
+  },
+  "devDependencies": {
+    "sharp": "0.34.5",
+    "playwright": "1.56.1"
+  }
+}

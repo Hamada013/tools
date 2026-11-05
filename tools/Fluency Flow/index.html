@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="كلام وطلاقة" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/icons/logo.webp" type="image/webp" />
+    <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#efdbfb" />
+    <meta name="description" content="كلام وطلاقة (Fluency Flow) — guided fluency, stuttering modification and breathing practice in Arabic and English." />
+    <title>كلام وطلاقة</title>
+    <link rel="stylesheet" href="./assets/index-B-ZKx10f.css" />
+    <link rel="stylesheet" href="./assets/responsive.css" />
+    <link rel="modulepreload" href="./assets/vendor.js" />
+    <link rel="modulepreload" href="./assets/ui.js" />
+  </head>
+  <body>
+    <div id="root">
+      <div class="ff-fallback" role="status">
+        <h1>كلام وطلاقة</h1>
+        <p>جارٍ التحميل… · Loading…</p>
+      </div>
+    </div>
+    <noscript><p class="ff-fallback">يرجى تفعيل JavaScript لاستخدام التطبيق. Please enable JavaScript to use this app.</p></noscript>
+    <script type="module">
+      import('./assets/app.js').catch(() => {
+        document.querySelector('#root').innerHTML = '<div class="ff-fallback"><h1>كلام وطلاقة</h1><p>تعذر تحميل التطبيق. أعد تحميل الصفحة للمحاولة مجدداً.</p><p lang="en" dir="ltr">The app could not load. Reload the page to try again.</p><a href="./index.html">إعادة التحميل · Reload</a></div>';
+      });
+    </script>
+  </body>
+</html>

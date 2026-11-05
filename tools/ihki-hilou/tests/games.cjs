@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict');
+(async()=>{const{analyzeFrame,breathPhase}=await import('../fluencyGames.js'),{reward}=await import('../storage.js');const sr=48000;
+for(const hz of [110,220,440]){const data=Float32Array.from({length:2048},(_,i)=>.15*Math.sin(2*Math.PI*hz*i/sr));const result=analyzeFrame(data,sr,.005);assert.ok(result.voiced);assert.ok(Math.abs(result.pitch-hz)<3,`${hz} -> ${result.pitch}`);}
+assert.equal(analyzeFrame(new Float32Array(2048),sr).pitch,null);let seed=7;const noise=Float32Array.from({length:2048},()=>{seed=(seed*16807)%2147483647;return(seed/2147483647-.5)*.1;});assert.equal(analyzeFrame(noise,sr).voiced,false);
+assert.equal(breathPhase(4,0).phase,'exhale');assert.equal(breathPhase(4,2).phase,'hold');assert.equal(breathPhase(6,2).phase,'exhale');for(let t=0;t<100;t+=.1){const p=breathPhase(t,2);assert.ok(p.scale>=.65&&p.scale<=1.1);}
+const a=reward({stars:4,badges:[],games:['turtle','breeze','feather','bridge']},{attempts:[{mode:'manual'}],moduleID:'balloon'});assert.equal(a.profile.stars,5);assert.ok(a.profile.badges.includes('explorer'));assert.ok(a.profile.badges.includes('five'));assert.equal(a.session.earned,1);assert.equal(reward({stars:0},{attempts:[],moduleID:'turtle'}).session.earned,0);
+console.log('PASS: known-pitch signals, noise/silence rejection, breathing timing and participation-based reward rules.');})().catch(e=>{console.error(e);process.exitCode=1;});

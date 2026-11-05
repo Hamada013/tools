@@ -1,0 +1,46 @@
+/* Size boards from their available width AND height, preserving square cards. */
+body.fitted-activity{height:100vh;height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+body.fitted-activity .app-header{flex-shrink:0;position:relative}
+#workspace.activity-fit{flex:1;min-height:0;min-width:0;width:100%;max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:12px;padding:14px max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+.activity-fit .activity-heading,.activity-fit .ling-heading{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;margin:0}
+.activity-fit .section-heading{display:flex;min-width:0;gap:8px;margin:0;flex:1}
+.activity-fit .section-heading h1{font-size:clamp(17px,2.4vw,24px);line-height:1.3;margin:0;white-space:normal}
+.activity-fit .toolbar{flex-shrink:0;margin:0;gap:0}
+.activity-fit .toolbar .actions,.activity-fit .ling-tools{flex-wrap:nowrap;gap:6px}
+.activity-fit .icon-button{min-width:44px;min-height:44px;width:44px;height:44px}
+.activity-fit .activity-board{flex:1;min-height:0;min-width:0;width:100%;container-type:size;display:grid;place-items:center}
+.activity-fit #status{flex-shrink:0;min-height:0;margin:0;font-size:14px;line-height:1.5}
+.activity-fit #status.error{padding:8px}
+.activity-fit .panel{margin:0;padding:18px}
+
+.activity-fit .matching-layout{--board-gap:12px;--card:min(240px,calc((100cqw - 2 * var(--board-gap)) / 3),calc((100cqh - var(--board-gap)) / 2));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,var(--card));gap:var(--board-gap);width:calc(3 * var(--card) + 2 * var(--board-gap))}
+.activity-fit .matching-layout .target-card{grid-column:2;width:100%;margin:0}
+.activity-fit .match-options-wrap{grid-column:1 / -1;width:100%;max-width:none;margin:0}
+.activity-fit .match-options{gap:var(--board-gap);margin:0}
+.activity-fit .matching-layout .picture{min-width:0;min-height:0;aspect-ratio:1;border-radius:clamp(14px,3vw,24px)}
+.activity-fit .matching-layout .picture.cue{animation:none;box-shadow:0 0 0 3px #d8effb}
+
+.activity-fit .memory-grid[data-size]{--columns:4;--rows:3;--board-gap:12px;--card:min(200px,calc((100cqw - (var(--columns) - 1) * var(--board-gap)) / var(--columns)),calc((100cqh - (var(--rows) - 1) * var(--board-gap)) / var(--rows)));width:calc(var(--columns) * var(--card) + (var(--columns) - 1) * var(--board-gap));max-width:none;grid-template-columns:repeat(var(--columns),minmax(0,1fr));gap:var(--board-gap);margin:0}
+.activity-fit .memory-grid[data-size="4"]{--columns:2;--rows:2}
+.activity-fit .memory-grid[data-size="6"]{--columns:3;--rows:2}
+.activity-fit .memory-grid[data-size="8"]{--columns:4;--rows:2}
+.activity-fit .memory-grid .picture{border-radius:clamp(12px,2.5vw,22px);padding:0}
+.activity-fit .memory-grid .picture.hidden-face::after{font-size:clamp(22px,5vmin,38px)}
+
+.activity-fit .ling-trial{flex-shrink:0;width:min(100%,400px);margin:0 auto;font-size:15px}
+.activity-fit .ling-trial span{margin-bottom:6px}
+.activity-fit .ling-choices[data-size]{--columns:2;--rows:1;--board-gap:12px;--card:min(300px,calc((100cqw - (var(--columns) - 1) * var(--board-gap)) / var(--columns)),calc((100cqh - (var(--rows) - 1) * var(--board-gap)) / var(--rows)));width:calc(var(--columns) * var(--card) + (var(--columns) - 1) * var(--board-gap));max-width:none;grid-template-columns:repeat(var(--columns),minmax(0,1fr));gap:var(--board-gap);margin:0}
+.activity-fit .ling-choices:is([data-size="3"],[data-size="4"]){--rows:2}
+.activity-fit .ling-choices:is([data-size="5"],[data-size="6"]){--columns:3;--rows:2}
+.activity-fit :is(.ling-choices,.ling-detection-card) .picture{width:100%;min-height:0;aspect-ratio:1;padding:0;gap:0;overflow:hidden;border-radius:clamp(14px,3vw,26px)}
+.activity-fit :is(.ling-choices,.ling-detection-card) .picture img{position:absolute;top:8%;left:8%;width:84%;height:calc(84% - 24px);object-fit:contain}
+.activity-fit :is(.ling-choices,.ling-detection-card) .picture span{position:absolute;bottom:5%;font-size:clamp(16px,3vmin,24px);line-height:1.2}
+.activity-fit .ling-detection-layout{--card:min(300px,calc(100cqw - 16px),calc(100cqh - 132px));display:flex;flex-direction:column;align-items:center;gap:12px}
+.activity-fit .ling-detection-card{width:var(--card);max-width:none;margin:0}
+.activity-fit .ling-responses{gap:12px}
+.activity-fit .ling-response{width:64px;height:64px;min-width:44px;min-height:44px;border-radius:18px;font-size:36px}
+.activity-fit .ling-response svg{width:32px;height:32px}
+.activity-fit .ling-navigation{margin:0;gap:24px}
+@media(max-width:520px){#workspace.activity-fit{gap:10px;padding:10px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}.activity-fit .activity-heading,.activity-fit .ling-heading{gap:8px}.activity-fit .section-heading h1{font-size:17px}.activity-fit .memory-grid[data-size],.activity-fit .ling-choices[data-size],.activity-fit .matching-layout{--board-gap:8px}}
+@media(max-width:520px) and (min-height:400px){.activity-fit .memory-grid[data-size="12"]{--columns:3;--rows:4}}
+@media(max-height:500px){#workspace.activity-fit{gap:8px;padding:8px max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}.activity-fit .ling-detection-layout{--card:min(240px,calc(100cqw - 16px),calc(100cqh - 108px));gap:8px}.activity-fit .ling-response{width:48px;height:48px;font-size:30px;border-radius:14px}.activity-fit .ling-response svg{width:26px;height:26px}.activity-fit .ling-choices[data-size],.activity-fit .memory-grid[data-size],.activity-fit .matching-layout{--board-gap:8px}.activity-fit .ling-trial{font-size:14px}}

@@ -1,0 +1,71 @@
+name: Build and publish tools
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Prepare recording analysis
+        run: |
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+      - name: Rebuild app catalogs and prepare the tools site
+        run: node tools/shared/build-pwa-releases.cjs --site
+      - name: Verify accounts and app integrity
+        run: |
+          node tools/VSS/tests/static.cjs
+          node tools/tests/update-readiness.cjs
+          node tools/tests/welcome-launch.cjs
+          node tools/tests/account-avatars.cjs
+          node tools/tests/account-deletion.cjs
+          node tools/tests/hamada-reset.cjs
+          node tools/auditory-rehabilitation/tests/static.cjs
+          node tools/follow-direction/tests/model.cjs
+          node tools/follow-direction/tests/research.cjs
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Upload tools site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: output/pages
+          include-hidden-files: true
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish tools
+        id: deployment
+        uses: actions/deploy-pages@v4

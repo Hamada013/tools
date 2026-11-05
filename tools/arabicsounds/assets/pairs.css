@@ -1,0 +1,44 @@
+/* Pair sessions follow Taffaha's quiet cards and compact local controls. */
+body.pair-view { height:100vh; height:100dvh; min-height:0; display:flex; flex-direction:column; }
+body.pair-view .app-header { flex-shrink:0; }
+body.pair-view #workspace.pair-workspace { display:flex; flex-direction:column; flex:1; gap:14px; width:100%; max-width:1060px; min-height:0; margin:0 auto; padding:18px max(20px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left)); }
+.pair-workspace .section-heading { flex-shrink:0; margin:0; gap:12px; }
+.pair-workspace .section-heading h1 { font-size:24px; color:#22445a; }
+.pair-tools { display:flex; justify-content:flex-end; flex-shrink:0; }
+.pair-workspace .picture-grid { flex:1; width:100%; max-width:760px; min-height:0; max-height:460px; margin:auto; gap:clamp(12px,2.5vw,26px); }
+.pair-workspace .picture { min-height:0; aspect-ratio:auto; border:2px solid #dceaf4; border-radius:28px; background:white; padding:clamp(12px,2vw,24px); overflow:hidden; box-shadow:0 12px 40px #276b8f0c; }
+.pair-workspace .picture img { height:calc(100% - 42px); min-height:0; object-fit:contain; }
+.pair-workspace .picture span { flex-shrink:0; font-size:clamp(22px,4vw,32px); line-height:1.3; }
+.pair-workspace .picture.cue { animation:pair-glow 1.1s ease-in-out infinite; border-color:#0284c7; }
+.pair-workspace .picture.pair-covered > * { visibility:hidden; }
+.pair-workspace .picture.pair-covered::after { content:''; position:absolute; inset:0; border-radius:inherit; background:repeating-linear-gradient(135deg,#edf7fd,#edf7fd 18px,#e8f3fa 18px,#e8f3fa 36px); }
+.pair-workspace .picture.matched { border-color:#42a96f; background:#f0fbf4; }
+.pair-workspace .picture.wrong { border-color:#df6371; background:#fff5f6; }
+.pair-actions { display:flex; justify-content:center; gap:18px; flex-shrink:0; }
+.pair-actions .icon-button { width:58px; height:58px; min-width:48px; min-height:48px; border:0; border-radius:18px; }
+.pair-actions .icon-button svg { width:29px; height:29px; }
+.pair-practice { background:#e4f5ff; color:#0284c7; }
+.pair-test { background:#e7f7ed; color:#418c60; }
+.pair-tools .icon-button { background:#edf5fa; border:0; }
+.pair-countdown { position:fixed; inset:0; width:100vw; max-width:none; height:100vh; height:100dvh; max-height:none; margin:0; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; overflow:hidden; }
+.pair-countdown[open] { display:grid; place-items:center; }
+.pair-countdown::backdrop { background:#f4f9fcaa; backdrop-filter:blur(6px); }
+.countdown-number { display:block; font-size:clamp(130px,30vmin,240px); font-weight:900; line-height:1; text-align:center; text-shadow:0 10px 45px #276b8f20; font-variant-numeric:lining-nums; }
+.countdown-number[data-step="1"] { color:#0284c7; }
+.countdown-number[data-step="2"] { color:#d99612; }
+.countdown-number[data-step="3"] { color:#38a66b; }
+@keyframes pair-glow { 0%,100%{box-shadow:0 0 0 3px #d8effb,0 12px 40px #276b8f0c} 50%{box-shadow:0 0 0 6px #d8effb,0 12px 40px #0284c71c} }
+@media(max-width:520px){body.pair-view #workspace.pair-workspace{padding:14px 14px max(14px,env(safe-area-inset-bottom));gap:12px}.pair-workspace .section-heading h1{font-size:21px}.pair-workspace .picture{border-radius:24px}.pair-workspace .picture-grid{max-height:420px}}
+@media(max-height:500px){body.pair-view #workspace.pair-workspace{padding:8px 16px;gap:8px}.pair-workspace .section-heading h1{font-size:20px}.pair-workspace .picture{padding:8px 14px;border-radius:22px}.pair-workspace .picture span{font-size:22px}.pair-actions .icon-button{width:48px;height:48px}.pair-tools .icon-button{height:44px;width:44px}}
+@media(prefers-reduced-motion:reduce){.pair-workspace .picture.cue{animation:none;box-shadow:0 0 0 4px #d8effb}}
+body.pair-view .app-header { padding:0; background:#ffffffeb; border-bottom:1px solid #dceaf4; }
+body.pair-view .header-inner { min-height:0; max-width:none; padding:max(12px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) 12px max(18px,env(safe-area-inset-left)); gap:12px; }
+body.pair-view .brand { min-width:0; color:#22445a; gap:10px; }
+body.pair-view .brand img { width:44px; height:44px; flex-shrink:0; background:transparent; }
+body.pair-view .brand strong { display:block; font-size:20px; line-height:1.3; font-weight:800; }
+body.pair-view .brand small { display:block; font-size:12px; line-height:1.6; color:#5c7285; font-weight:500; }
+body.pair-view .header-actions { margin-inline-start:auto; gap:8px; }
+.pair-workspace .picture-grid { max-height:min(420px,70vw); }
+@media(max-width:520px){body.pair-view .header-inner{padding-inline:12px;gap:8px}body.pair-view .brand{gap:8px}body.pair-view .brand img{width:36px;height:36px}body.pair-view .brand strong{font-size:17px}body.pair-view .brand small{font-size:10px}body.pair-view .header-actions{gap:6px}.pair-workspace .picture-grid{max-height:min(360px,70vw)}}
+@media(max-height:500px){body.pair-view .header-inner{padding-block:8px}body.pair-view .brand small{display:none}}
+body.pair-view .icon-button { min-width:44px; min-height:44px; }

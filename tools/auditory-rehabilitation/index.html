@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0284c7"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="أصوات من حولي"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="أصوات من حولي: اكتشاف الصوت والتمييز والتعرف والذاكرة السمعية."><title>أصوات من حولي</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icons/icon-192.png" type="image/png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/home.css"><link rel="stylesheet" href="assets/activities.css"><link rel="stylesheet" href="assets/pwa.css"><link rel="stylesheet" href="assets/updates.css">
+<link rel="stylesheet" href="assets/parent-gate.css"><link rel="stylesheet" href="assets/flow-ui.css"><link rel="stylesheet" href="assets/app-navigation.css"><link rel="stylesheet" href="assets/sound-suite.css"><link rel="stylesheet" href="assets/detection-game.css"><script defer src="assets/sound-progress.js"></script><script defer src="assets/parent-gate.js"></script><script defer src="assets/accounts.js" data-app="auditory-rehabilitation"></script><script defer src="assets/sound-suite.js" data-app="auditory-rehabilitation"></script><script defer src="assets/flow-ui.js"></script><script defer src="assets/app-navigation.js" data-app="auditory-rehabilitation"></script><script type="module" src="assets/app.js"></script><script type="module" src="assets/pwa.js"></script>
+</head><body class="app-home-shell" data-screen="home">
+<a class="skip" href="#workspace">إلى المحتوى</a>
+<header class="app-header app-home-topbar"><div class="header-inner app-home-bar">
+<a class="brand app-home-brand" href="#/home" aria-label="أصوات من حولي، الرئيسية"><img src="images/logo.webp" width="52" height="52" alt=""><span><strong>أصوات من حولي</strong><small>نستمع ونتعرف على عالمنا</small></span></a>
+<div class="header-actions app-home-tools"><a id="home-link" class="icon-button" href="#/home" title="الرئيسية" aria-label="الرئيسية" hidden></a><button id="menu-toggle" class="icon-button" title="القائمة" aria-label="فتح القائمة" aria-controls="drawer" aria-expanded="false" hidden></button></div>
+</div></header>
+<dialog id="drawer" class="drawer" aria-labelledby="drawer-title"><div class="dialog-heading"><h2 id="drawer-title">أصوات من حولي</h2><button class="icon-button" data-close title="إغلاق" aria-label="إغلاق"></button></div><nav id="drawer-links" aria-label="أقسام التطبيق"></nav></dialog>
+<main id="workspace" class="app-home-main" tabindex="-1"></main>
+<dialog id="session-countdown" class="session-overlay countdown-overlay" aria-label="الاستعداد"><span id="countdown-number" role="status" aria-live="assertive" dir="ltr"></span></dialog>
+<dialog id="listening-overlay" class="session-overlay listening-overlay" aria-label="الاستماع"><span id="listening-ear" aria-hidden="true"></span></dialog>
+<div id="announcement" class="sr-only" aria-live="polite"></div>
+<dialog id="modal" aria-labelledby="modal-title"><div class="dialog-heading"><h2 id="modal-title"></h2><button class="icon-button" data-close title="إغلاق" aria-label="إغلاق"></button></div><div id="modal-body"></div></dialog>
+<dialog id="install-dialog" class="download-dialog" aria-labelledby="install-title"><div class="dialog-heading"><h2 id="install-title">تنزيل</h2><button class="icon-button" type="button" data-close aria-label="إغلاق">×</button></div><button id="install-app" class="button primary" hidden>تثبيت التطبيق</button><p id="install-help" class="subtle" hidden></p><button id="offline-download" class="button primary">تنزيل</button><p id="offline-status" dir="ltr" role="status" aria-live="polite">0%</p><progress id="offline-progress" value="0" max="100" aria-label="تقدم التنزيل"></progress><p id="offline-error" role="alert" hidden></p></dialog>
+<button id="install" class="sound-download-trigger" hidden title="تنزيل" aria-label="تنزيل" aria-haspopup="dialog"></button></body></html>

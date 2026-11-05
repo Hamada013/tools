@@ -1,0 +1,26 @@
+{
+  "name": "senb-sentence-builder",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:account-deletion": "node ../../tests/account-deletion.cjs",
+    "test:account-deletion:browser": "node ../../tests/account-deletion-browser.cjs",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i assets/tailwind.css -o assets/utilities.css --minify",
+    "build:pwa": "node scripts/build-pwa.cjs",
+    "test:delete:browser": "node ../../tests/delete-mode-browser.cjs",
+    "test:report-charts": "node ../../tests/acquisition-reports.cjs",
+    "test:report-charts:browser": "node ../../tests/acquisition-reports-browser.cjs",
+    "test": "node tests/regression.cjs && node tests/verb-context.cjs && node tests/audio.cjs && node tests/activities-model.cjs && node tests/offline.cjs",
+    "test:browser": "node tests/browser.cjs && node tests/activities-browser.cjs && node tests/pwa-browser.cjs",
+    "build:icons": "node scripts/build-icons.cjs",
+    "test:workplace:browser": "node tests/workplace-metronome-browser.cjs && node tests/workplace-frame-browser.cjs",
+    "test:expression:browser": "node tests/expression-animation-browser.cjs",
+    "test:sessions": "node tests/child-progress.cjs && node tests/session-model.cjs && node tests/session-reports.cjs",
+    "test:sessions:browser": "node tests/picker-progress-browser.cjs && node tests/child-profile-browser.cjs && node tests/session-browser.cjs && node tests/dynamic-browser.cjs && node tests/session-edge-browser.cjs && node tests/session-reports-browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.50.1",
+    "tailwindcss": "3.4.17",
+    "sharp": "0.34.5"
+  }
+}

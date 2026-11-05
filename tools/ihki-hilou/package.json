@@ -1,0 +1,1 @@
+{"name":"ihki-hilou","private":true,"type":"module","scripts":{"build":"node scripts/build-data.cjs && node scripts/build-pwa.cjs","build:icons":"node scripts/build-icons.cjs","test":"node tests/static.cjs && node tests/games.cjs","test:browser":"node tests/browser.cjs"},"devDependencies":{"sharp":"0.34.5","playwright":"1.56.1"}}

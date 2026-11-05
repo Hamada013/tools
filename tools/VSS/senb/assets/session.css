@@ -1,0 +1,75 @@
+/* Automatic sessions share the calm card layout of the workplace. */
+.senb-session-icon { display:inline-grid;place-items:center;flex-shrink:0;min-width:44px;height:44px;border:1px solid #dceaf4;border-radius:14px;background:white;color:#087eb5;padding:9px;cursor:pointer; }
+.senb-session-icon svg { width:24px;height:24px; }
+.senb-session-icon:focus-visible,.senb-session-card:focus-visible,.session-word-mark:focus-visible {outline:3px solid #e7a83c;outline-offset:3px;}
+.senb-session-icon:disabled {opacity:.5;cursor:default;}
+.senb-session-view {flex:1;min-height:0;overflow:auto;width:100%;padding:clamp(12px,2vw,24px);color:#22445a;background:radial-gradient(ellipse at top right,#e7f8efaa,transparent 60%),#f8fafc;}
+.senb-session-view[hidden],.senb-session-curtain[hidden],.senb-session-view [hidden] {display:none!important;}
+.senb-session-active .app-header .app-brand {pointer-events:none;}
+.senb-session-active .header-actions {display:contents;}
+.senb-session-active .header-actions > :not(#vocAppLink) {display:none!important;}
+.senb-session-view * {box-sizing:border-box;}
+.senb-session-view h2 {font:800 clamp(1rem,3vw,1.45rem)/1.5 system-ui,Tahoma,Arial,sans-serif;margin:0;}
+.senb-session-bar {max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:.75rem;}
+.senb-session-bar>div {display:flex;gap:.4rem;}
+.senb-session-view progress {display:block;width:min(100%,1100px);height:7px;margin:12px auto;border:0;accent-color:#22a381;}
+#sessionStatus {max-width:1100px;margin:0 auto;color:#5c7285;min-height:1.6em;text-align:center;font-size:.9rem;}
+#sessionStatus.error {color:#a34820;}
+.senb-session-board {max-width:1050px;margin:10px auto;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:clamp(8px,1.5vw,18px);}
+.senb-session-card {position:relative;border:2px solid #dceaf4;border-radius:24px;background:white;min-width:0;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden;color:#22445a;cursor:pointer;}
+.senb-session-card:disabled {opacity:1;cursor:default;}
+.senb-session-card img {display:block;max-width:100%;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+.dynamic-board {flex-direction:column;flex-wrap:nowrap;}
+.session-target-words {display:flex;direction:rtl;flex-wrap:wrap;justify-content:center;gap:clamp(8px,1vw,14px);width:100%;}
+.session-target-words>.senb-session-card {width:clamp(72px,14vw,150px);aspect-ratio:1;}
+.dynamic-board .session-advanced {aspect-ratio:16/9;max-height:min(36dvh,360px);width:min(100%,640px);margin:auto;}
+.session-advanced {aspect-ratio:16/9;max-width:780px;width:100%;max-height:50dvh;}
+.senb-session-card.session-glow {border-color:#19a880;background:#edfcf6;box-shadow:0 0 0 4px #a5ecd9,0 0 30px #29b78a60;}
+.session-small-tick {position:absolute;inset-inline-end:6px;top:6px;background:#1ba473;color:white;border-radius:50%;width:28px;height:28px;padding:5px;}
+.session-small-tick svg {width:100%;height:100%;}
+.session-finger {position:absolute;bottom:6%;left:44%;width:clamp(32px,6vw,66px);height:70px;filter:drop-shadow(0 3px 4px #22445a44);animation:session-touch .65s ease-in-out both;}
+.session-finger svg {width:100%;height:100%;}
+.senb-session-actions {display:flex;justify-content:center;gap:14px;margin:20px auto;}
+.senb-session-actions .senb-session-icon {width:60px;height:60px;border-radius:20px;}
+.senb-session-actions .senb-session-icon svg {width:30px;height:30px;}
+.session-confirm {color:#14865e;background:#ecfaf3;border-color:#89d6b5;}
+.session-expression-frame {padding:clamp(10px,2vw,20px);border:2px solid #dceaf4;border-radius:26px;background:white;cursor:pointer;width:min(100%,calc(var(--words,2) * 160px + (var(--words,2) - 1) * 14px + 40px));}
+.session-expression-frame:focus-visible {outline:3px solid #e7a83c;outline-offset:3px;}
+.session-question {font-size:1.2rem;line-height:1.8;text-align:center;padding:2rem 1rem;}
+.senb-session-curtain {position:fixed;inset:0;z-index:95;display:grid;place-items:center;pointer-events:none;background:#f8fafca6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.session-count {font:900 clamp(120px,26vw,280px)/1 system-ui,sans-serif;color:#0c9cc9;animation:session-count .7s ease-out;}
+.session-count[data-count="2"] {color:#efad35;}.session-count[data-count="3"] {color:#9e65d3;}
+.session-answer {width:clamp(130px,24vw,250px);height:clamp(130px,24vw,250px);border-radius:50%;display:grid;place-items:center;background:white;box-shadow:0 15px 60px #22445a22;animation:session-count .35s ease-out;}
+.session-answer svg {width:70%;height:70%;stroke-width:3;}.session-answer.yes {color:#13a770;}.session-answer.no {color:#df6256;}
+.session-word-row {display:grid;grid-template-columns:repeat(min(var(--words,2),6),minmax(0,1fr));gap:clamp(4px,1vw,14px);width:min(100%,calc(var(--words,2) * 180px + (var(--words,2) - 1) * 14px));align-items:center;margin-inline:auto;direction:rtl;}
+.session-word-row>.senb-session-card {aspect-ratio:1;padding:8px;max-height:230px;}
+.session-choice-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+.session-sentence-choice {width:100%;aspect-ratio:16/9;max-height:32dvh;padding:10px;}
+.session-sentence-choice .session-word-row img {aspect-ratio:1;min-width:0;}
+.session-gap {display:grid;place-items:center;aspect-ratio:1;border:2px dashed #87bfd5;border-radius:22px;font-size:2.5rem;color:#1685ba;background:#f0f9ff;}
+.session-missing-options {display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;margin-top:1rem;}
+.session-missing-options .senb-session-card {width:min(27vw,180px);aspect-ratio:1;}
+.session-expression-marks {width:100%;display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(8px,2vw,22px);margin-top:1rem;}
+.session-word-mark {width:48px;height:48px;flex-shrink:0;border:3px solid var(--mark-color,#0284c7);border-radius:50%;background:white;color:#22445a;font:700 1rem system-ui;cursor:pointer;}
+.session-word-mark[aria-pressed=true] {background:var(--mark-color,#0284c7);box-shadow:inset 0 0 0 4px white;}
+@keyframes session-touch {0% {transform:translateY(25px) rotate(-12deg);opacity:0;}45%,75% {transform:translateY(0) scale(.9);opacity:1;}100% {transform:translateY(6px);opacity:1;}}
+@keyframes session-count {0% {transform:scale(.6);opacity:0;}60% {transform:scale(1.08);opacity:1;}100% {transform:scale(1);opacity:1;}}
+@media(max-width:480px){.dynamic-board .session-advanced {max-height:30dvh;}.senb-session-card {border-radius:18px;padding:7px;}.session-choice-grid {gap:8px;}.session-word-mark {width:42px;height:42px;}.session-expression-marks {gap:6px;}.session-sentence-choice .session-word-row {gap:2px;}}
+@media(max-height:500px) and (min-width:600px){.dynamic-board .session-advanced {max-height:36dvh;}.session-target-words>.senb-session-card {width:90px;}.senb-session-view {padding:8px 16px;}.senb-session-board {margin:5px auto;}.session-advanced {max-height:42dvh;}.senb-session-actions {margin:10px auto;}.session-expression-marks {margin-top:5px;}}
+@media(prefers-reduced-motion:reduce){.senb-session-view *,.senb-session-curtain * {animation:none!important;transition:none!important;}}
+
+/* Model movement is visual only; test cards support touch, mouse and keyboard. */
+.session-demo-hand {z-index:3;}
+.session-drag-copy {position:fixed;z-index:96;pointer-events:none;transition:transform .8s ease-in-out;box-shadow:0 10px 28px #22445a22;}
+.session-missing-options .senb-session-card {touch-action:none;user-select:none;-webkit-user-select:none;}
+.session-gap {overflow:hidden;}
+.session-gap img {width:100%;height:100%;object-fit:contain;}
+.session-beat {border-color:#b9dfd6;background:#f5fcf9;transition:background .15s,box-shadow .15s;}
+.session-beat.lit {background:#24b38c;border-color:#179775;box-shadow:0 0 0 7px #a5ecd966;}
+.session-beat:disabled {opacity:1;cursor:default;}
+@media(prefers-reduced-motion:reduce){.session-drag-copy {transition:none;}}
+
+.senb-automation-actions{display:flex;justify-content:center;gap:28px;margin:16px 0 4px}.senb-automation-actions button{width:56px;height:56px;border:0;background:transparent;color:#22445a}.senb-automation-actions svg{width:30px;height:30px}
+#advItemsGrid .picker-card[aria-pressed=true]{border:2px solid #179774;background:#eefbf5;position:relative}#advItemsGrid .picker-card[aria-pressed=true]::after{content:'✓';position:absolute;top:6px;right:8px;color:#087b59;font-weight:900}
+
+#senbSelectionPlay[hidden]{display:none!important}
