@@ -27,9 +27,3 @@ for(const file of ['updates.js','welcome.js','welcome.css']){
  else{fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,source);}
 }
 
-// Research collectors and the download-only app share one reset confirmation.
-for(const app of ['tools/follow-direction']){
- const source=fs.readFileSync(path.join(__dirname,'workbook-reset.js')),target=path.resolve(__dirname,'../..',app,'assets/workbook-reset.js');
- if(process.argv.includes('--check')){if(!fs.existsSync(target)||!source.equals(fs.readFileSync(target)))throw Error('Workbook reset copy is stale: '+target);}
- else fs.writeFileSync(target,source);
-}
