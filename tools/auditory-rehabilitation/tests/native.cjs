@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
-const {chromium,webkit}=require(process.env.SOUNDS_PLAYWRIGHT||path.resolve(__dirname,'../../VSS/voc/node_modules/playwright'));
+const {chromium,webkit}=require(process.env.SOUNDS_PLAYWRIGHT||'playwright');
 const root=path.resolve(__dirname,'..'),types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.m4a':'audio/mp4'};
 let failWorker=true,corruptMedia=true;
 const server=http.createServer(async(req,res)=>{

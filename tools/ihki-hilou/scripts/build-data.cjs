@@ -1,6 +1,6 @@
 // Resolve labels from the authoritative libraries; never guess numbered paths.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const root=path.resolve(__dirname,'..'),voc=path.resolve(root,'../VSS/voc'),senb=path.resolve(root,'../VSS/senb');
+const root=path.resolve(__dirname,'..'),voc=path.resolve(root,process.env.VOC_SOURCE||'../../../vocabulary-builder'),senb=path.resolve(root,process.env.SENB_SOURCE||'../../../sentences-builder');
 const source=fs.readFileSync(path.join(voc,'index.html'),'utf8'),start=source.indexOf('const RAW_CATEGORIES ='),end=source.indexOf('const app =',start);
 if(start<0||end<0)throw Error('VOC labels not found');
 const categories=vm.runInNewContext(source.slice(start,end)+';JSON.parse(JSON.stringify(CATEGORIES))',{}, {timeout:1000});
@@ -27,4 +27,6 @@ for(const [folder,sub,n]of [[2,1,1],[2,1,2],[2,1,3],[3,1,1],[3,1,2],[3,1,3]]){
  prompts.push({id:`senb-${folder}-${sub}-${n}`,label:p.title,games:['bridge'],images:[{library:'senb',path:p.imgPath}],audio:[{library:'senb',path:p.soundPath}]});
 }
 prompts.push({id:'breath',label:'نفس لطيف… على راحتك',games:['balloon'],images:[{library:'local',path:'breathing.svg'}],audio:[]});
-fs.writeFileSync(path.join(root,'assets/prompts.json'),JSON.stringify({prompts},null,2)+'\n');console.log(`Built ${prompts.length} word/sentence prompts.`);
+fs.writeFileSync(path.join(root,'assets/prompts.json'),JSON.stringify({prompts},null,2)+'\n');
+// Copy the borrowed pictures/recordings so the app never loads another app's files.
+for(const prompt of prompts)for(const asset of [...prompt.images,...prompt.audio])if(['voc','senb'].includes(asset.library)){const target=path.join(root,'assets/library',asset.library,asset.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(asset.library==='voc'?voc:senb,asset.path),target);}console.log(`Built ${prompts.length} word/sentence prompts.`);

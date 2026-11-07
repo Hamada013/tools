@@ -25,3 +25,12 @@ dialog{width:min(600px,calc(100% - 24px));max-height:calc(100svh - 32px);max-hei
 .score-0{--grade-bg:#fce7e7;--grade-ink:#9c3039;--grade-border:#e6b9bd}.score-20{--grade-bg:#ffebdf;--grade-ink:#914517;--grade-border:#ebc5aa}.score-40{--grade-bg:#fff3d6;--grade-ink:#795713;--grade-border:#e6d29b}.score-60{--grade-bg:#eff5d9;--grade-ink:#53651c;--grade-border:#cbd9a1}.score-80{--grade-bg:#ddf4ed;--grade-ink:#236956;--grade-border:#a5d7c8}.score-100{--grade-bg:#d8efdf;--grade-ink:#216435;--grade-border:#a0cdae}
 @media(max-width:600px){.grade-controls{gap:6px}.grade{font-size:.8rem;min-height:58px}}
 @media(max-height:560px) and (min-aspect-ratio:1/1){.grade-controls{position:static;width:min(100%,490px);gap:6px}.grade{flex-direction:row;gap:4px;min-height:44px;font-size:.8rem}.grade svg{width:18px;height:18px}.production-card{min-height:0}.production-card .syllable-part img{height:clamp(25px,10vh,45px)}}
+
+/* The card is the sound control; letter labels are already part of the pictures. */
+.listening-cue{flex:none;min-height:52px;height:56px;max-width:420px;align-self:center;gap:10px;padding:8px 18px;border-radius:20px}
+.listening-cue svg{width:30px;height:30px}.listening-cue>span{display:flex;align-items:center}
+.production-card{cursor:pointer}.syllable-part{gap:0}
+.matching-target.drop-target{width:100%;border:1px dashed #b8d4ca;border-radius:24px;padding:10px;background:#ffffffa0}
+.matching-target.drop-target.matched{border:1px solid #91c2ae;background:#edf8f1}
+.matching-target.drop-target:hover{border-color:#6caa90}.matching-target.drop-target.is-playing{opacity:1}
+@media(max-height:560px) and (min-aspect-ratio:1/1){.listening-cue{min-height:44px;height:44px;padding:4px 12px}.listening-cue svg{width:24px;height:24px}}

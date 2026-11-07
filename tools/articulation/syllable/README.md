@@ -4,10 +4,10 @@ Open `syllable.html` for the home screen or `matching.html` for direct matching 
 
 ## Activities
 
-- **Practice:** choose one to three consonants, CV/VC/VCV, and the first vowel. Tap a picture sequence to hear the existing recording. Three sequences per page, or one on short portrait phones. Changing sounds, modes or pages stops audio. Manual encouragement stars remain separate from assessment scores.
-- **Matching:** three visible sequences and three covered audio targets. Select a source then a target using taps or keyboard, or drag with a mouse, stylus or touch. The listen control on each covered target plays only its recording. Matched pairs remain visible and cannot be counted twice. This is practice, separate from the assessment records.
-- **Listening test:** every unique selected syllable appears once, with three distinct choices, including when one consonant is chosen. The full recording must finish before an answer is accepted. Only the first selection is scored, then the test advances. Sound/image errors expose retry and skip controls.
-- **Production test:** one sequence appears without automatic audio. The examiner selects one of six colored icon buttons: 0%, 20%, 40%, 60%, 80%, or 100%. Each syllable retains its exact percentage; the report shows the arithmetic mean of percentage-rated items, excluding skips. A model is optional through replay and is recorded as a prompt on that item, including after reload. This is examiner scoring, not microphone recording or automatic speech recognition.
+- **Practice:** choose one to three consonants, CV/VC/VCV, and the first vowel. Tap a picture sequence to hear the existing recording. The pictures already carry their sound labels, so extra letter captions are omitted in every activity. Three sequences per page, or one on short portrait phones. Changing sounds, modes or pages stops audio. Manual encouragement stars remain separate from assessment scores.
+- **Matching:** three visible sequences and three covered audio targets. Select a source then a target using taps or keyboard, or drag with a mouse, stylus or touch. Tap a covered card to hear its recording; with a source selected, tapping also checks the pair. Matched cards can still be tapped to listen without scoring again. Matched pairs remain visible and cannot be counted twice. This is practice, separate from the assessment records.
+- **Listening test:** every unique selected syllable appears once, with three distinct choices, including when one consonant is chosen. Tap the question sound card to replay, separately from choosing an answer. The full recording must finish before an answer is accepted. Only the first selection is scored, then the test advances. Sound/image errors expose retry and skip controls.
+- **Production test:** one sequence appears without automatic audio. The examiner selects one of six colored icon buttons: 0%, 20%, 40%, 60%, 80%, or 100%. Each syllable retains its exact percentage; the report shows the arithmetic mean of percentage-rated items, excluding skips. A model is optional by tapping the production card and is recorded as a prompt on that item, including after reload. This is examiner scoring, not microphone recording or automatic speech recognition.
 
 Every test has a finite plan: 3 CV/VC or 9 VCV items per selected consonant. Listening accuracy excludes skipped items. Production reports average the selected percentages; 100% also counts as fully correct and 20–80% as partial production. Earlier saved ratings retain their original labels and legacy summaries; in a resumed test with both scales, the percentage mean uses only items rated with a percentage. Reports show item responses, choice/model information, planned/assessed counts and print/PDF support. These descriptive practice/test scores are not standardized norms.
 
@@ -23,7 +23,7 @@ White Taffaha-style cards retain the articulation logo and existing letter pictu
 
 ```sh
 node tools/articulation/syllable/tests/model.mjs
-ARTICULATION_PLAYWRIGHT="$PWD/tools/VSS/voc/node_modules/playwright" node tools/articulation/syllable/tests/browser.cjs
+node tools/articulation/syllable/tests/browser.cjs
 ```
 
 The model check verifies all 375 consonant targets against the supplied recordings and picture paths, scoring, prompt flags, duplicate-response protection and stored-session validation. The browser check runs Chrome and WebKit with real WAV playback, nine phone/iPad/landscape viewport sizes, practice/filter changes, listening, production, save/reload, finite results and pointer/tap/keyboard matching. Add `ARTICULATION_ENGINE=chromium` or `webkit` to select one engine. QA screenshots use synthetic results and are written under `/private/tmp/`.
