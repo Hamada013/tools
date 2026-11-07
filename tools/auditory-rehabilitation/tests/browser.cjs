@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
-const {chromium,webkit}=require(process.env.SOUNDS_PLAYWRIGHT||path.resolve(__dirname,'../../VSS/voc/node_modules/playwright'));
+const {chromium,webkit}=require(process.env.SOUNDS_PLAYWRIGHT||'playwright');
 const {solveParentGate}=require('../../tests/solve-parent-gate.cjs');
 const root=path.resolve(__dirname,'../../..'),types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.m4a':'audio/mp4'};
 const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(!file.startsWith(root+path.sep))return res.writeHead(403).end();fs.readFile(file,(e,b)=>{if(e)return res.writeHead(404).end();res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');res.end(b);});});

@@ -23,7 +23,7 @@ White Taffaha-style cards retain the articulation logo and existing letter pictu
 
 ```sh
 node tools/articulation/syllable/tests/model.mjs
-ARTICULATION_PLAYWRIGHT="$PWD/tools/VSS/voc/node_modules/playwright" node tools/articulation/syllable/tests/browser.cjs
+node tools/articulation/syllable/tests/browser.cjs
 ```
 
 The model check verifies all 375 consonant targets against the supplied recordings and picture paths, scoring, prompt flags, duplicate-response protection and stored-session validation. The browser check runs Chrome and WebKit with real WAV playback, nine phone/iPad/landscape viewport sizes, practice/filter changes, listening, production, save/reload, finite results and pointer/tap/keyboard matching. Add `ARTICULATION_ENGINE=chromium` or `webkit` to select one engine. QA screenshots use synthetic results and are written under `/private/tmp/`.

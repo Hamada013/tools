@@ -36,15 +36,11 @@ jobs:
         run: node tools/shared/build-pwa-releases.cjs --site
       - name: Verify accounts and app integrity
         run: |
-          node tools/VSS/tests/static.cjs
           node tools/tests/update-readiness.cjs
-          node tools/tests/welcome-launch.cjs
-          node tools/tests/account-avatars.cjs
-          node tools/tests/account-deletion.cjs
-          node tools/tests/hamada-reset.cjs
+          node tools/tests/update-activation.cjs
+          node tools/tests/sound-suite.cjs
+          node tools/tests/standalone-sound-accounts.cjs
           node tools/auditory-rehabilitation/tests/static.cjs
-          node tools/follow-direction/tests/model.cjs
-          node tools/follow-direction/tests/research.cjs
           node tools/tests/one-way-links.cjs
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'

@@ -2,7 +2,7 @@
 
 An Arabic, local-only practice PWA for children ages 6+, built as a new app in `tools/ihki-hilou`. White backgrounds, rounded cards, flat SVG scenes, RTL typography and large touch controls follow VOC/SENB's visual style. The app ships without a backend, CDN, remote font or runtime build dependency.
 
-Serve the **repository root** over HTTPS (or localhost), then open `/tools/ihki-hilou/`. Keep `tools/VSS/voc`, `tools/VSS/senb` and `tools/arabicsounds` at their documented paths. Opening an HTML file directly does not provide the required PWA/microphone environment.
+Serve the **repository root** over HTTPS (or localhost), then open `/tools/ihki-hilou/`. Keep `tools/arabicsounds` at its documented path. The few VOC/SENB pictures and recordings this app uses are local copies in `assets/library/`; `node scripts/build-data.cjs` refreshes them from the Vocabulary Builder and Sentences Builder repositories next to this one. Opening an HTML file directly does not provide the required PWA/microphone environment.
 
 ## Practice flow
 
@@ -20,7 +20,7 @@ The clinical framing draws on [ASHA's Stuttering, Cluttering, and Fluency Practi
 
 ## Audio and assets
 
-`assetsManager.js` maps VOC images/word recordings, SENB matching word fallbacks and reviewed sentence presets, plus isolated Arabic sounds. The repository calls its phoneme folder `arabicsounds`; `arabic-sound-app` is an alias. Missing images try matching fallbacks, then a local placeholder. Missing whole-word audio tries available alternatives and a clearly announced Arabic device voice; device voices may require Internet. Nothing uploads the child's recordings.
+`assetsManager.js` maps local copies of VOC images/word recordings, SENB matching word fallbacks and reviewed sentence presets, plus isolated Arabic sounds. The repository calls its phoneme folder `arabicsounds`; `arabic-sound-app` is an alias. Missing images try matching fallbacks, then a local placeholder. Missing whole-word audio tries available alternatives and a clearly announced Arabic device voice; device voices may require Internet. Nothing uploads the child's recordings.
 
 Normal library speech is labeled as a word/sentence example. To demonstrate a particular technique, choose **نموذج المرافق للبطاقة الحالية** in caregiver settings, record the example, then return the setting to child attempts. Models are separate for each profile/game/prompt and work offline. They replace the previous model for that combination.
 
