@@ -67,6 +67,20 @@
                 });
                 const practised = [...new Set((child.sessions || []).filter(s => s.mode === 'practice').flatMap(s => (s.results || []).filter(r => r.outcome !== 'skip').map(r => skillOf(r.item))))];
                 return { level: null, plan: practised.length ? { goals: practised.map(id => ({ id })) } : null, sessions };
+            } },
+        { id: 'aural', name: 'التأهيل السمعي', color: '#0369a1', key: 'aural-rehabilitation-children-v1', url: '../../aural-rehabilitation-/', goals: ['../../aural-rehabilitation-/assets/lessons.js', '../../aural-rehabilitation-/assets/intervention-goals.js'],
+            skills: { 'my-house': 'بيتي', 'my-kitchen': 'مطبخي', transport: 'مواصلات', buses: 'الباصات' },
+            sources: { station: 'محطة' },
+            // Each station play is one entry in child.aural.log ({t, l: lesson, v: level, s: station, pct}).
+            read: child => {
+                const log = child.aural?.log || [], days = new Map();
+                for (const play of log) {
+                    const day = new Date(play.t).toISOString().slice(0, 10), session = days.get(day) || { date: new Date(play.t).toISOString(), kind: 'assessment', source: 'station', skills: {}, raw: { records: [] } };
+                    const skill = session.skills[play.l] ||= { correct: 0, total: 0 }; skill.total += 100; skill.correct += play.pct || 0;
+                    session.raw.records.push(play); days.set(day, session);
+                }
+                const played = [...new Set(log.map(play => `${play.l}.${play.v}`))];
+                return { level: null, plan: played.length ? { goals: played.map(key => ({ prefix: key })) } : null, sessions: [...days.values()] };
             } }
     ];
     // The two sound apps keep sessions per app (child.soundApps[app]); only tests have right/wrong answers.
@@ -115,7 +129,8 @@
     // ---- Goal banks: each app's own intervention-goals.js, loaded on demand (needs the app online once) ----
     const goalBanks = new Map();
     function goalBank(app) {
-        if (!goalBanks.has(app.id)) goalBanks.set(app.id, fetch(app.goals).then(response => response.ok ? response.text() : Promise.reject())
+        // `goals` is one file, or several run together (e.g. a lessons file and the goal file that reads it).
+        if (!goalBanks.has(app.id)) goalBanks.set(app.id, Promise.all([].concat(app.goals).map(url => fetch(url).then(response => response.ok ? response.text() : Promise.reject()))).then(parts => parts.join(';\n'))
             .then(code => { const sandbox = {}; new Function('globalThis', 'window', 'self', 'module', code)(sandbox, sandbox, sandbox, undefined); return sandbox.InterventionGoals || null; })
             .catch(() => null));
         return goalBanks.get(app.id);
@@ -123,6 +138,7 @@
     // A goal's value: the therapist's rating when newer than the last measured session, else the app's estimate.
     function goalStates(bank, plan, child) {
         if (!bank || !plan?.goals?.length) return null;
+        if (plan.goals.some(goal => goal.prefix)) plan = { ...plan, goals: plan.goals.flatMap(goal => goal.prefix ? bank.GOALS.flatMap(long => long.short).filter(item => item.id.startsWith(goal.prefix + '.')).map(item => ({ id: item.id })) : [goal]) };
         let estimates = {}; try { estimates = bank.estimate?.(child) || {}; } catch {}
         const rows = plan.goals.filter(goal => bank.short(goal.id)).map(goal => {
             const est = estimates[goal.id], manualAt = goal.history?.at?.(-1)?.date;
