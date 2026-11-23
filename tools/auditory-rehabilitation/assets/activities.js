@@ -73,6 +73,7 @@ export function createActivities({main,icon,pic,control,title,tile,button,escape
  function stars(answers=[]){return `<div class="stars" aria-label="${answers.filter(Boolean).length} من ${answers.length}">${Array.from({length:10},(_,i)=>`<svg class="trial-star ${answers[i]?'filled':''}" data-completed="${i<answers.length}" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>`).join('')}</div>`;}
  function scorePopup(s,restart){
   window.SoundProgress?.complete(s.sessionId);
+  if(autoRoute){s.phase='complete';void routeAfter(s);return;}
   s.phase='complete';const practice=s.activity==='practice';
   openModal(s.text||'اكتشاف الصوت',`<div class="center"><div class="result-metric" dir="ltr">${practice?'10 محاولات':s.score+' / 10'}</div>${practice?'':`<p class="result-percent" dir="ltr">${s.score*10}%</p>`}<div class="actions">${control('session-again','refresh',practice?'تدريب جديد':'جلسة جديدة')}${control('session-back','back','رجوع')}</div></div>`);
   $('#session-again').onclick=()=>{$('#modal').close();restart();};
@@ -109,7 +110,8 @@ export function createActivities({main,icon,pic,control,title,tile,button,escape
   if(!active(s)||!['playing','answer'].includes(s.phase)||$('#heard').disabled)return;s.phase='answered';s.detectionController?.abort();stopPlayback();const present=s.queue[s.trial],correct=value===present;s.score+=Number(correct);s.answers.push(correct);$$('.detect-answer').forEach(node=>node.disabled=true);
   window.SoundProgress?.record({owner:s.owner,sessionId:s.sessionId,id:String(s.trial),activity:'اكتشاف الصوت',skill:'detection',kind:'assessment',label:present?SOUND_NAMES[s.target]:'سكوت',target:present?String(s.target):'silence',present,response:value,correct});
   $('.stars').outerHTML=stars(s.answers);
-  run(s,async()=>{await feedback(s,correct);if(s.trial===9){scorePopup(s,()=>startDetection(s.pool));return;}s.trial++;s.target=null;drawDetection(s);s.phase='ready';if(s.auto)await playDetection(s);});
+  if(autoRoute&&!correct&&present)autoRoute.failed.add(s.target);
+  run(s,async()=>{await feedback(s,correct);if(autoRoute&&active(s))await (correct?window.VocPrompts?.praise():window.VocPrompts?.retry());if(s.trial===9){scorePopup(s,()=>startDetection(s.pool));return;}s.trial++;s.target=null;drawDetection(s);s.phase='ready';if(s.auto)await playDetection(s);});
  }
  function pauseDetection(){const s=current;if(!s||s.mode!=='detection')return;s.auto=false;s.detectionController?.abort();stopPlayback();closeEar();s.game?.playing(false);if(s.phase==='playing'||s.phase==='answer')s.phase='ready';updateDetectionAuto();}
  async function playDetection(s){
@@ -202,11 +204,12 @@ export function createActivities({main,icon,pic,control,title,tile,button,escape
  function identifyAnswer(s,id){
   if(!active(s)||!s.hasCue||!['playing','answer'].includes(s.phase)||!s.options.includes(id))return;
   s.phase='answered';stopPlayback();const correct=id===s.target,card=$(`.answer-grid [data-sound="${id}"]`);s.score+=Number(correct);s.answers.push(correct);
-  window.SoundProgress?.record({owner:s.owner,sessionId:s.sessionId,id:String(s.trial++),activity:s.text,skill:skill(s),kind:s.activity==='test'?'assessment':'practice',label:SOUND_NAMES[s.target],target:String(s.target),response:String(id),correct});
+  window.SoundProgress?.record({owner:s.owner,sessionId:s.sessionId,id:String(s.trial++),activity:s.text,skill:skill(s),kind:s.activity==='test'?'assessment':'practice',label:SOUND_NAMES[s.target],target:String(s.target),response:String(id),correct,choices:s.options.length});
   $('#identify-target').replaceChildren(card.querySelector('img').cloneNode());card.classList.add(correct?'matched':'wrong');$$('.answer-grid button').forEach(card=>card.disabled=true);$('#identify-target').disabled=true;
   if($('.stars'))$('.stars').outerHTML=stars(s.answers);
+  if(autoRoute&&!correct)autoRoute.failed.add(s.target);
   run(s,async()=>{
-   await feedback(s,correct);
+   await feedback(s,correct);if(autoRoute&&active(s))await (correct?window.VocPrompts?.praise():window.VocPrompts?.retry());
    if(s.activity==='listen'){s.hasCue=false;s.phase='ready';drawIdentification(s);return;}
    if(s.trial===10){scorePopup(s,()=>startIdentification(s.pool,s.text,s.back,s.activity));return;}
    prepareIdentification(s);drawIdentification(s);await playIdentificationTarget(s);
@@ -261,9 +264,9 @@ export function createActivities({main,icon,pic,control,title,tile,button,escape
  }
 
  function memorySetup(){main.innerHTML=heading('الذاكرة','around')+`<div class="setup-board"><div class="actions">${[4,6,8,12].map(size=>`<button class="button" data-size="${size}">${size}</button>`).join('')}</div></div>`;$$('[data-size]').forEach(button=>button.onclick=()=>startMemory(Number(button.dataset.size)));}
- function startMemory(size){
+ function startMemory(size,routePool=null){
   const previous=current?.mode==='memory'?[...new Set(current.deck)]:[];
-  const pool=shuffle(environment.filter(id=>!previous.includes(id))).slice(0,size/2),s=begin({mode:'memory',activity:'test',size,deck:shuffle([...pool,...pool]),open:[],matched:new Set(),locked:true,attempts:0});
+  const pool=routePool||shuffle(environment.filter(id=>!previous.includes(id))).slice(0,size/2),s=begin({mode:'memory',activity:'test',route:!!routePool,size,deck:shuffle([...pool,...pool]),open:[],matched:new Set(),locked:true,attempts:0});
   main.innerHTML=heading('الذاكرة','around',control('memory-restart','refresh','بدء لعبة جديدة')+control('memory-size','cards','عدد البطاقات'))+`<div class="memory-board activity-board"><div class="memory-grid" data-size="${size}">${s.deck.map((id,index)=>pic('around',id,'',false).replace('data-sound=',`data-index="${index}" data-sound=`).replace('<button','<button disabled')).join('')}</div></div>${errorNode()}`;
   $$('.memory-grid button').forEach(card=>card.onclick=()=>flipMemory(s,Number(card.dataset.index)));$('#memory-restart').onclick=()=>startMemory(size);$('#memory-size').onclick=()=>{reset();memorySetup();};
   run(s,async()=>{
@@ -286,7 +289,7 @@ export function createActivities({main,icon,pic,control,title,tile,button,escape
   window.SoundProgress?.record({owner:s.owner,sessionId:s.sessionId,id:String(s.attempts++),activity:'الذاكرة',skill:'memory',kind:'assessment',label:SOUND_NAMES[s.deck[a]],target:String(s.deck[a]),response:String(s.deck[b]),correct});
   if(correct){
    for(const i of [a,b]){s.matched.add(i);const card=$(`.memory-grid [data-index="${i}"]`);card.classList.add('matched');card.disabled=true;}
-   s.open=[];s.locked=false;if(s.matched.size===s.deck.length){window.SoundProgress?.complete(s.sessionId);s.locked=true;run(s,async()=>{await wait(1200,s.signal);startMemory(s.size);});}
+   s.open=[];s.locked=false;if(s.matched.size===s.deck.length){window.SoundProgress?.complete(s.sessionId);s.locked=true;run(s,async()=>{await wait(1200,s.signal);if(autoRoute&&s.route){finishRoute();return;}startMemory(s.size);});}
   }else run(s,async()=>{await wait(1000,s.signal);for(const i of [a,b]){const card=$(`.memory-grid [data-index="${i}"]`);card.classList.add('hidden-face');card.setAttribute('aria-label','بطاقة مقلوبة');}s.open=[];s.locked=false;});
  }
  function library(){
@@ -303,9 +306,71 @@ export function createActivities({main,icon,pic,control,title,tile,button,escape
   };
   $('#pitch-prev').onclick=()=>{s.page--;draw();};$('#pitch-next').onclick=()=>{s.page++;draw();};s.observer=new ResizeObserver(draw);s.observer.observe(board);draw();
  }
+
+ // ---- «المسار التلقائي»: the listening ladder on one set the therapist picks (2–4 sounds). ----
+ // Detection test → discrimination (practice → test, first two sounds) → identification (practice → test,
+ // the whole set) → memory. After each test the missed sounds repeat; a test under 80% ends the route for today.
+ let autoRoute=null,routeRepeat=null;
+ const ROUTE_TEXT={discrimination:'التمييز · المسار التلقائي',identification:'التعرف · المسار التلقائي'};
+ const NEW_STEP=new Set(['discrimination-practice','identification-practice','memory']);
+ function closeRouteDialogs(){if(routeRepeat?.open)routeRepeat.close();}
+ function chooseRouteSet(){
+  main.innerHTML=heading('المسار التلقائي','around')+`<div class="setup-board"><p class="route-intro">اختر مجموعة الأصوات لهذا اليوم</p></div>`;
+  const sets=[...SETS[2],...SETS[3]];
+  openModal('المسار التلقائي',`<p class="route-intro">اختر مجموعة أصوات. نبدأ بالاكتشاف ثم التمييز ثم التعرف ثم الذاكرة.</p><div class="set-library">${sets.map((set,index)=>`<button class="set-card" data-route-set="${index}" aria-label="${escape(set.map(id=>SOUND_NAMES[id]).join('، '))}">${set.map(id=>`<img src="images/${id}.webp" alt="">`).join('')}</button>`).join('')}</div>`);
+  $$('[data-route-set]').forEach(card=>card.onclick=()=>{$('#modal').close();startRoute(sets[Number(card.dataset.routeSet)]);});
+ }
+ function startRoute(set){
+  window.pickGlowColour?.();window.VocPrompts?.unlock?.();
+  const extra=set.length<3?shuffle(environment.filter(id=>!set.includes(id))).slice(0,3-set.length):[];
+  autoRoute={set:[...set],full:[...set,...extra],steps:['detection','discrimination-practice','discrimination','identification-practice','identification','memory'],failed:new Set()};
+  runStep();
+ }
+ function runStep(){
+  const own=autoRoute;if(!own)return;const step=own.steps.shift();if(!step){finishRoute();return;}
+  own.failed=new Set();
+  const go=()=>{
+   if(autoRoute!==own)return;
+   if(step==='detection')startDetection(own.set);
+   else if(step==='discrimination-practice')startIdentification(own.set.slice(0,2),ROUTE_TEXT.discrimination,'around/route','practice');
+   else if(step==='discrimination')startIdentification(own.set.slice(0,2),ROUTE_TEXT.discrimination,'around/route','test');
+   else if(step==='identification-practice')startIdentification(own.full,ROUTE_TEXT.identification,'around/route','practice');
+   else if(step==='identification')startIdentification(own.full,ROUTE_TEXT.identification,'around/route','test');
+   else startMemory(own.set.length*2,[...own.set]);
+  };
+  // A short play break before each new step (not between a practice and its own test).
+  if(window.VocInterlude&&NEW_STEP.has(step))window.VocInterlude.show(go);else go();
+ }
+ async function routeAfter(s){
+  const own=autoRoute;if(!own)return;
+  if(s.activity==='practice'){runStep();return;}
+  const passed=s.score>=8;
+  await repeatMissed([...own.failed]);if(autoRoute!==own)return;
+  if(!passed){stopForToday(s);return;}
+  runStep();
+ }
+ // Each missed sound three times, its picture big and glowing, one second apart. No buttons.
+ async function repeatMissed(ids){
+  if(!ids.length)return;const own=autoRoute;
+  if(!routeRepeat){routeRepeat=document.createElement('dialog');routeRepeat.className='route-repeat';routeRepeat.setAttribute('aria-label','نسمع الأصوات مرة ثانية');routeRepeat.addEventListener('cancel',()=>{autoRoute=null;stopPlayback();});document.body.append(routeRepeat);}
+  routeRepeat.showModal();const s=begin({mode:'repeat'});
+  try{for(const id of ids){
+   if(autoRoute!==own)break;routeRepeat.innerHTML=`<div class="route-repeat-card">${pic('around',id)}</div>`;const card=routeRepeat.querySelector('button');
+   for(let i=0;i<3&&autoRoute===own;i++){card.classList.add('route-glow');await clip(s,id,'',null,{record:false});card.classList.remove('route-glow');await wait(1000,s.signal);}
+  }}catch(error){if(error.name!=='AbortError')console.error(error);}
+  if(routeRepeat.open)routeRepeat.close();
+ }
+ function stopForToday(s){
+  autoRoute=null;
+  openModal('نكمل المرة القادمة',`<div class="center"><div class="result-metric" dir="ltr">${s.score} / 10</div><p class="route-intro">نتدرّب على هذه الخطوة ونرجع لها في الجلسة القادمة.</p><div class="actions">${button('route-home','الرئيسية')}</div></div>`);
+  $('#route-home').onclick=()=>{$('#modal').close();location.hash='/around';};
+ }
+ function finishRoute(){autoRoute=null;void window.VocPrompts?.say('done-1');location.hash='/around';}
  function render(page){
+  closeRouteDialogs();autoRoute=null;
+  if(page==='route'){chooseRouteSet();return;}
   if(page==='detection')detectionSetup();else if(page==='discrimination')discriminationSetup();else if(page==='duration')durationSetup();else if(page==='identification')identificationSetup();else if(page==='memory')memorySetup();else if(page==='library')library();else location.hash='/around';
  }
- function hide(){if(current?.mode==='memory'){reset();memorySetup();}else if(current&&['detection','duration','identification'].includes(current.mode)&&current.activity!=='listen')returnToWorkplace();else stopPlayback();}
+ function hide(){autoRoute=null;closeRouteDialogs();if(current?.mode==='memory'){reset();memorySetup();}else if(current&&['detection','duration','identification'].includes(current.mode)&&current.activity!=='listen')returnToWorkplace();else stopPlayback();}
  return {render,reset,hide};
 }

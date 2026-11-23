@@ -3,7 +3,7 @@
  'use strict';
  const APPS=['arabicsounds','auditory-rehabilitation'];
  const registrations=child=>child.apps||{};
- const admin=child=>child?.role==='admin'||String(child?.name||'').normalize('NFKC').trim().toLowerCase()==='hamada';
+ const admin=()=>false;
  function create({app,storage}){
   if(!APPS.includes(app))throw Error('Unknown sound app');
   const KEY=`${app}-children-v1`;
@@ -16,9 +16,8 @@
   let memory={schema:1,active:null,children:[]},storageOK=true;
   function read(){if(!storageOK)return structuredClone(memory);try{const saved=JSON.parse(storage.getItem(KEY));if(saved?.schema===1&&Array.isArray(saved.children))memory=saved;}catch{}return structuredClone(memory);}
   function write(data){memory=structuredClone(data);try{storage.setItem(KEY,JSON.stringify(data));storageOK=true;}catch{storageOK=false;}root.dispatchEvent?.(new Event('sound-progress-change'));}
-  function ensure(){const data=read(),hamada=data.children.find(child=>String(child.name||'').normalize('NFKC').trim().toLowerCase()==='hamada');if(!hamada){data.children.push({id:'hamada-admin',name:'Hamada',role:'admin',created:new Date().toISOString(),apps:{}});write(data);}else if(hamada.role!=='admin'){hamada.role='admin';write(data);}}
-  ensure();
-  const children=()=>read().children;
+  // The built-in Hamada owner account was retired on 2026-11-19: every account is an ordinary child.
+  const children=()=>read().children.filter(child=>child.role!=='admin'&&String(child.name||'').normalize('NFKC').trim().toLowerCase()!=='hamada');
   const active=()=>{const data=read();return data.children.find(child=>child.id===data.active)||null;};
   function register(){const data=read(),child=data.children.find(child=>child.id===data.active);if(!child||child.apps?.[app])return;child.apps={...registrations(child),[app]:true};write(data);}
   function activate(id){const data=read(),child=data.children.find(child=>child.id===id);if(!child||data.deletedChildren?.[id])return false;data.active=id;child.apps={...registrations(child),[app]:true};write(data);return true;}
@@ -29,13 +28,16 @@
    const id=entry.sessionId||`listen-${Date.now()}`,kind=entry.kind==='assessment'?'assessment':'practice';
    let session=state.sessions.find(s=>s.id===id);if(!session){session={id,date:new Date().toISOString(),activity:entry.activity||'الاستماع',skill:entry.skill||'listening',kind,partial:true,records:[]};state.sessions.push(session);}
    if(entry.id&&session.records.some(row=>row.id===entry.id))return false;
-   session.records.push({id:entry.id||root.crypto?.randomUUID?.()||String(Math.random()),label:String(entry.label),target:String(entry.target||entry.label),correct:kind==='assessment'?entry.correct===true:null,response:entry.response??null,present:entry.present??null});write(data);return true;
+   session.records.push({id:entry.id||root.crypto?.randomUUID?.()||String(Math.random()),label:String(entry.label),target:String(entry.target||entry.label),correct:kind==='assessment'?entry.correct===true:null,response:entry.response??null,present:entry.present??null,choices:entry.choices??null,level:entry.level??null});write(data);return true;
   }
   function complete(id){const data=read(),child=data.children.find(c=>c.id===data.active),session=child?.soundApps?.[app]?.sessions.find(s=>s.id===id);if(session){session.partial=false;write(data);}}
   function report(id){const owner=active(),child=children().find(c=>c.id===(id||owner?.id));if(!owner||!child||(!admin(owner)&&owner.id!==child.id))return null;return {child,sessions:child.soundApps?.[app]?.sessions||[]};}
   function saveDetail(kind,detail){const data=read(),child=data.children.find(c=>c.id===data.active);if(!child||data.deletedChildren?.[child.id]||detail.owner!==child.id)return;child.soundApps||={};child.soundApps[app]||={sessions:[]};child.soundApps[app].details||={};child.soundApps[app].details[kind]=structuredClone(detail);write(data);}
   const detail=kind=>active()?.soundApps?.[app]?.details?.[kind]||null;
-  register();return {saveDetail,detail,active,children,add,activate,register,record,complete,report,isAdmin:()=>admin(active()),storageOK:()=>storageOK};
+  // The therapist's intervention plan for the active child, in this app only.
+  const intervention=()=>structuredClone(active()?.soundApps?.[app]?.intervention||null);
+  function saveIntervention(plan){const data=read(),child=data.children.find(c=>c.id===data.active);if(!child)return false;child.soundApps||={};child.soundApps[app]||={sessions:[]};child.soundApps[app].intervention=structuredClone(plan);write(data);return storageOK;}
+  register();return {intervention,saveIntervention,saveDetail,detail,active,children,add,activate,register,record,complete,report,isAdmin:()=>admin(active()),storageOK:()=>storageOK};
  }
  if(typeof module!=='undefined')module.exports={create};
  root.SoundProgressModel={create};

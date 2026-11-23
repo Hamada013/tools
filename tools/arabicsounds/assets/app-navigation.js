@@ -26,7 +26,7 @@
    const kind=controlKind(node);if(kind){
     node.dataset.suiteControl=kind;const label=node.getAttribute('aria-label')||node.title||node.textContent.trim();node.setAttribute('aria-label',label);if(!node.title)node.title=label;
     const glyph=kind==='suiteHome'?'home':kind==='back'?(node.getAttribute('href')==='games.html'?'games':'home'):kind;
-    if(icons[glyph]&&!node.querySelector('[data-suite-glyph]')){
+    if(icons[glyph]&&!node.querySelector('[data-suite-glyph],.suite-account-chip')){
      const template=document.createElement('template');template.innerHTML=icons[glyph];const icon=template.content.firstElementChild;icon.dataset.suiteGlyph=glyph;
      const old=node.querySelector('svg,i');if(old)old.replaceWith(icon);else node.prepend(icon);
     }

@@ -45,8 +45,37 @@
                     groups.set(id, session);
                 }
                 return { level: child.level || child.taffaha?.level, plan: child.taffaha?.intervention || null, sessions: [...groups.values()] };
+            } },
+        { id: 'arabicsounds', name: 'أصواتي العربية', color: '#d97706', key: 'arabicsounds-children-v1', url: '../arabicsounds/', goals: '../arabicsounds/assets/intervention-goals.js',
+            skills: { pair: 'تمييز أصوات الكلام', 'ling-detection': 'اكتشاف أصوات لينغ', 'ling-identification': 'التعرف على أصوات لينغ', matching: 'المطابقة', memory: 'الذاكرة' },
+            sources: { pair: 'تمييز أصوات الكلام', 'ling-detection': 'اكتشاف أصوات لينغ', 'ling-identification': 'التعرف على أصوات لينغ', matching: 'المطابقة', memory: 'الذاكرة' },
+            read: child => soundRead(child, 'arabicsounds') },
+        { id: 'auditory-rehabilitation', name: 'أصوات من حولي', color: '#0891b2', key: 'auditory-rehabilitation-children-v1', url: '../auditory-rehabilitation/', goals: '../auditory-rehabilitation/assets/intervention-goals.js',
+            skills: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
+            sources: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
+            read: child => soundRead(child, 'auditory-rehabilitation') },
+        { id: 'follow', name: 'اتبع التعليمات', color: '#16a34a', key: 'follow-direction-children-v1', url: '../../follow-direction/', goals: '../../follow-direction/assets/intervention-goals.js',
+            skills: { one: 'حركة واحدة', objects: 'أشياء مألوفة', attributes: 'لون وحجم', quantity: 'واحد واثنان وثلاثة', function: 'استخدام الأشياء', space: 'المكان', two: 'حركتان بالترتيب', order: 'أشياء بالترتيب', play: 'خطوتان في اللعب', condition: 'إذا…', three: 'ثلاث خطوات' },
+            sources: { practice: 'التدريب', screen: 'الفرز' },
+            // Answers count when done without help; the plan is the road itself (every skill practised).
+            read: child => {
+                const skillOf = item => String(item || '').replace(/[-_]?\d+$/, '');
+                const sessions = (child.sessions || []).filter(s => s.ended).map(s => {
+                    const skills = {};
+                    for (const r of s.results || []) { if (r.outcome === 'skip') continue; const k = skills[skillOf(r.item)] ||= { correct: 0, total: 0 }; k.total++; if (r.outcome === 'independent') k.correct++; }
+                    return { date: s.finished || s.started, kind: s.mode === 'screen' ? 'assessment' : 'practice', source: s.mode, skills, raw: s };
+                });
+                const practised = [...new Set((child.sessions || []).filter(s => s.mode === 'practice').flatMap(s => (s.results || []).filter(r => r.outcome !== 'skip').map(r => skillOf(r.item))))];
+                return { level: null, plan: practised.length ? { goals: practised.map(id => ({ id })) } : null, sessions };
             } }
     ];
+    // The two sound apps keep sessions per app (child.soundApps[app]); only tests have right/wrong answers.
+    function soundRead(child, app) {
+        const own = child.soundApps?.[app] || {};
+        return { level: child.level, plan: own.intervention || null,
+            sessions: (own.sessions || []).filter(s => !s.partial).map(s => ({ date: s.date, kind: s.kind, source: s.skill,
+                skills: s.kind === 'assessment' ? { [s.skill]: { correct: s.records.filter(r => r.correct).length, total: s.records.length } } : {}, raw: s })) };
+    }
 
     // ---- Reading every app ----
     const normalizeName = name => String(name || '').normalize('NFKC').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim().toLocaleLowerCase();
@@ -186,16 +215,16 @@
             document.body.append(printDialog); printDialog.querySelector('[data-cancel]').onclick = () => printDialog.close();
         }
         const choices = [['all', 'تقرير موحّد لكل التطبيقات'], ...child.accounts.map(a => [a.ref, `تقرير ${a.app.name}`])];
-        printDialog.querySelector('.dash-print-list').innerHTML = choices.map(([id, label]) => `<label><input type="checkbox" value="${id}" checked><span>${label}</span></label>`).join('');
-        const go = printDialog.querySelector('[data-go]'), sync = () => { go.disabled = !printDialog.querySelector('input:checked'); };
-        printDialog.querySelectorAll('input').forEach(input => { input.onchange = sync; }); sync();
+        printDialog.querySelector('.dash-print-list').innerHTML = choices.map(([id, label]) => `<button type="button" class="print-choice" data-choice="${id}" aria-pressed="true"><span class="print-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg></span><span><b>${label}</b></span></button>`).join('');
+        const go = printDialog.querySelector('[data-go]'), sync = () => { go.disabled = !printDialog.querySelector('[aria-pressed=true]'); };
+        printDialog.querySelectorAll('[data-choice]').forEach(el => { el.onclick = () => { el.setAttribute('aria-pressed', String(el.getAttribute('aria-pressed') !== 'true')); sync(); }; }); sync();
         go.onclick = async () => {
             go.disabled = true; go.textContent = 'جاري التنزيل…'; printDialog.querySelector('.dash-print-error').hidden = true;
             try {
-                for (const id of [...printDialog.querySelectorAll('input:checked')].map(input => input.value)) {
+                for (const id of [...printDialog.querySelectorAll('[data-choice][aria-pressed=true]')].map(button => button.dataset.choice)) {
                     const list = id === 'all' ? child.accounts : child.accounts.filter(a => a.ref === id);
                     const doc = await pdfFor(child, list); doc.save(`تقرير-${child.name.replace(/[^\p{L}\p{N}_-]/gu, '_')}-${id === 'all' ? 'موحد' : list[0].app.name}-${date(new Date().toISOString()).replaceAll('/', '-')}.pdf`);
-                    await new Promise(resolve => setTimeout(resolve, 400));
+                    await new Promise(resolve => setTimeout(resolve, 900));
                 }
                 printDialog.close();
             } catch { const error = printDialog.querySelector('.dash-print-error'); error.textContent = 'تعذّر إنشاء التقرير. أعد المحاولة.'; error.hidden = false; }
@@ -212,7 +241,7 @@
         const text = (s, x, yy, size = 26, color = '#18394b', align = 'right', weight = 700) => { c.font = `${weight} ${size}px Cairo`; c.fillStyle = color; c.textAlign = align; c.direction = /[؀-ۿ]/.test(s) ? 'rtl' : 'ltr'; c.textBaseline = 'middle'; c.fillText(String(s), x, yy); };
         const box = (x, yy, w, h, fill, r = 18) => { c.fillStyle = fill; c.beginPath(); c.roundRect(x, yy, w, h, r); c.fill(); };
         const page = () => { const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; c = canvas.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); pages.push(canvas);
-            box(M, 60, W - 2 * M, 170, '#f1f8fc'); text(list.length > 1 ? 'تقرير موحّد · كلمة وجملة ومقطع' : `تقرير ${list[0].app.name}`, W - M - 28, 105, 24, '#0284c7'); text(child.name, W - M - 28, 160, 38); text(`${PERIODS[period][0]} · ${date(new Date().toISOString())}`, W - M - 28, 205, 21, '#587082', 'right', 600); y = 270; };
+            box(M, 60, W - 2 * M, 170, '#f1f8fc'); text(list.length > 1 ? 'تقرير موحّد · ' + list.map(section => section.app.name).join(' · ') : `تقرير ${list[0].app.name}`, W - M - 28, 105, 24, '#0284c7'); text(child.name, W - M - 28, 160, 38); text(`${PERIODS[period][0]} · ${date(new Date().toISOString())}`, W - M - 28, 205, 21, '#587082', 'right', 600); y = 270; };
         const ensure = need => { if (y + need > H - 100) page(); };
         page();
         for (const account of list) {

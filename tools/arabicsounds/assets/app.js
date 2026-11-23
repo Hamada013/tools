@@ -3,7 +3,7 @@ import {AudioEngine} from './audio.js';
 import {LETTER_MAP,SPEECH_LEVELS} from './data.js';
 import {createLing} from './ling.js';
 import {showAnswerFeedback} from './feedback.js';
-const paths={pause:'M8 5v14 M16 5v14',home:'M3 11 12 3l9 8 M5 10v11h14V10 M9 21v-7h6v7',menu:'M4 6h16 M4 12h16 M4 18h16',close:'m6 6 12 12 M18 6 6 18',download:'M12 3v12 m-5-5 5 5 5-5 M4 16v5h16v-5',ear:'M6 9a6 6 0 1 1 12 0c0 4-4 4-4 7s-1 5-4 5-4-2-4-4 M10 10a2 2 0 1 1 4 0l-2 3',sound:'m11 4-6 5H2v6h3l6 5z M15 8a6 6 0 0 1 0 8 M18 5a10 10 0 0 1 0 14',cards:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',play:'m8 4 12 8-12 8z',test:'M9 4V2h6v2 M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2 M9 10h6 M9 15l2 2 4-4',practice:'m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z',back:'m9 5 7 7-7 7 M16 12H3',shuffle:'M3 6h3l12 12h3 M3 18h3L18 6h3 m-4-4 4 4-4 4 m0 4 4 4-4 4',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',memory:'M9 3a3 3 0 0 0-5 4 4 4 0 0 0-1 7 4 4 0 0 0 6 6z M15 3a3 3 0 0 1 5 4 4 4 0 0 1 1 7 4 4 0 0 1-6 6z M9 8H6 M15 8h3 M9 15H6 M15 15h3',match:'M3 3h6v6H3z M15 15h6v6h-6z M6 12v6h6 m-3-3 3 3-3 3',clock:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M12 7v5l3 2',check:'m4 12 5 5L20 6',refresh:'M20 8a8 8 0 1 0 0 8 M20 3v5h-5',book:'M12 5q-4-3-9-1v16q5-2 9 1 4-3 9-1V4q-5-2-9 1z M12 5v16',target:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0 M12 11v2'};
+const paths={route:'M3 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0 M17 6a2 2 0 1 0 4 0a2 2 0 1 0-4 0 M7 18h6a4 4 0 0 0 0-8h-2a4 4 0 0 1 0-8h6',pause:'M8 5v14 M16 5v14',home:'M3 11 12 3l9 8 M5 10v11h14V10 M9 21v-7h6v7',menu:'M4 6h16 M4 12h16 M4 18h16',close:'m6 6 12 12 M18 6 6 18',download:'M12 3v12 m-5-5 5 5 5-5 M4 16v5h16v-5',ear:'M6 9a6 6 0 1 1 12 0c0 4-4 4-4 7s-1 5-4 5-4-2-4-4 M10 10a2 2 0 1 1 4 0l-2 3',sound:'m11 4-6 5H2v6h3l6 5z M15 8a6 6 0 0 1 0 8 M18 5a10 10 0 0 1 0 14',cards:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',play:'m8 4 12 8-12 8z',test:'M9 4V2h6v2 M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2 M9 10h6 M9 15l2 2 4-4',practice:'m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z',back:'m9 5 7 7-7 7 M16 12H3',shuffle:'M3 6h3l12 12h3 M3 18h3L18 6h3 m-4-4 4 4-4 4 m0 4 4 4-4 4',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',memory:'M9 3a3 3 0 0 0-5 4 4 4 0 0 0-1 7 4 4 0 0 0 6 6z M15 3a3 3 0 0 1 5 4 4 4 0 0 1 1 7 4 4 0 0 1-6 6z M9 8H6 M15 8h3 M9 15H6 M15 15h3',match:'M3 3h6v6H3z M15 15h6v6h-6z M6 12v6h6 m-3-3 3 3-3 3',clock:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M12 7v5l3 2',check:'m4 12 5 5L20 6',refresh:'M20 8a8 8 0 1 0 0 8 M20 3v5h-5',book:'M12 5q-4-3-9-1v16q5-2 9 1 4-3 9-1V4q-5-2-9 1z M12 5v16',target:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0 M12 11v2'};
 export const icon=name=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]||paths.sound}"/></svg>`;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const main=$('#workspace'),modal=$('#modal'),body=$('#modal-body');
@@ -49,9 +49,9 @@ $('#menu-toggle').onclick=()=>{if($('#drawer').open)$('#drawer').close();else{$(
 $('#drawer').addEventListener('cancel',event=>{event.preventDefault();closeDialog($('#drawer'));});
 $('#drawer').addEventListener('close',()=>{$('#menu-toggle').setAttribute('aria-expanded','false');$('#menu-toggle').focus();});
 $('#drawer-links').onclick=e=>{if(e.target.closest('a'))$('#drawer').close();};
-function renderHome(){main.innerHTML=`<section class="app-home-screen app-home-screen--many"><button type="button" class="app-home-logo app-logo-download" data-sound-download aria-label="تنزيل محتوى التطبيق" title="تنزيل محتوى التطبيق" aria-haspopup="dialog"><img src="images/logo.webp" width="180" height="180" alt=""></button><h1 class="app-home-title">${APP.title}</h1><p class="app-home-description">${APP.tagline}</p><div class="app-home-actions"><a href="#/arabic/sounds" class="app-home-action"><span class="app-home-action-icon">${icon('sound')}</span><span>اختيار الأصوات</span></a><a href="#/arabic/levels" class="app-home-action"><span class="app-home-action-icon">${icon('cards')}</span><span>المستويات</span></a><button id="ling" class="app-home-action"><span class="app-home-action-icon">${icon('ear')}</span><span>أصوات لينغ</span></button><a href="#/arabic/memory" class="app-home-action"><span class="app-home-action-icon">${icon('memory')}</span><span>الذاكرة</span></a><a href="#/arabic/matching" class="app-home-action"><span class="app-home-action-icon">${icon('match')}</span><span>السحب والمطابقة</span></a></div></section><footer class="app-home-footer" lang="en" dir="ltr"><p>SPEECH AND LANGUAGE PATHOLOGY</p><p><strong>Ahmad Ghanem</strong></p><p>Latakia - Syria</p><p><a href="mailto:slp.ahmadghanem@gmail.com">slp.ahmadghanem@gmail.com</a></p></footer>`;$('#ling').onclick=ling.openSetup;}
+function renderHome(){main.innerHTML=`<section class="app-home-screen app-home-screen--many"><button type="button" class="app-home-logo app-logo-download" data-sound-download aria-label="تنزيل محتوى التطبيق" title="تنزيل محتوى التطبيق" aria-haspopup="dialog"><img src="images/logo.webp" width="180" height="180" alt=""></button><h1 class="app-home-title">${APP.title}</h1><p class="app-home-description">${APP.tagline}</p><div class="app-home-actions"><a href="#/arabic/route" class="app-home-action app-home-route"><span class="app-home-action-icon">${icon('route')}</span><span>المسار التلقائي</span></a><a href="#/arabic/sounds" class="app-home-action"><span class="app-home-action-icon">${icon('sound')}</span><span>اختيار الأصوات</span></a><a href="#/arabic/levels" class="app-home-action"><span class="app-home-action-icon">${icon('cards')}</span><span>المستويات</span></a><button id="ling" class="app-home-action"><span class="app-home-action-icon">${icon('ear')}</span><span>أصوات لينغ</span></button><a href="#/arabic/memory" class="app-home-action"><span class="app-home-action-icon">${icon('memory')}</span><span>الذاكرة</span></a><a href="#/arabic/matching" class="app-home-action"><span class="app-home-action-icon">${icon('match')}</span><span>السحب والمطابقة</span></a></div></section><footer class="app-home-footer" lang="en" dir="ltr"><p>SPEECH AND LANGUAGE PATHOLOGY</p><p><strong>Ahmad Ghanem</strong></p><p>Latakia - Syria</p><p><a href="mailto:slp.ahmadghanem@gmail.com">slp.ahmadghanem@gmail.com</a></p></footer>`;$('#ling').onclick=ling.openSetup;}
 function render(){
- reset();main.onclick=null;route=location.hash.replace(/^#\/?/,'')||'home';
+ reset();autoRoute=null;closeRouteDialogs();main.onclick=null;route=location.hash.replace(/^#\/?/,'')||'home';
  const isHome=route==='home'||route===APP.kind;
  document.body.classList.toggle('app-home-shell',isHome);document.body.dataset.screen=isHome?'home':'activity';
  main.className=isHome?'app-home-main':'';
@@ -70,13 +70,15 @@ function render(){
 }
 function renderArabic(page){
  if(!page){renderHome();}
- else if(page==='levels')renderLevels();else if(page==='sounds')renderSounds();else if(page==='pair')renderPair();else if(page==='practice'||page==='test')startPair(page);else if(page==='matching')startMatching();else if(page==='memory')memorySetup('arabic');else if(page==='ling')ling.start();else if(page==='ling-result')ling.result();else location.hash='/arabic';
+ else if(page==='levels')renderLevels();else if(page==='sounds')renderSounds();else if(page==='pair')renderPair();else if(page==='practice'||page==='test')startPair(page);else if(page==='matching')startMatching();else if(page==='route')startRoute();else if(page==='memory')memorySetup('arabic');else if(page==='ling')ling.start();else if(page==='ling-result')ling.result();else location.hash='/arabic';
 }
 function renderSounds(){main.innerHTML=title('اختر صوتين','arabic')+`<div class="panel"><div id="selection" class="sound-grid">${letters.map(id=>pic('arabic',id,selected.includes(id)?'selected':'')).join('')}</div></div><div class="actions">${button('open-pair','عرض البطاقتين')}</div>`;
  const update=()=>{$$('#selection .picture').forEach(b=>{const yes=selected.includes(b.dataset.sound);b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',String(yes));});$('#open-pair').disabled=selected.length!==2;};
  $('#selection').onclick=e=>{const b=e.target.closest('[data-sound]');if(!b)return;const id=b.dataset.sound;selected=selected.includes(id)?selected.filter(x=>x!==id):selected.length<2?[...selected,id]:[selected[1],id];update();};$('#open-pair').onclick=()=>{pairOrder=[...selected];pairBack='arabic/sounds';location.hash='/arabic/pair';};update();}
 function renderLevels(){main.innerHTML=title('المستويات','arabic')+`<div class="panel"><h2>أصوات كلامية · المستوى ١</h2><div id="level1" class="pair-list"></div><h2>أصوات كلامية · المستوى ٢</h2><div id="level2"></div></div>`;
  const pairsHTML=pairs=>pairs.map(p=>`<button class="button" data-pair="${p.join(',')}">${p.join(' / ')}</button>`).join('');$('#level1').innerHTML=pairsHTML(SPEECH_LEVELS.level1.pairs);$('#level2').innerHTML=SPEECH_LEVELS.level2.map(g=>`<h3>${g.category.split(' (')[0]}</h3><div class="pair-list">${pairsHTML(g.pairs)}</div>`).join('');main.onclick=e=>{const b=e.target.closest('[data-pair]');if(b){selected=b.dataset.pair.split(',');pairOrder=[...selected];pairBack='arabic/levels';location.hash='/arabic/pair';}};}
+// Level 1 pairs are sounds far apart; every other pair counts as level 2 (close sounds).
+function pairLevel(pair){const key=[...pair].sort().join('|');return SPEECH_LEVELS.level1.pairs.some(p=>[...p].sort().join('|')===key)?1:2;}
 function ensurePairOrder(){if(pairOrder.length!==2||!pairOrder.every(id=>selected.includes(id)))pairOrder=[...selected];}
 function renderPair(){
  ensurePairOrder();main.classList.add('pair-workspace');main.dataset.pairMode='idle';
@@ -135,12 +137,12 @@ function startPair(mode){
     if(index!==1||repetition!==9)await pairWait(1000,s.signal);
    }
   }
-  if(session===s&&!s.signal.aborted){window.SoundProgress?.complete(s.sessionId);returnToPair();}
+  if(session===s&&!s.signal.aborted){window.SoundProgress?.complete(s.sessionId);if(autoRoute)routeNext('practice');else returnToPair();}
  })().catch(error=>pairFailure(s,error));
 }
 async function pairTrial(s){
  if(s.signal.aborted)return;
- if(s.trial===10){window.SoundProgress?.complete(s.sessionId);returnToPair({score:s.score});return;}
+ if(s.trial===10){window.SoundProgress?.complete(s.sessionId);if(autoRoute){routeNext('test');return;}returnToPair({score:s.score});return;}
  drawPairSession(s);s.phase='playing';s.target=s.queue[s.trial];
  await playPairSound(s,s.target);
  if(s.signal.aborted)return;
@@ -149,9 +151,10 @@ async function pairTrial(s){
 function answerPair(id){
  const s=session;if(!s||s.mode!=='test'||s.phase!=='answer'||s.signal.aborted)return;
  s.phase='feedback';const correct=id===s.target;s.score+=Number(correct);
- window.SoundProgress?.record({owner:s.owner,sessionId:s.sessionId,id:String(s.trial),activity:'اختبار تمييز أصوات الكلام',skill:'pair',kind:'assessment',label:s.target,response:id,correct});
+ window.SoundProgress?.record({owner:s.owner,sessionId:s.sessionId,id:String(s.trial),activity:'اختبار تمييز أصوات الكلام',skill:'pair',kind:'assessment',label:s.target,response:id,correct,level:pairLevel(s.order)});
  $$('#pair-cards button').forEach(card=>card.disabled=true);$(`#pair-cards [data-sound="${id}"]`).classList.add(correct?'matched':'wrong');
- void(async()=>{await pairWait(650,s.signal);s.trial++;await pairTrial(s);})().catch(error=>pairFailure(s,error));
+ if(autoRoute&&!correct)autoRoute.failed.add(s.target);
+ void(async()=>{await pairWait(650,s.signal);if(autoRoute&&!s.signal.aborted)await (correct?window.VocPrompts?.praise():window.VocPrompts?.retry());if(s.signal.aborted)return;s.trial++;await pairTrial(s);})().catch(error=>pairFailure(s,error));
 }
 $('#pair-countdown').addEventListener('close',()=>{if(session?.phase==='countdown')returnToPair();});
 function startMatching(pool=letters.slice(0,3)){session={mode:'matching',pool,covered:false,locked:false};matchRound();}
@@ -192,19 +195,63 @@ function matchAnswer(id){
  const s=session;if(s.locked)return;s.locked=true;player.stop();
  window.SoundProgress?.record({sessionId:listenSession,activity:'المطابقة',skill:'matching',kind:'practice',label:s.target});
  const correct=id===s.target,card=$(`.match-options [data-sound="${id}"]`);
+ if(autoRoute&&s.route)void (correct?window.VocPrompts?.praise():window.VocPrompts?.retry());
  card.classList.add(correct?'matched':'wrong');
  $$('.matching-layout button,.matching-toolbar button').forEach(button=>button.disabled=true);
  const feedback=showAnswerFeedback(correct,'match-feedback');
  later(()=>{
-  feedback.remove();if(correct){matchRound();return;}
+  feedback.remove();if(correct){if(autoRoute&&session?.route&&++session.right>=6){routeGameDone();return;}matchRound();return;}
   card.classList.remove('wrong');s.locked=false;
   $$('.matching-layout button,.matching-toolbar button').forEach(button=>button.disabled=false);
  },650);
 }
 function drag(node,getId,answer,selector){let start=null,ghost=null,moved=false;const clear=()=>{ghost?.remove();ghost=null;start=null;};node.addEventListener('pointerdown',e=>{if(e.button!==0)return;start={x:e.clientX,y:e.clientY};moved=false;node.setPointerCapture(e.pointerId);});node.addEventListener('pointermove',e=>{if(!start)return;if(Math.hypot(e.clientX-start.x,e.clientY-start.y)>8){moved=true;if(!ghost){ghost=document.createElement('img');ghost.src=node.querySelector('img')?.src||'';ghost.className='drag-ghost';document.body.append(ghost);}ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';e.preventDefault();}});node.addEventListener('pointerup',e=>{if(moved){const target=document.elementFromPoint(e.clientX,e.clientY)?.closest(selector);if(target)answer(target.dataset.sound,getId());node.addEventListener('click',ev=>{ev.stopImmediatePropagation();ev.preventDefault();},{once:true,capture:true});}clear();});node.addEventListener('pointercancel',clear);node.addEventListener('lostpointercapture',clear);}
 function memorySetup(kind){main.innerHTML=title('الذاكرة','arabic')+`<div class="panel center"><h2>عدد البطاقات</h2><div class="actions">${[4,6,8,12].map(n=>`<button class="button" data-size="${n}">${n}</button>`).join('')}</div><p class="subtle" style="margin-top:20px">اكشف بطاقتين وابحث عن صورتين متطابقتين.</p></div>`;$$('[data-size]').forEach(b=>b.onclick=()=>startMemory(kind,Number(b.dataset.size)));}
-function startMemory(kind,size){const previous=session?.mode==='memory'&&session.kind===kind?[...new Set(session.deck)]:[];player.stop();timers.forEach(clearTimeout);timers.clear();const pool=shuffle(letters.filter(id=>!previous.includes(id))).slice(0,Math.floor(size/2));session={mode:'memory',kind,size,deck:shuffle([...pool,...pool]),open:[],matched:new Set(),locked:false,moves:0};const s=session;main.innerHTML=`<div class="activity-heading">${title('الذاكرة','arabic')}<div class="toolbar memory-toolbar"><div class="actions">${control('memory-restart','refresh','بدء لعبة جديدة')}${control('memory-size','cards','عدد البطاقات')}</div></div></div><div class="memory-board activity-board"><div class="memory-grid" data-size="${size}">${s.deck.map((id,i)=>pic(kind,id,'hidden-face',false).replace(/aria-label="[^"]*"/,'aria-label="بطاقة مقلوبة"').replace('data-sound=',`data-index="${i}" data-sound=`)).join('')}</div></div><p id="status" class="status" role="status" hidden></p>`;$$('.memory-grid [data-sound]').forEach(b=>b.onclick=()=>flipMemory(Number(b.dataset.index)));$('#memory-restart').onclick=()=>startMemory(kind,size);$('#memory-size').onclick=()=>{reset();memorySetup(kind);};}
-function flipMemory(index){const s=session;if(s.locked||s.open.includes(index)||s.matched.has(index))return;const b=$(`.memory-grid [data-index="${index}"]`);b.classList.remove('hidden-face');b.setAttribute('aria-label',name(s.kind,s.deck[index]));play(s.kind,s.deck[index]);s.open.push(index);if(s.open.length!==2)return;s.moves++;s.locked=true;const [a,c]=s.open;const correct=s.deck[a]===s.deck[c];if(correct){s.matched.add(a);s.matched.add(c);[a,c].forEach(i=>{$(`.memory-grid [data-index="${i}"]`).classList.add('matched');$(`.memory-grid [data-index="${i}"]`).disabled=true;});s.open=[];s.locked=false;if(s.matched.size===Math.floor(s.size/2)*2){s.locked=true;status('أحسنت! بطاقات جديدة…');later(()=>startMemory(s.kind,s.size),1200);}}else{later(()=>{[a,c].forEach(i=>{const b=$(`.memory-grid [data-index="${i}"]`);b.classList.add('hidden-face');b.setAttribute('aria-label','بطاقة مقلوبة');});s.open=[];s.locked=false;},1000);}}
+function startMemory(kind,size,routePool=null){const previous=session?.mode==='memory'&&session.kind===kind?[...new Set(session.deck)]:[];player.stop();timers.forEach(clearTimeout);timers.clear();const pool=routePool||shuffle(letters.filter(id=>!previous.includes(id))).slice(0,Math.floor(size/2));session={mode:'memory',kind,size,deck:shuffle([...pool,...pool]),open:[],matched:new Set(),locked:false,moves:0,route:!!routePool};const s=session;main.innerHTML=`<div class="activity-heading">${title('الذاكرة','arabic')}<div class="toolbar memory-toolbar"><div class="actions">${control('memory-restart','refresh','بدء لعبة جديدة')}${control('memory-size','cards','عدد البطاقات')}</div></div></div><div class="memory-board activity-board"><div class="memory-grid" data-size="${size}">${s.deck.map((id,i)=>pic(kind,id,'hidden-face',false).replace(/aria-label="[^"]*"/,'aria-label="بطاقة مقلوبة"').replace('data-sound=',`data-index="${i}" data-sound=`)).join('')}</div></div><p id="status" class="status" role="status" hidden></p>`;$$('.memory-grid [data-sound]').forEach(b=>b.onclick=()=>flipMemory(Number(b.dataset.index)));$('#memory-restart').onclick=()=>startMemory(kind,size);$('#memory-size').onclick=()=>{reset();memorySetup(kind);};}
+function flipMemory(index){const s=session;if(s.locked||s.open.includes(index)||s.matched.has(index))return;const b=$(`.memory-grid [data-index="${index}"]`);b.classList.remove('hidden-face');b.setAttribute('aria-label',name(s.kind,s.deck[index]));play(s.kind,s.deck[index]);s.open.push(index);if(s.open.length!==2)return;s.moves++;s.locked=true;const [a,c]=s.open;const correct=s.deck[a]===s.deck[c];if(correct){s.matched.add(a);s.matched.add(c);[a,c].forEach(i=>{$(`.memory-grid [data-index="${i}"]`).classList.add('matched');$(`.memory-grid [data-index="${i}"]`).disabled=true;});s.open=[];s.locked=false;if(s.matched.size===Math.floor(s.size/2)*2){s.locked=true;status('أحسنت! بطاقات جديدة…');later(()=>{if(autoRoute&&s.route){routeGameDone();return;}startMemory(s.kind,s.size);},1200);}}else{later(()=>{[a,c].forEach(i=>{const b=$(`.memory-grid [data-index="${i}"]`);b.classList.add('hidden-face');b.setAttribute('aria-label','بطاقة مقلوبة');});s.open=[];s.locked=false;},1000);}}
+// ---- «المسار التلقائي»: pair practice → pair test → automatic repeat of the missed sounds → games box. ----
+// The chosen pair (from «اختيار الأصوات» or «المستويات») is used. Any navigation stops the route.
+let autoRoute=null,routeBox=null,routeRepeat=null;
+function closeRouteDialogs(){if(routeBox?.open)routeBox.close();if(routeRepeat?.open)routeRepeat.close();}
+function routeStep(page){history.replaceState(null,'','#/arabic/'+page);route='arabic/'+page;}
+function startRoute(){
+ ensurePairOrder();window.pickGlowColour?.();pairPlayer.unlock();window.VocPrompts?.unlock?.();
+ autoRoute={pair:[...pairOrder],failed:new Set(),games:[]};routeStep('practice');startPair('practice');
+}
+async function routeNext(step){
+ const own=autoRoute;if(!own)return;
+ if(step==='practice'){routeStep('test');startPair('test');return;}
+ if(step==='test'){await repeatMissed([...own.failed]);if(autoRoute!==own)return;showGamesBox();}
+}
+// Each missed sound three times, its card big and glowing, one second apart. No buttons.
+async function repeatMissed(ids){
+ if(!ids.length)return;const own=autoRoute;
+ if(!routeRepeat){routeRepeat=document.createElement('dialog');routeRepeat.className='route-repeat';routeRepeat.setAttribute('aria-label','نسمع الأصوات مرة ثانية');routeRepeat.addEventListener('cancel',()=>{autoRoute=null;pairPlayer.stop();});document.body.append(routeRepeat);}
+ routeRepeat.showModal();const controller=new AbortController();pairController=controller;
+ try{for(const id of ids){
+  if(autoRoute!==own)break;routeRepeat.innerHTML=`<div class="pair-workspace route-repeat-card">${pic('arabic',id)}</div>`;const card=routeRepeat.querySelector('.picture');
+  for(let i=0;i<3&&autoRoute===own;i++){await pairPlayer.play(source('arabic',id),{signal:controller.signal,onStart:()=>card.classList.add('cue')}).finally(()=>card.classList.remove('cue'));await pairWait(1000,controller.signal);}
+ }}catch(error){if(error.name!=='AbortError')console.error(error);}
+ if(routeRepeat.open)routeRepeat.close();
+}
+// Games box: the therapist keeps or turns off each game, then «يلا نكمل»; a short play break comes before each game.
+function showGamesBox(){
+ const own=autoRoute;if(!own)return;
+ if(!routeBox){routeBox=document.createElement('dialog');routeBox.className='route-box';routeBox.dir='rtl';routeBox.setAttribute('aria-labelledby','route-box-title');
+  routeBox.innerHTML=`<h2 id="route-box-title">نكمل بالألعاب؟</h2><div class="route-box-list"><button type="button" data-game="matching" aria-pressed="true"><b>السحب والمطابقة</b><small>نطابق الصوت مع صورته</small></button><button type="button" data-game="memory" aria-pressed="true"><b>الذاكرة</b><small>نجد الصورتين المتشابهتين</small></button></div><button type="button" class="route-box-go" data-go>يلا نكمل</button><button type="button" class="route-box-end" data-end>إنهاء</button>`;
+  document.body.append(routeBox);routeBox.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true')));routeBox.addEventListener('cancel',e=>e.preventDefault());}
+ routeBox.querySelectorAll('[data-game]').forEach(b=>b.setAttribute('aria-pressed','true'));
+ routeBox.querySelector('[data-go]').onclick=()=>{own.games=[...routeBox.querySelectorAll('[data-game][aria-pressed=true]')].map(b=>b.dataset.game);routeBox.close();nextRouteGame();};
+ routeBox.querySelector('[data-end]').onclick=()=>{routeBox.close();finishRoute();};
+ routeBox.showModal();routeBox.querySelector('[data-go]').focus();
+}
+function nextRouteGame(){
+ const own=autoRoute;if(!own)return;const game=own.games.shift();if(!game){finishRoute();return;}
+ const go=()=>{if(autoRoute!==own)return;if(game==='matching'){routeStep('matching');const extra=shuffle(letters.filter(id=>!own.pair.includes(id)))[0];session={mode:'matching',pool:[...own.pair,extra],covered:false,locked:false,route:true,right:0};matchRound();}else{routeStep('memory');startMemory('arabic',4,[...own.pair]);}};
+ if(window.VocInterlude)window.VocInterlude.show(go);else go();
+}
+function routeGameDone(){if(autoRoute)nextRouteGame();}
+function finishRoute(){autoRoute=null;void window.VocPrompts?.say('done-1');location.hash='/arabic';}
 window.addEventListener('hashchange',()=>{main.onclick=null;render();});window.addEventListener('pagehide',()=>reset());document.addEventListener('visibilitychange',()=>{if(document.hidden){if(pairController)returnToPair();else{ling.hide();player.stop();$$('.cue').forEach(b=>b.classList.remove('cue'));}}});render();
 // Internal activities share a route; returning to that route must rebuild its menu.
 document.addEventListener('click',event=>{const a=event.target.closest('a[href^="#/"]');if(a&&a.getAttribute('href')===location.hash){event.preventDefault();main.onclick=null;render();}});

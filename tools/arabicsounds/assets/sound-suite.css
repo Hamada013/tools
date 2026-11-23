@@ -36,13 +36,52 @@ body.app-home-shell .app-home-brand{font-size:inherit}.app-home-brand>a{text-dec
 
 .sound-visual-report{display:grid;gap:20px;margin:20px 0;color:#22445a}
 .sound-report-overview{display:flex;align-items:center;justify-content:center;gap:22px;padding:20px 12px;border:1px solid #dceaf4;border-radius:22px;background:#f9fcfb}
-.sound-score-ring{display:grid;place-items:center;flex:none;width:112px;height:112px;padding:10px;border-radius:50%;background:conic-gradient(#64a58a var(--score),#e4edf2 0);direction:ltr}
-.sound-score-ring>span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#fff;font-size:27px;font-weight:800}
 .sound-report-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}.sound-report-stats>div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#5c7285}.sound-report-stats b{font-size:25px;color:#22445a}
 .sound-skill-charts{display:grid;gap:16px}.sound-skill-charts article{padding:12px;border:1px solid #e1ebf0;border-radius:16px}.sound-skill-charts header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;font-size:13px}.sound-skill-charts header>span{font-size:12px;color:#5c7285}.sound-skill-charts small{display:block;margin-top:6px;color:#5c7285;font-size:11px}
 .sound-skill-track{height:10px;overflow:hidden;border-radius:12px;background:#edf2f6;direction:ltr}.sound-skill-track>span{display:block;height:100%;background:#6cae94;border-radius:inherit}
 .sound-recent-sessions{display:flex;align-items:flex-end;justify-content:space-around;gap:10px;height:140px;padding:12px;border-bottom:1px solid #dceaf4;direction:ltr}.sound-recent-sessions>div{display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;min-width:0}.sound-session-bar{display:flex;align-items:flex-end;width:min(100%,36px);height:80px;background:#edf2f6;border-radius:9px;overflow:hidden}.sound-session-bar>i{display:block;width:100%;height:var(--score);background:#72a8ca;border-radius:9px}.sound-recent-sessions b,.sound-recent-sessions small{font-size:11px}
 .sound-response-marks{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}.sound-response-mark{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#eaf6ef;color:#438b64}.sound-response-mark.incorrect{background:#fff0ee;color:#c46e6e}.sound-response-mark.practice{background:#edf5fb;color:#568cad}.sound-response-mark svg{width:17px;height:17px}
 .sound-report-table summary{font-size:13px;cursor:pointer}.sound-report-table .table-wrap{margin-top:10px}
-@media(max-width:400px){.sound-report-overview{gap:12px;padding:14px 8px}.sound-score-ring{width:90px;height:90px;padding:8px}.sound-score-ring>span{font-size:22px}.sound-report-stats{gap:10px}.sound-report-stats b{font-size:21px}.sound-report-stats>div{font-size:10px}}
-@media print{.sound-score-ring,.sound-session-bar>i,.sound-skill-track>span,.sound-response-mark{print-color-adjust:exact;-webkit-print-color-adjust:exact}.sound-report-overview,.sound-skill-charts article{break-inside:avoid}}
+@media(max-width:400px){.sound-report-overview{gap:12px;padding:14px 8px}.sound-report-stats{gap:10px}.sound-report-stats b{font-size:21px}.sound-report-stats>div{font-size:10px}}
+@media print{.sound-session-bar>i,.sound-skill-track>span,.sound-response-mark{print-color-adjust:exact;-webkit-print-color-adjust:exact}.sound-report-overview,.sound-skill-charts article{break-inside:avoid}}
+
+/* Report: bars only, and «طباعة التقارير» opens a window where each chosen report downloads as its own PDF. */
+.sound-visual-report .sound-report-stats{margin:0 0 14px}
+.sound-report-sub{margin:16px 0 8px;font-size:15px;color:#22445a}
+.sound-print-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}
+.sound-print-button svg{width:22px;height:22px}
+dialog.sound-print-dialog{width:min(92vw,420px);border:0;border-radius:26px;padding:24px;box-shadow:0 20px 50px #0f172a33}
+dialog.sound-print-dialog::backdrop{background:#0f172a55;backdrop-filter:blur(4px)}
+.sound-print-dialog h2{margin:0;color:#0369a1;font-size:21px}.sound-print-dialog>p{color:#5c7285;margin:4px 0 14px}
+.sound-print-list{display:grid;gap:8px;margin-bottom:16px}
+.sound-print-choice{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1.5px solid #dceaf4;border-radius:16px;background:#fff;color:#22445a;font:inherit;text-align:start;cursor:pointer}
+.sound-print-choice>span:last-child{display:grid}.sound-print-choice small{color:#5c7285;font-size:13px}
+.sound-print-tick{display:grid;place-items:center;flex:none;width:26px;height:26px;border:2px solid #cbd5e1;border-radius:8px;color:transparent}
+.sound-print-tick svg{width:18px;height:18px}
+.sound-print-choice[aria-pressed=true]{border-color:#0284c7;background:#f0f9ff}
+.sound-print-choice[aria-pressed=true] .sound-print-tick{border-color:#0284c7;background:#0284c7;color:#fff}
+.sound-print-dialog footer{display:flex;gap:8px}.sound-print-dialog footer .button{flex:1}
+.sound-print-dialog [data-go]:disabled{opacity:.5}
+
+/* Automatic route: the home tile, the games box and the big repeat card. */
+.app-home-action.app-home-route{border-color:#7cc4e4;background:linear-gradient(135deg,#f0f9ff,#ecfdf5)}
+dialog.route-box{width:min(92vw,420px);border:0;border-radius:26px;padding:24px;text-align:center;box-shadow:0 20px 50px #0f172a33}
+dialog.route-box::backdrop{background:#0f172a55;backdrop-filter:blur(4px)}
+.route-box h2{margin:0 0 14px;color:#0369a1;font-size:22px}
+.route-box-list{display:grid;gap:10px;margin-bottom:16px}
+.route-box-list button{display:grid;gap:2px;padding:14px;border:2px solid #dceaf4;border-radius:18px;background:#fff;color:#22445a;font:inherit;cursor:pointer}
+.route-box-list button small{color:#5c7285}
+.route-box-list button[aria-pressed=true]{border-color:#0284c7;background:#f0f9ff;box-shadow:0 0 0 3px #bae6fd}
+.route-box-list button[aria-pressed=false]{opacity:.55}
+.route-box-go,.route-box-end{display:block;width:100%;min-height:50px;margin-top:8px;border:0;border-radius:16px;font:800 17px Cairo,system-ui,sans-serif;cursor:pointer}
+.route-box-go{background:#16a34a;color:#fff}.route-box-end{background:#f1f5f9;color:#22445a}
+dialog.route-repeat{border:0;background:transparent;padding:0;box-shadow:none}
+dialog.route-repeat::backdrop{background:#f0f9ffee;backdrop-filter:blur(6px)}
+.route-repeat-card .picture{width:min(62vmin,420px);height:auto;aspect-ratio:1}
+.route-repeat-card .picture img{width:100%;height:100%;object-fit:contain}
+.route-repeat-card>button{width:min(62vmin,420px);height:auto;aspect-ratio:1;border-radius:28px}
+.route-repeat-card>button img{width:100%;height:100%;object-fit:contain}
+.route-glow{border-color:var(--glow-edge,#0284c7)!important;animation:route-glow 1.1s ease-in-out infinite}
+@keyframes route-glow{0%,100%{box-shadow:0 0 0 4px var(--glow-soft,#d8effb)}50%{box-shadow:0 0 0 10px var(--glow-soft,#d8effb),0 0 30px 8px var(--glow-soft,#bae6fd)}}
+@media(prefers-reduced-motion:reduce){.route-glow{animation:none;box-shadow:0 0 0 8px var(--glow-soft,#d8effb)}}
+.route-intro{margin:0 0 12px;color:#5c7285;text-align:center}

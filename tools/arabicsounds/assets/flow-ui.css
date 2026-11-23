@@ -67,3 +67,71 @@ html[data-suite-input="pointer"] :is(h1,h2,h3,dialog):focus{outline:none!importa
 @media(prefers-reduced-motion:reduce){.suite-account-browser .suite-account-filters :is(input,button,svg){transition:none}}
 
 .suite-account-browser .suite-account-select{display:flex!important;background:transparent!important;border:0!important;box-shadow:none!important;justify-content:flex-start!important}.suite-account-grid .suite-account-tools{margin-top:auto}
+
+/* Child accounts window (2026-11-19, same layout as VB-MAPP): plain white, one add row, one filter row, one tidy list. */
+dialog.suite-account-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;transform:none;width:520px;max-width:calc(100vw - 24px);height:fit-content;max-height:calc(100dvh - 24px);padding:0;border:1px solid #e3ebf0;border-radius:24px;background:#fff;color:#22445a;box-shadow:0 24px 70px #0b253026;overflow:auto;font-family:inherit;direction:rtl;text-align:start}
+dialog.suite-account-dialog::backdrop{background:#0b253033;backdrop-filter:blur(6px)}
+dialog.suite-account-dialog [hidden]{display:none!important}
+.suite-account-dialog .account-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:18px 20px 12px;background:#fff;border-bottom:1px solid #eef3f6}
+.suite-account-dialog .account-head h2{margin:0;padding:0;font-size:20px;font-weight:800;line-height:1.4;color:#22445a}
+.suite-account-dialog .account-head-tools{display:flex;align-items:center;gap:6px}
+.suite-account-dialog .account-head-tools>button{display:grid;place-items:center;box-sizing:border-box;width:40px;height:40px;min-width:40px;min-height:40px;margin:0;padding:9px;border:0;border-radius:12px;background:#f3f7f9;color:#4a6572;font-size:18px;line-height:1;cursor:pointer;box-shadow:none}
+.suite-account-dialog .account-head-tools>button:hover{background:#e9f0f4}
+.suite-account-dialog .account-head-tools svg{display:block;width:20px;height:20px}
+.suite-account-dialog form.account-add{display:block;margin:0;padding:16px 20px 4px}
+.suite-account-dialog form.account-add label{display:block;margin:0 0 6px;font-size:13px;font-weight:600;color:#5c7285}
+.suite-account-dialog .account-add-row{display:flex;gap:8px}
+.suite-account-dialog .account-add-row input{box-sizing:border-box;flex:1;min-width:0;width:auto;height:48px;margin:0;padding:0 14px;border:1px solid #d7e3ea;border-radius:14px;background:#fff;color:#22445a;font:inherit;font-size:16px;box-shadow:none}
+.suite-account-dialog .account-add-row input:focus{outline:none;border-color:#246b86;box-shadow:0 0 0 3px #246b8622}
+.suite-account-dialog .account-add-row button[type=submit]{flex:none;width:auto;height:48px;min-height:48px;margin:0;padding:0 18px;border:0;border-radius:14px;background:#246b86;color:#fff;font:inherit;font-weight:700;white-space:nowrap;cursor:pointer;box-shadow:none}
+.suite-account-dialog .account-add-row button[type=submit]:hover{background:#1d5a71}
+.suite-account-dialog .account-error{margin:4px 20px 0;font-size:13px;color:#a43c38}
+.suite-account-dialog .account-error:empty{display:none}
+.suite-account-dialog .suite-account-browser{display:block!important;margin:0;padding:8px 20px 20px}
+.suite-account-dialog .suite-account-filters{display:flex;flex-direction:row;margin:8px 0 10px;gap:8px}
+.suite-account-dialog .suite-account-browser .suite-account-filters :is(.suite-account-search,.suite-account-sort){height:42px;min-height:42px;border-color:#e3ebf0;border-radius:12px;background-color:#f8fafb;font-size:14px}
+.suite-account-dialog .suite-account-sort-wrap{flex:0 0 150px;width:auto}
+.suite-account-dialog .suite-account-browser .suite-account-filters .suite-account-search{width:auto}
+.suite-account-dialog .suite-account-count{margin:4px 2px 6px;font-size:12px;font-weight:600;line-height:1.6;color:#7a8e9b}
+.suite-account-dialog .suite-account-count:empty{display:none}
+.suite-account-dialog .suite-account-grid{display:flex;flex-direction:column;gap:0;margin:0 0 8px;border:1px solid #eef3f6;border-radius:16px;overflow:hidden}
+.suite-account-dialog .suite-account-grid .suite-account-row{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 8px;border:0;border-bottom:1px solid #eef3f6;border-radius:0;background:#fff}
+.suite-account-dialog .suite-account-grid .suite-account-row:last-child{border-bottom:0}
+.suite-account-dialog .suite-account-grid .suite-account-row.is-current{background:#f2f8fa}
+.suite-account-dialog .suite-account-avatar-button{position:relative;display:grid;place-items:center;flex:none;width:52px;height:52px;min-width:52px;min-height:52px;margin:0;padding:2px;border:0;border-radius:50%;background:transparent;box-shadow:none;cursor:pointer}
+.suite-account-dialog .suite-account-avatar{display:grid;grid-template-columns:repeat(var(--avatar-columns,1),minmax(0,1fr));place-content:center;width:48px;height:48px;margin:0;padding:0;border-radius:50%;overflow:hidden;box-shadow:none}
+.suite-account-dialog .suite-account-avatar>span{display:block;aspect-ratio:1;min-width:0}
+.suite-account-dialog .suite-account-avatar svg{display:block;width:100%;height:100%}
+.suite-account-dialog .is-current .suite-account-avatar{box-shadow:0 0 0 2.5px #246b86}
+.suite-account-dialog .suite-avatar-edit{position:absolute;inset-block-end:0;inset-inline-start:0;display:grid;place-items:center;width:20px;height:20px;border:1.5px solid #fff;border-radius:50%;background:#246b86;color:#fff;opacity:0;transition:opacity .15s}
+.suite-account-dialog .suite-avatar-edit svg{width:11px;height:11px;stroke-width:2.4}
+.suite-account-dialog .suite-account-avatar-button:is(:hover,:focus-visible,[aria-expanded=true]) .suite-avatar-edit{opacity:1}
+@media(hover:none){.suite-account-dialog .suite-avatar-edit{opacity:.9}}
+.suite-account-dialog .suite-account-browser .suite-account-select{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-start!important;flex:1;min-width:0;width:auto;min-height:48px;height:auto;margin:0;padding:6px 8px;border:0!important;border-radius:12px;background:transparent!important;box-shadow:none!important;color:#22445a;text-align:start;font:inherit;cursor:pointer}
+.suite-account-dialog .suite-account-browser .suite-account-select:hover{background:#f6f9fb!important}
+.suite-account-dialog .suite-account-text{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;text-align:start}
+.suite-account-dialog .suite-account-name{display:block;width:100%;font-size:16px;font-weight:700;line-height:1.5;color:#22445a;overflow-wrap:anywhere}
+.suite-account-dialog .suite-account-meta{font-size:12px;font-weight:500;line-height:1.5;color:#7a8e9b}
+.suite-account-dialog .is-current .suite-account-meta{color:#246b86;font-weight:600}
+.suite-account-dialog .suite-account-grid .suite-account-tools{display:flex;gap:2px;margin:0}
+.suite-account-dialog .suite-account-browser .suite-account-tools>button{display:grid;place-items:center;box-sizing:border-box;width:40px;height:40px;min-width:40px;min-height:40px;margin:0;padding:9px;border:0;border-radius:12px;background:transparent;color:#7a8e9b;font-size:17px;box-shadow:none;cursor:pointer}
+.suite-account-dialog .suite-account-browser .suite-account-tools>button:hover{background:#f3f7f9;color:#22445a}
+.suite-account-dialog .suite-account-browser .suite-account-tools>.suite-delete{color:#9aa9b3}
+.suite-account-dialog .suite-account-browser .suite-account-tools>.suite-delete:hover{background:#fdf1f0;color:#b65e57}
+.suite-account-dialog .suite-account-tools svg{display:block;width:21px;height:21px}
+.suite-account-dialog .suite-avatar-picker{flex:1 0 100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin:2px 0 4px;padding:10px;border-radius:14px;background:#f6f9fb}
+.suite-account-dialog .suite-avatar-choice{display:grid;place-items:center;width:100%;min-width:44px;height:48px;min-height:44px;margin:0;padding:2px;border:0;border-radius:12px;background:transparent;box-shadow:none;cursor:pointer}
+.suite-account-dialog .suite-avatar-choice .suite-account-avatar{width:40px;height:40px}
+.suite-account-dialog .suite-avatar-choice:hover:not(:disabled){background:#fff}
+.suite-account-dialog .suite-avatar-choice[aria-pressed=true] .suite-account-avatar{box-shadow:0 0 0 2.5px #246b86}
+.suite-account-dialog .suite-avatar-choice:disabled{opacity:.28;cursor:not-allowed}
+.suite-account-dialog .suite-account-empty{margin:0;padding:18px;font-size:14px;line-height:1.8;text-align:center;color:#5c7285}
+.suite-account-dialog :is(button,input):focus-visible{outline:3px solid #0284c7;outline-offset:2px}
+.suite-account-confirm .suite-text-actions button[data-delete-confirm]{background:#fff5f4;border-color:#f0caca;color:#a43c38}
+.suite-account-confirm .suite-text-actions button[data-delete-back]{background:#f0f7fc;border-color:#dceaf4;color:#22445a}
+.suite-account-chip{display:inline-grid;flex:none;width:28px;height:28px;border-radius:50%;overflow:hidden}
+.suite-account-chip .suite-account-avatar{display:grid;width:28px;height:28px;margin:0;padding:0;border-radius:50%}
+.suite-account-chip .suite-account-avatar>span{display:block;aspect-ratio:1}
+.suite-account-chip svg{display:block;width:100%;height:100%}
+@media(max-width:480px){.suite-account-dialog .suite-account-sort-wrap{flex:0 0 128px}.suite-account-dialog .account-head{padding:14px 16px 10px}.suite-account-dialog form.account-add{padding:14px 16px 4px}.suite-account-dialog .suite-account-browser{padding:8px 16px 16px}.suite-account-dialog .account-add-row button[type=submit]{padding:0 14px}}
+@media(prefers-reduced-motion:reduce){.suite-account-dialog .suite-avatar-edit{transition:none}}

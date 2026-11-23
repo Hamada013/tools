@@ -12,13 +12,14 @@ for(const app of ['arabicsounds','auditory-rehabilitation']){
  p.record({sessionId:'practice',label:'تدريب',kind:'practice',correct:true});
  let data=p.report();assert.equal(data.sessions.length,2);assert.equal(data.sessions[0].partial,true);assert.equal(data.sessions[1].records[0].correct,null,'Practice is never scored as an assessment');p.complete('run');assert.equal(p.report().sessions[0].partial,false);
  assert.equal(JSON.stringify(p.active().words),before);assert.deepEqual(p.active().senb.sessions,[{id:'existing'}]);assert.deepEqual(p.active().taffaha.attempts,[{id:'old'}]);
- p.activate('hamada-admin');p.record({sessionId:'sandbox',label:'تجربة',kind:'assessment',correct:true});assert.equal(p.report('ali').sessions.length,2);assert.equal(remove(storage,'hamada-admin','hamada-admin'),false);assert.equal(p.children().filter(c=>c.name==='Hamada').length,1);assert.equal(p.add('hamada').id,'hamada-admin');
- p.activate('ali');assert.equal(p.report('hamada-admin'),null,'A child cannot read Hamada or another child');
+ // The retired Hamada owner is never listed, readable or switched to; every account is an ordinary child.
+ assert.equal(p.children().some(c=>c.role==='admin'||c.name==='Hamada'),false);assert.equal(p.report('hamada-admin'),null);assert.equal(p.isAdmin(),false);
+ assert.equal(p.active().id,'ali');
  const other=p.add('سارة');assert.equal(p.report().sessions.length,0);assert.equal(p.report('ali'),null);p.activate('ali');assert.equal(p.report().sessions.length,2);
  const reloaded=create({app,storage});assert.equal(reloaded.report().sessions.length,2);
 }
-const p=create({app:'arabicsounds',storage});assert.equal(p.report().sessions.length,2,'Apps keep separate evidence');p.activate('hamada-admin');assert.equal(remove(storage,'hamada-admin','ali'),true);assert.equal(p.activate('ali'),false);assert.equal(p.record({owner:'ali',label:'stale'}),false);
-console.log('PASS: child/app isolation, protected Hamada sandbox, preserved learned libraries, first-response deduplication, partial/completed sessions, unscored practice, reloads, authorized report access and deletion tombstones.');
+const p=create({app:'arabicsounds',storage});assert.equal(p.report().sessions.length,2,'Apps keep separate evidence');assert.equal(remove(storage,'ali'),true);assert.equal(p.activate('ali'),false);assert.equal(p.record({owner:'ali',label:'stale'}),false);
+console.log('PASS: child/app isolation, no Hamada account, preserved learned libraries, first-response deduplication, partial/completed sessions, unscored practice, reloads, authorized report access and deletion tombstones.');
 
 const failing=create({app:'arabicsounds',storage:{getItem(){return null;},setItem(){throw Error('full');}}});const child=failing.add('نور');assert(child);failing.record({label:'م',sessionId:'memory',kind:'practice'});assert.equal(failing.report().sessions.length,1);assert.equal(failing.storageOK(),false);
 console.log('PASS: storage failures retain a usable in-memory account and evidence.');

@@ -1,0 +1,139 @@
+/* Therapist mode and intervention plan. Calm white cards, compact icon controls. */
+[data-open-plan][hidden], .voc-plan [hidden], .voc-therapist [hidden] { display: none !important; }
+body[data-screen]:not([data-screen="home"]) :is([data-therapist], [data-open-plan]) { display: none !important; }
+[data-therapist][aria-pressed="true"] { color: #2f7a52 !important; position: relative; }
+[data-therapist][aria-pressed="true"]::after { content: ''; position: absolute; top: 7px; inset-inline-end: 7px; width: 8px; height: 8px; border-radius: 50%; background: #34a26a; box-shadow: 0 0 0 2px #fff; }
+
+.voc-therapist, .voc-plan { box-sizing: border-box; border: 1px solid #dceaf4; background: #fff; color: #22445a; font-family: Cairo, system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif; padding: 0; }
+.voc-therapist::backdrop, .voc-plan::backdrop { background: #163d5366; backdrop-filter: blur(5px); }
+.voc-therapist *, .voc-plan * { box-sizing: border-box; }
+.voc-therapist button, .voc-plan button, .voc-plan input { font: inherit; }
+.voc-therapist button:focus-visible, .voc-plan :is(button, input):focus-visible { outline: 3px solid #79b9d4; outline-offset: 2px; }
+.voc-plan-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; min-width: 44px; padding: 10px; border: 0; border-radius: 12px; background: transparent; color: #22445a; cursor: pointer; }
+.voc-plan-icon svg, .voc-therapist svg { width: 22px; height: 22px; }
+.voc-plan-icon:disabled { opacity: .4; cursor: default; }
+
+/* Password and exit dialogs */
+.voc-therapist { width: min(360px, calc(100% - 24px)); margin: auto; border-radius: 24px; padding: 20px; }
+.voc-therapist header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.voc-therapist h2 { flex: 1; margin: 0; font-size: 20px; font-weight: 800; }
+.voc-therapist p { margin: 0 0 12px; color: #5c7285; font-size: 15px; line-height: 1.7; }
+.voc-therapist input { width: 100%; height: 52px; padding: 0 16px; border: 1px solid #cfe2eb; border-radius: 16px; font: 700 22px/1 system-ui, sans-serif; letter-spacing: .3em; text-align: center; direction: ltr; color: #22445a; }
+.voc-therapist input[aria-invalid="true"] { border-color: #d97a7a; }
+.voc-therapist [role="alert"] { margin: 8px 0 0; color: #a74343; font-size: 14px; }
+.voc-therapist .voc-therapist-actions { display: flex; gap: 10px; margin-top: 16px; }
+.voc-therapist .voc-therapist-actions button { flex: 1; height: 48px; border: 1px solid #dceaf4; border-radius: 16px; background: #fff; color: #22445a; font-weight: 700; cursor: pointer; }
+.voc-therapist .voc-therapist-actions button.primary { border-color: #0284c7; background: #0284c7; color: #fff; }
+
+/* Plan: full screen on phones, a large card on tablets */
+.voc-plan { width: 100%; max-width: 100%; height: 100%; max-height: 100%; margin: 0; border-radius: 0; display: none; flex-direction: column; overflow: hidden; }
+.voc-plan[open] { display: flex; }
+@media (min-width: 700px) and (min-height: 600px) {
+    .voc-plan { width: min(900px, calc(100% - 48px)); height: min(92dvh, 1000px); margin: auto; border-radius: 28px; }
+}
+.voc-plan-head { display: flex; align-items: center; gap: 4px; padding: max(10px, env(safe-area-inset-top)) 12px 10px; border-bottom: 1px solid #e6f0f6; }
+.voc-plan-head h2 { flex: 1; margin: 0 6px; font-size: 20px; font-weight: 800; }
+.voc-plan-body { flex: 1; overflow-y: auto; padding: 16px max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: radial-gradient(ellipse at 12% 0%, #effaf3 0, transparent 40%), #f8fafc; }
+.voc-plan-info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.voc-plan-info label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700; color: #5c7285; }
+.voc-plan-info input { height: 44px; padding: 0 12px; border: 1px solid #dceaf4; border-radius: 14px; background: #fff; color: #22445a; font-size: 15px; font-weight: 600; }
+@media (max-width: 599px) { .voc-plan-info { grid-template-columns: 1fr 1fr; } .voc-plan-info label:first-child { grid-column: 1 / -1; } }
+
+.voc-plan-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; margin-bottom: 14px; border: 1px solid #dceaf4; border-radius: 16px; background: #fff; }
+.voc-plan-tabs button { height: 42px; border: 0; border-radius: 12px; background: transparent; color: #5c7285; font-weight: 700; cursor: pointer; }
+.voc-plan-tabs button[aria-selected="true"] { background: #eaf6fd; color: #0369a1; }
+.voc-plan-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.voc-plan-summary div { padding: 10px; border: 1px solid #dceaf4; border-radius: 16px; background: #fff; text-align: center; }
+.voc-plan-summary strong { display: block; font-size: 24px; line-height: 1.3; color: #0284c7; }
+.voc-plan-summary div:nth-child(2) strong { color: #2f7a52; }
+.voc-plan-summary div:nth-child(3) strong { color: #a66a00; }
+.voc-plan-summary span { font-size: 13px; color: #5c7285; }
+
+.voc-goal { margin-bottom: 14px; padding: 14px; border: 1px solid #dceaf4; border-radius: 22px; background: #fff; box-shadow: 0 8px 28px #276b8f0a; }
+.voc-goal > h3 { margin: 0; font-size: 17px; font-weight: 800; }
+.voc-goal > p { margin: 2px 0 10px; color: #5c7285; font-size: 14px; line-height: 1.7; }
+.voc-goal-sources { margin: 8px 0 0 !important; font-size: 12px !important; color: #7b8f9d !important; }
+.voc-short { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; padding: 12px 0; border-top: 1px solid #edf3f7; }
+.voc-short-text { font-size: 15px; font-weight: 600; line-height: 1.7; }
+.voc-short-text small { display: block; margin-top: 2px; color: #7b8f9d; font-size: 12px; font-weight: 500; }
+.voc-short-tools { display: flex; align-items: center; gap: 6px; }
+.voc-rating { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; grid-column: 1 / -1; direction: ltr; }
+.voc-rating button { height: 44px; border: 1px solid #dceaf4; border-radius: 14px; background: #fff; color: #22445a; font: 700 15px/1 system-ui, sans-serif; cursor: pointer; }
+.voc-rating button[aria-pressed="true"] { border-color: #0284c7; background: #0284c7; color: #fff; }
+.voc-rating button[data-level="80"][aria-pressed="true"] { border-color: #2f7a52; background: #2f7a52; }
+.voc-status { padding: 3px 10px; border-radius: 999px; background: #fff6e5; color: #8a5a00; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.voc-status[data-state="done"] { background: #e9f7ef; color: #2f7a52; }
+.voc-status[data-state="new"] { background: #f1f5f8; color: #5c7285; }
+.voc-add { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 1px solid #dceaf4; border-radius: 14px; background: #fff; color: #0284c7; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.voc-add svg { width: 18px; height: 18px; }
+.voc-add[aria-pressed="true"] { border-color: #bbe3cb; background: #eef9f2; color: #2f7a52; }
+.voc-plan-empty { padding: 28px 16px; border: 1px dashed #cfe2eb; border-radius: 22px; background: #fff; color: #5c7285; text-align: center; line-height: 1.8; }
+.voc-plan-empty button { margin-top: 10px; }
+.voc-plan [role="alert"] { margin: 0 0 12px; padding: 10px 14px; border-radius: 14px; background: #fdf0f0; color: #a74343; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .voc-plan *, .voc-therapist * { transition: none !important; } }
+
+/* With the therapist, plan and accounts buttons, narrow phones fit the header icons on one row. */
+@media (max-width: 400px) {
+    .app-home-shell .app-home-tools.suite-toolbar { gap: 2px; }
+    .app-home-shell .app-home-tools.suite-toolbar [data-suite-control] { flex: 0 0 40px; width: 40px; min-width: 40px; max-width: 40px; height: 40px; min-height: 40px; padding: 8px; }
+    .app-home-shell .app-home-tools [data-child-profile] .child-name { display: none; }
+}
+@media (max-width: 340px) {
+    .app-home-shell .app-home-tools.suite-toolbar { gap: 1px; }
+    .app-home-shell .app-home-tools.suite-toolbar [data-suite-control] { flex-basis: 36px; width: 36px; min-width: 36px; max-width: 36px; height: 40px; padding: 7px; }
+}
+
+/* Therapist switch (2026-11-19, like the articulation app): a lock when closed, an open lock in green when open. */
+[data-therapist].voc-therapist-switch svg { width: 22px; height: 22px; }
+[data-therapist].voc-therapist-switch[aria-pressed="true"] { background: #edf6f0; color: #2f7a52; border-color: #bfe0cc; }
+[data-therapist].voc-therapist-switch[aria-pressed="true"]::after { content: none; }
+
+/* Plan goals inside the child's progress report. */
+.voc-plan-report { margin: 18px 0 6px; padding: 14px; border: 1px solid #e2eef5; border-radius: 18px; background: #fbfdff; direction: rtl; text-align: start; }
+.voc-plan-report > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.voc-plan-report h3 { margin: 0; font-size: 18px; font-weight: 800; color: #18394b; }
+.voc-plan-report .voc-plan-icon { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #dceaf4; border-radius: 13px; background: #fff; color: #0369a1; cursor: pointer; }
+.voc-plan-report .voc-plan-icon svg { width: 22px; height: 22px; }
+.voc-plan-report .voc-plan-icon:disabled { opacity: .5; }
+.voc-plan-report .voc-goal { margin-top: 10px; }
+.voc-plan-report .voc-goal h4 { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 4px; font-size: 15px; color: #0369a1; }
+.voc-plan-report .voc-goal h4 small { flex: none; font-size: 12px; color: #587082; font-weight: 600; }
+.voc-plan-report .voc-goal > p { margin: 0 0 6px; font-size: 13px; color: #587082; line-height: 1.7; }
+.voc-plan-report-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px auto; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #eef3f6; font-size: 14px; line-height: 1.6; }
+.voc-plan-report-bar { position: relative; height: 10px; border-radius: 5px; background: #eaf0f4; overflow: hidden; direction: ltr; }
+.voc-plan-report-bar i { position: absolute; inset-block: 0; left: 0; border-radius: 5px; background: #0284c7; }
+.voc-plan-report-bar i[data-state="done"] { background: #2f7a52; }
+.voc-plan-report-empty { margin: 0; font-size: 14px; color: #587082; line-height: 1.8; }
+@media (max-width: 480px) { .voc-plan-report-row { grid-template-columns: minmax(0, 1fr) 70px; } .voc-plan-report-row .voc-status { grid-column: 1 / -1; justify-self: start; } }
+
+/* Ready-made plans and achievement percentages (2026-11-19). */
+.voc-ready { margin: 14px 0; padding: 12px; border: 1px solid #e2eef5; border-radius: 16px; background: #f7fbfd; }
+.voc-ready h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #18394b; }
+.voc-ready > p { margin: 0 0 10px; font-size: 13px; color: #587082; line-height: 1.7; }
+.voc-ready-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.voc-ready-card { display: flex; flex-direction: column; gap: 4px; padding: 10px; border: 1px solid #dceaf4; border-radius: 14px; background: #fff; }
+.voc-ready-card b { font-size: 16px; color: #0369a1; }
+.voc-ready-card span { font-size: 13px; color: #22445a; line-height: 1.6; }
+.voc-ready-card small { font-size: 12px; color: #7b8f9d; }
+.voc-ready-card .voc-add { margin-top: auto; align-self: flex-start; }
+.voc-ready-card .voc-add:disabled { opacity: .7; cursor: default; }
+.voc-goal-percent { margin-inline-start: 6px; padding: 1px 8px; border-radius: 999px; background: #e7f3fb; color: #0369a1; font-size: 13px; font-weight: 700; }
+.voc-plan-report .voc-plan-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Goal colours: red = in progress, green = achieved, yellow = suggested next goals. */
+.voc-status[data-state="working"] { background: #fdecea; color: #b42318; }
+.voc-status[data-state="suggested"] { background: #fef6dc; color: #a16207; }
+.voc-plan-report-bar i[data-state="working"] { background: #d64545; }
+.voc-short[data-state="done"] { background: #f0faf4; border-color: #bfe5cd; }
+.voc-short[data-state="working"] { border-inline-start: 4px solid #e57373; }
+.voc-short[data-state="done"] { border-inline-start: 4px solid #2f7a52; }
+.voc-estimate { display: block; margin-top: 3px; color: #0369a1; font-weight: 700; }
+.voc-plan-group { margin: 10px 0; padding: 10px 12px; border-radius: 16px; border: 1.5px solid; }
+.voc-plan-group h4 { margin: 0 0 6px; font-size: 15px; }
+.voc-plan-group h4 small { font-weight: 600; opacity: .75; }
+.voc-plan-group[data-state="working"] { background: #fdf3f2; border-color: #f2c4bf; }
+.voc-plan-group[data-state="working"] h4 { color: #b42318; }
+.voc-plan-group[data-state="done"] { background: #f2fbf5; border-color: #bfe5cd; }
+.voc-plan-group[data-state="done"] h4 { color: #2f7a52; }
+.voc-plan-group[data-state="suggested"] { background: #fffbeb; border-color: #f6dfa0; }
+.voc-plan-group[data-state="suggested"] h4 { color: #a16207; }
+.voc-plan-group-empty { margin: 4px 0 2px; font-size: 13px; color: #6b7f8e; }

@@ -56,3 +56,12 @@ svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke
 .dash-print-error{color:#b42318}
 @media(max-width:560px){.dash-brand p{display:none}.dash-stats strong{font-size:17px}.dash-bar{grid-template-columns:auto 1fr auto}}
 :focus-visible{outline:3px solid #38bdf8;outline-offset:2px}
+
+/* Report choices in the print window: styled toggle cards (no browser checkboxes). */
+.print-choice{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1.5px solid #dceaf4;border-radius:16px;background:#fff;color:#22445a;font:inherit;text-align:start;cursor:pointer}
+.print-choice>span:last-child{display:grid}.print-choice small{color:#5c7285;font-size:13px}
+.print-tick{display:grid;place-items:center;flex:none;width:26px;height:26px;border:2px solid #cbd5e1;border-radius:8px;color:transparent}
+.print-tick svg{width:18px;height:18px}
+.print-choice[aria-pressed=true]{border-color:#0284c7;background:#f0f9ff}
+.print-choice[aria-pressed=true] .print-tick{border-color:#0284c7;background:#0284c7;color:#fff}
+.print-choice:focus-visible{outline:3px solid #38bdf8;outline-offset:2px}

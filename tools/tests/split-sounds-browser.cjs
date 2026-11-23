@@ -33,7 +33,7 @@ try{
   await page.addInitScript(app=>{localStorage.setItem(`${app}-children-v1`,JSON.stringify({schema:1,active:'qa-sounds',children:[{id:'qa-sounds',name:'اختبار',role:'child',apps:{},words:{}}]}));window.finishedAudio=0;const Context=window.AudioContext||window.webkitAudioContext;if(Context){const create=Context.prototype.createBufferSource;Context.prototype.createBufferSource=function(...args){const node=create.apply(this,args);node.addEventListener('ended',()=>{if(node.buffer?.length>1)window.finishedAudio++;},{once:true});return node;};}const native=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){this.addEventListener('ended',()=>window.finishedAudio++,{once:true});return native.call(this);};},app);
   const url=`${origin}/standalone/${app}/index.html`;await page.goto(url);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   await page.waitForFunction(()=>!document.getElementById('offline-download').disabled);
-  assert.equal(await page.locator('.app-home-action').count(),5);assert.equal(await page.locator('[data-suite-apps],[data-report-app]').count(),0,'No cross-app navigation');assert.equal(await page.locator('#menu-toggle:visible,#home-link:visible').count(),0);
+  assert.equal(await page.locator('.app-home-action').count(),6);assert.equal(await page.locator('.app-home-action').first().getAttribute('href'),'#/'+kind+'/route','The automatic route is the first home tile');assert.equal(await page.locator('[data-suite-apps],[data-report-app]').count(),0,'No cross-app navigation');assert.equal(await page.locator('#menu-toggle:visible,#home-link:visible').count(),0);
   const cdp=await context.newCDPSession(page);const installability=await cdp.send('Page.getInstallabilityErrors');assert.deepEqual(installability.installabilityErrors.filter(error=>error.errorId!=='in-incognito'),[],'Chromium installation requirements (test contexts are incognito)');await cdp.detach();
   assert.equal((await rpc(page,'STATUS')).count,0,'Startup does not bulk-download media');
   for(const[width,height]of[[320,568],[390,844],[844,390],[768,1024],[1280,640]]){
@@ -61,10 +61,10 @@ try{
   releases[app].version+='-updated';releases[app].shell.find(entry=>entry.url===css).sha=sha(body);releases[app].shell.find(entry=>entry.url===css).bytes=body.length;
   await page.evaluate(async()=>{await(await navigator.serviceWorker.getRegistration()).update();});await page.locator('.app-update-dialog').waitFor({state:'visible'});
   await page.locator('[data-update-later]').click();assert(await page.evaluate(async()=>!!(await navigator.serviceWorker.getRegistration()).waiting));await page.reload();await page.locator('.app-update-dialog').waitFor({state:'visible'});
-  await Promise.all([page.waitForEvent('load'),page.locator('[data-update-accept]').click()]);await page.waitForFunction(()=>document.querySelectorAll('.app-home-action').length===5);
+  await Promise.all([page.waitForEvent('load'),page.locator('[data-update-accept]').click()]);await page.waitForFunction(()=>document.querySelectorAll('.app-home-action').length===6);
   assert.equal((await rpc(page,'STATUS')).count,total);assert.equal((await rpc(page,'STATUS')).version,releases[app].version);
   assert.deepEqual(errors,[]);assert.deepEqual(foreign,[],'Standalone app never requests a sibling app');await context.close();
-  console.log(`PASS ${app}: five home actions, responsive layouts, own ${total} media files, integrity rejection/retry, all ${decoded.length} native audio decoders, real offline images/audio/ranges, deferred and accepted updates.`);
+  console.log(`PASS ${app}: six home actions (route first), responsive layouts, own ${total} media files, integrity rejection/retry, all ${decoded.length} native audio decoders, real offline images/audio/ranges, deferred and accepted updates.`);
  }
  // Both installed apps can be open on the same origin without sharing accounts.
  const isolated=await browser.newContext(),one=await isolated.newPage(),two=await isolated.newPage();

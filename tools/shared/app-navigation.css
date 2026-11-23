@@ -44,7 +44,7 @@ body.suite-transition-active>:not(#suite-transition):not(script):not(style):not(
 .suite-toolbar [data-suite-control][hidden],.suite-toolbar [data-suite-control].hidden{display:none!important}
 .suite-toolbar [data-suite-control]>svg{display:block;width:23px;height:23px;flex-shrink:0}
 .suite-toolbar [data-suite-control]>i,.suite-settings-panel .child-button>i{display:block;background:transparent!important;border-radius:0;padding:0;font-size:21px;color:inherit}
-.suite-toolbar [data-suite-control=profile]>span,.suite-toolbar .game-back>span{display:none}
+.suite-toolbar [data-suite-control=profile]>span:not(.suite-account-chip),.suite-toolbar .game-back>span{display:none}
 .suite-toolbar [data-suite-control]:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
 .game-header.suite-toolbar{justify-content:flex-start;gap:8px;font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif}
 .game-header.suite-toolbar .game-brand{order:2;margin-left:auto;margin-right:0;min-width:0}
