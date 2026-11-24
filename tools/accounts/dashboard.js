@@ -73,7 +73,7 @@
             skills: { pair: 'تمييز أصوات الكلام', 'ling-detection': 'اكتشاف أصوات لينغ', 'ling-identification': 'التعرف على أصوات لينغ', matching: 'المطابقة', memory: 'الذاكرة' },
             sources: { pair: 'تمييز أصوات الكلام', 'ling-detection': 'اكتشاف أصوات لينغ', 'ling-identification': 'التعرف على أصوات لينغ', matching: 'المطابقة', memory: 'الذاكرة' },
             read: child => soundRead(child, 'arabicsounds') },
-        { id: 'auditory-rehabilitation', logo: '../auditory-rehabilitation/icons/icon-192.png', name: 'أصوات من حولي', color: '#0891b2', key: 'auditory-rehabilitation-children-v1', url: '../auditory-rehabilitation/', goals: '../auditory-rehabilitation/assets/intervention-goals.js',
+        { id: 'auditory-rehabilitation', logo: '../../non-speech-sounds-rehab/icons/icon-192.png', name: 'أصوات من حولي', color: '#0891b2', key: 'auditory-rehabilitation-children-v1', url: '../../non-speech-sounds-rehab/', goals: '../../non-speech-sounds-rehab/assets/intervention-goals.js',
             skills: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
             sources: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
             read: child => soundRead(child, 'auditory-rehabilitation') },
@@ -335,7 +335,7 @@
     const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span>${a.ref.startsWith('cloud:') ? `<button type="button" class="dash-icon dash-danger" data-remove-assessment="${esc(a.ref)}" aria-label="حذف هذا التقييم من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button>` : ''}</header>
         ${a.sections.filter(section => section.items.length).map(section => `<details><summary>${esc(section.title)} <small>(${section.items.length})</small></summary><dl>${section.items.map(item => `<div><dt>${esc(item.label)}</dt><dd>${esc(item.value).replace(/\n/g, '<br>')}</dd></div>`).join('')}</dl></details>`).join('')}</section>`;
     // ---- Board tools for the clinic's database ----
-    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds'];
+    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds', 'auditory-rehabilitation'];
     // Two taps for anything that deletes: the first turns the button red for three seconds.
     function twoTaps(button, action, again = 'اضغط مرة أخرى للتأكيد') {
         button.onclick = async () => {

@@ -40,7 +40,6 @@ jobs:
           node tools/tests/update-activation.cjs
           node tools/tests/sound-suite.cjs
           node tools/tests/standalone-sound-accounts.cjs
-          node tools/auditory-rehabilitation/tests/static.cjs
           node tools/tests/one-way-links.cjs
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'

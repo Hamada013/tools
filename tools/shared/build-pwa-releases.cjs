@@ -1,7 +1,7 @@
 // One build entrypoint for GitHub Pages and the final app bundle. No npm install required.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto'),cp=require('node:child_process');
 const ROOT=path.resolve(__dirname,'../..'),TOOLS=path.join(ROOT,'tools');
-const APPS=['auditory-rehabilitation'];
+const APPS=[];
 const sha=(body,encoding='hex')=>crypto.createHash('sha256').update(body).digest(encoding);
 function inventory(app,root=TOOLS){
  const base=path.join(root,app),context={self:{}};
@@ -22,7 +22,7 @@ function inventory(app,root=TOOLS){
 }
 // Apps that moved to their own repositories: old links and offline copies forward to the new address.
 // Saved children stay, because the new address is on the same site (hamada013.github.io).
-const MOVED=[['arabicsounds','/arabic-sounds/']];
+const MOVED=[['arabicsounds','/arabic-sounds/'],['auditory-rehabilitation','/non-speech-sounds-rehab/']];
 function writeMovedApps(destination){
  for(const [app,to] of MOVED){
   const dir=path.join(destination,app),from='/tools/'+app+'/',target='https://hamada013.github.io'+to;fs.mkdirSync(dir,{recursive:true});
