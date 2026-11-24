@@ -3,6 +3,9 @@
  * Children with the same name in different apps are shown as one child; different spellings can be
  * linked by hand. For each child: every app's report alone, or all apps together, and PDFs.
  *
+ * The clinic's online database (speech-cloud.js): once the therapist signs in with Google, every child saved there
+ * (with their 6-digit number) and their assessments show here by themselves, joined to this device's accounts by name.
+ *
  * «ملف الطفل» files from other devices (the apps' share button, and assessment forms on the speech website)
  * are imported here and kept on this device: their progress shows beside this device's, labelled with who
  * recorded it, and assessments show in their own section. A newer file from the same device replaces the older.
@@ -169,6 +172,17 @@
         return notes;
     }
     function removeImport(id) { store.set(IMPORTS_KEY, imports().filter(entry => entry.id !== id)); }
+    // ---- The clinic's online database ----
+    const cloud = { user: null, children: [], assessments: new Map(), error: '', busy: false };
+    async function refreshCloud() {
+        const C = window.SpeechCloud; if (!C || !cloud.user) return;
+        cloud.busy = true; cloud.error = '';
+        try {
+            const list = await C.children(), all = await Promise.all(list.map(child => C.assessments(child.id).catch(() => [])));
+            cloud.children = list; cloud.assessments = new Map(list.map((child, index) => [child.id, all[index]]));
+        } catch (error) { cloud.error = C.explain(error); }
+        cloud.busy = false; if (isOpen()) route();
+    }
     // Assessments from imported files, each with its child's name and its source.
     const assessments = () => imports().flatMap(({ file }) => file.assessments.map((a, index) => ({ ...a, ref: `${fileId(file)}#${index}`, name: a.child?.name || file.child.name, from: { ...file.recorder, exported: file.exported } })));
     // One child = accounts with the same name, plus accounts the therapist linked by hand.
@@ -188,7 +202,15 @@
             const group = named || groups.get(`assess:${normalizeName(a.name)}`) || { key: `assess:${normalizeName(a.name)}`, accounts: [], name: a.name };
             (group.assessments ||= []).push(a); groups.set(group.key, group);
         }
-        return [...groups.values()].map(group => ({ ...group, assessments: group.assessments || [], name: group.accounts[0]?.name || group.name,
+        // Children in the clinic's database: joined to the board with the same name, or a board of their own.
+        for (const child of cloud.children) {
+            const named = [...groups.values()].find(group => !group.cloud && (group.accounts.some(account => normalizeName(account.name) === normalizeName(child.name)) || normalizeName(group.name) === normalizeName(child.name)));
+            const group = named || { key: `cloud:${child.id}`, accounts: [], name: child.name };
+            group.cloud = child; group.name = child.name;
+            for (const a of cloud.assessments.get(child.id) || []) (group.assessments ||= []).push({ ...a, ref: `cloud:${child.id}:${a.id}`, name: child.name, from: { role: 'therapist', name: a.examiner || '', exported: a.saved } });
+            groups.set(group.key, group);
+        }
+        return [...groups.values()].map(group => ({ ...group, assessments: group.assessments || [], name: group.cloud?.name || group.accounts[0]?.name || group.name,
             last: Math.max(0, ...group.accounts.flatMap(a => a.sessions.map(s => Date.parse(s.date) || 0)), ...(group.assessments || []).map(a => Date.parse(a.date) || 0)) }))
             .sort((a, b) => b.last - a.last || a.name.localeCompare(b.name, 'ar'));
     }
@@ -241,7 +263,7 @@
     let current = null, view = 'all';
     function route() {
         const open = isOpen();
-        $('#dash-gate').hidden = open; $('#dash-lock').hidden = !open; $('#dash-import').hidden = !open;
+        $('#dash-gate').hidden = open; $('#dash-lock').hidden = !open; $('#dash-import').hidden = !open; $('#dash-cloud').hidden = !open || !window.SpeechCloud;
         $('#dash-list').hidden = !open || !!current; $('#dash-child').hidden = !open || !current;
         if (!open) { $('#dash-gate input').value = ''; $('#dash-gate input').focus(); return; }
         if (current) renderChild(); else renderList();
@@ -249,9 +271,11 @@
     function renderList() {
         const query = normalizeName($('#dash-search').value), all = children(), list = all.filter(child => normalizeName(child.name).includes(query));
         $('#dash-count').textContent = `${all.length} طفل`;
+        const line = $('#dash-cloud-line'); line.hidden = !window.SpeechCloud; line.dataset.state = cloud.error ? 'error' : cloud.user ? 'on' : 'off';
+        line.textContent = cloud.error || (cloud.user ? (cloud.busy ? 'جارٍ التحميل من قاعدة بيانات العيادة…' : `متصل بقاعدة بيانات العيادة · ${cloud.children.length} طفل محفوظ`) : 'سجّل الدخول بحساب العيادة (زر السحابة) لعرض ما حُفظ في قاعدة البيانات.');
         $('#dash-children').replaceChildren(...list.map(child => {
             const button = document.createElement('button'); button.type = 'button'; button.className = 'dash-child-card'; button.setAttribute('role', 'listitem');
-            button.innerHTML = `<strong>${esc(child.name)}</strong><span class="dash-apps">${child.accounts.map(a => `<i style="--app:${a.app.color}"${a.from ? ` title="${esc(sourceLabel(a.from))}"` : ''}>${a.app.name}${a.from ? ' · ' + esc(ROLES[a.from.role] || '') : ''}</i>`).join('')}${child.assessments.length ? `<i style="--app:#475569">تقييم (${child.assessments.length})</i>` : ''}</span><small>${child.last ? 'آخر جلسة ' + date(child.last) : 'لا توجد جلسات بعد'}</small>`;
+            button.innerHTML = `<strong>${esc(child.name)}${child.cloud?.code ? ` <bdi class="dash-code" dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi>` : ''}</strong><span class="dash-apps">${child.accounts.map(a => `<i style="--app:${a.app.color}"${a.from ? ` title="${esc(sourceLabel(a.from))}"` : ''}>${a.app.name}${a.from ? ' · ' + esc(ROLES[a.from.role] || '') : ''}</i>`).join('')}${child.assessments.length ? `<i style="--app:#475569">تقييم (${child.assessments.length})</i>` : ''}</span><small>${child.last ? 'آخر جلسة ' + date(child.last) : 'لا توجد جلسات بعد'}</small>`;
             button.onclick = () => { current = child.key; view = 'all'; route(); window.scrollTo(0, 0); };
             return button;
         }));
@@ -287,7 +311,7 @@
         if (!child) { current = null; route(); return; }
         const host = $('#dash-child'), accountsShown = view === 'all' ? child.accounts : child.accounts.filter(a => a.ref === view);
         const others = accounts().filter(a => !child.accounts.some(own => own.ref === a.ref));
-        host.innerHTML = `<div class="dash-child-head"><button type="button" class="dash-icon" data-back aria-label="كل الأطفال" title="كل الأطفال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><h2 id="dash-child-name">${esc(child.name)}</h2><button type="button" class="dash-print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>طباعة</button></div>
+        host.innerHTML = `<div class="dash-child-head"><button type="button" class="dash-icon" data-back aria-label="كل الأطفال" title="كل الأطفال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><h2 id="dash-child-name">${esc(child.name)}</h2>${child.cloud?.code ? `<span class="dash-code" title="رقم الطفل">رقم الطفل <bdi dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi></span>` : ''}<button type="button" class="dash-print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>طباعة</button></div>
             <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, a.app.name + (a.from ? ' · ' + (ROLES[a.from.role] || '') : '')]), ...(child.assessments.length ? [['assess', 'التقييمات']] : [])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
             <nav class="dash-periods" aria-label="الفترة">${Object.entries(PERIODS).map(([id, [label]]) => `<button type="button" data-period="${id}" aria-pressed="${period === id}">${label}</button>`).join('')}</nav>
             <div class="dash-sections">${view === 'all' || view === 'assess' ? child.assessments.map(assessmentSection).join('') : ''}${(await Promise.all((view === 'assess' ? [] : accountsShown).map(appSection))).join('')}</div>
@@ -369,6 +393,18 @@
         };
         $('#dash-lock').onclick = () => { current = null; setOpen(false); };
         $('#dash-search').oninput = renderList;
+        // Google sign-in for the clinic's database; two taps sign out.
+        const cloudButton = $('#dash-cloud');
+        const paint = () => { cloudButton.dataset.state = cloud.user ? 'on' : 'off'; const label = cloud.user ? `متصل بقاعدة بيانات العيادة (${cloud.user.email}) · اضغط مرتين لتسجيل الخروج` : 'تسجيل الدخول إلى قاعدة بيانات العيادة'; cloudButton.title = label; cloudButton.setAttribute('aria-label', label); };
+        if (window.SpeechCloud) {
+            window.SpeechCloud.onUser(user => { cloud.user = user; cloud.children = []; cloud.assessments = new Map(); paint(); if (user) refreshCloud(); else if (isOpen()) route(); });
+            cloudButton.onclick = async () => {
+                if (!cloud.user) { try { await window.SpeechCloud.signIn(); } catch (error) { cloud.error = window.SpeechCloud.explain(error); route(); } return; }
+                if (!cloudButton.dataset.armed) { cloudButton.dataset.armed = '1'; setTimeout(() => delete cloudButton.dataset.armed, 3000); return; }
+                delete cloudButton.dataset.armed; await window.SpeechCloud.signOut();
+            };
+            paint();
+        }
         // «ملف طفل» from another device: one or more files at once.
         const picker = $('#dash-import-file'), note = $('#dash-import-note');
         $('#dash-import').onclick = () => picker.click();
@@ -382,5 +418,5 @@
         window.addEventListener('storage', event => { if ((APPS.some(app => app.key === event.key) || event.key === IMPORTS_KEY) && isOpen()) route(); });
         route();
     });
-    window.SpeechDashboard = { APPS, accounts, children, goalStates, importFiles, imports, assessments };
+    window.SpeechDashboard = { APPS, accounts, children, goalStates, importFiles, imports, assessments, refreshCloud, cloud };
 })();

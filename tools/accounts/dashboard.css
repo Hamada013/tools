@@ -81,3 +81,8 @@ svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke
 .dash-files [data-armed]{background:#fee2e2;color:#b42318}
 .dash-import-note{white-space:pre-line;margin:0 auto 12px;max-width:900px;padding:10px 14px;border-radius:14px;background:#eaf7ef;color:#1f6b45;font-weight:700}
 @media(max-width:560px){.dash-assessment dl>div{grid-template-columns:1fr}}
+/* The clinic's online database: header cloud button, status line and the child's number. */
+#dash-cloud .dash-cloud-tick{opacity:0}#dash-cloud[data-state=on]{color:#2f7a52}#dash-cloud[data-state=on] .dash-cloud-tick{opacity:1}#dash-cloud[data-armed]{background:#fee2e2;color:#b42318}
+.dash-cloud-line{margin:4px 0 10px;padding:8px 12px;border-radius:12px;background:#f1f5f9;color:#475569;font-size:14px;font-weight:700}
+.dash-cloud-line[data-state=on]{background:#eaf7ef;color:#1f6b45}.dash-cloud-line[data-state=error]{background:#fee2e2;color:#b42318}
+.dash-code{font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px;background:#f1f8fc;color:#0369a1;white-space:nowrap}
