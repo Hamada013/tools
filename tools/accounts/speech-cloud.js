@@ -108,6 +108,7 @@
         if (!String(details.child?.name || '').trim()) throw Object.assign(Error('name'), { code: 'name' });
         const { store, db } = await load();
         const { child, created } = await childFor(details.child);
+        if (details.apps?.length) { const apps = [...new Set([...(child.apps || []), ...details.apps])]; await store.setDoc(store.doc(db, 'children', child.id), { apps }, { merge: true }); child.apps = apps; }
         const ref = details.assessmentId ? store.doc(db, 'children', child.id, 'assessments', details.assessmentId) : store.doc(store.collection(db, 'children', child.id, 'assessments'));
         const sections = (details.sections || []).map(section => ({ title: String(section.title || ''), items: (section.items || []).map(item => ({ label: String(item.label || ''), value: String(item.value ?? '') })) }));
         await store.setDoc(ref, { form: details.form, title: details.title, date: details.date || null, examiner: details.examiner || '', sections, saved: new Date().toISOString() });
@@ -145,6 +146,24 @@
     }
     async function devices() { const { store, db } = await load(); return (await store.getDocs(store.collection(db, 'devices'))).docs.map(entry => ({ id: entry.id, ...entry.data() })); }
     async function removeDevice(uid) { const { store, db } = await load(); await store.deleteDoc(store.doc(db, 'devices', uid)); }
-    root.SpeechCloud = { load, onUser, signIn, signOut, user, explain, children, assessments, saveAssessment, childFor, normalizeName, formatCode, validCode, checkDigit,
+    // ---- Parents: the child's name and number open the apps until the account's end date ----
+    // The ticket's id is a hash of name and number (the apps compute the same in assets/speech-sync.js).
+    async function parentKey(name, code) {
+        const bytes = new TextEncoder().encode(normalizeName(name) + '|' + String(code).replace(/\D/g, ''));
+        return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function ticket(child) {
+        if (!child.until) return;
+        const { store, db } = await load();
+        await store.setDoc(store.doc(db, 'joinCodes', await parentKey(child.name, child.code)), { all: false, children: [child.id], role: 'parents', created: new Date().toISOString(), expires: new Date(child.until) });
+    }
+    /** Sets how long the child's account is valid (3, 6, 9 or 12 months from today) and renews the parents' ticket. */
+    async function setUntil(child, months) {
+        const { store, db } = await load(), until = new Date(); until.setMonth(until.getMonth() + months);
+        await store.setDoc(store.doc(db, 'children', child.id), { until: until.toISOString(), months, updated: new Date().toISOString() }, { merge: true });
+        await ticket({ ...child, until: until.toISOString() });
+        return until.toISOString();
+    }
+    root.SpeechCloud = { parentKey, ticket, setUntil, load, onUser, signIn, signOut, user, explain, children, assessments, saveAssessment, childFor, normalizeName, formatCode, validCode, checkDigit,
         createChild, setApps, rename, records, removeAssessment, removeChild, makeJoinCode, devices, removeDevice };
 })(globalThis);

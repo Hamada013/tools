@@ -95,3 +95,6 @@ svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke
 .dash-danger{color:#b42318}.dash-icon[data-armed]{background:#fee2e2;color:#b42318}
 .dash-join-code{margin:8px 0 0;font-size:34px;font-weight:900;letter-spacing:.12em;text-align:center;color:#0369a1}
 .dash-join-link{margin:6px 0;padding:8px 10px;border-radius:12px;background:#f1f5f9;font-size:13px;word-break:break-all}
+.dash-until{font-weight:700;color:#2f7a52}.dash-until[data-state=ended]{color:#b42318}.dash-until[data-state=none]{color:#a16207}
+.dash-need{padding:6px 8px;border-radius:14px;background:#fffbeb;outline:2px dashed #f6dfa0}
+pre.dash-join-link{white-space:pre-wrap;font:inherit;font-size:14px;direction:rtl}

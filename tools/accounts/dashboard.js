@@ -334,7 +334,9 @@
         if (!child.cloud) return `<div class="dash-cloud-tools"><p>هذا الطفل ليس في قاعدة بيانات العيادة بعد.</p><button type="button" class="dash-pill" data-cloud-create>حفظ في قاعدة البيانات وإعطاؤه رقماً</button></div>`;
         const apps = child.cloud.apps || [];
         return `<div class="dash-cloud-tools"><div class="dash-cloud-apps" role="group" aria-label="التطبيقات التي يظهر فيها الطفل"><span>يظهر في:</span>${APP_IDS.map(id => { const app = APPS.find(item => item.id === id); return `<button type="button" class="dash-pill" style="--app:${app.color}" data-app-toggle="${id}" aria-pressed="${apps.includes(id)}">${app.name}</button>`; }).join('')}</div>
-            <div class="dash-cloud-actions"><button type="button" class="dash-pill" data-join-child>ربط جهاز الأهل لهذا الطفل</button><button type="button" class="dash-icon dash-danger" data-cloud-remove aria-label="حذف ${esc(child.name)} من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button></div></div>`;
+            <div class="dash-cloud-apps${child.cloud.until ? '' : ' dash-need'}" role="group" aria-label="مدة حساب الطفل"><span>مدة الحساب:</span>${[3, 6, 9, 12].map(m => `<button type="button" class="dash-pill" data-months="${m}" aria-pressed="${child.cloud.months === m}">${m} أشهر</button>`).join('')}
+                <small class="dash-until" data-state="${!child.cloud.until ? 'none' : Date.parse(child.cloud.until) < Date.now() ? 'ended' : 'ok'}">${!child.cloud.until ? 'اختر المدة ليفتح الأهل التطبيقات' : Date.parse(child.cloud.until) < Date.now() ? `انتهت في ${date(child.cloud.until)} · مقفل حتى التجديد` : `صالح حتى ${date(child.cloud.until)}`}</small></div>
+            <div class="dash-cloud-actions"><button type="button" class="dash-pill" data-share-parents>مشاركة مع الأهل (الاسم والرقم)</button><button type="button" class="dash-icon dash-danger" data-cloud-remove aria-label="حذف ${esc(child.name)} من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button></div></div>`;
     }
     function wireCloudTools(host, child) {
         const C = window.SpeechCloud; if (!C || !cloud.user) return;
@@ -344,9 +346,32 @@
             button.setAttribute('aria-pressed', String(apps.has(button.dataset.appToggle)));
             try { await C.setApps(child.cloud.id, [...apps]); await refreshCloud(); } catch (error) { cloud.error = C.explain(error); route(); }
         }; });
-        const join = host.querySelector('[data-join-child]'); if (join) join.onclick = () => joinDialog({ children: [child.cloud.id], role: 'parents', who: child.name, apps: child.cloud.apps || [] });
+        host.querySelectorAll('[data-months]').forEach(button => { button.onclick = async () => { button.disabled = true; try { await C.setUntil(child.cloud, Number(button.dataset.months)); await refreshCloud(); } catch (error) { cloud.error = C.explain(error); route(); } }; });
+        const share = host.querySelector('[data-share-parents]'); if (share) share.onclick = () => shareDialog(child.cloud);
         const remove = host.querySelector('[data-cloud-remove]'); if (remove) twoTaps(remove, async () => { await C.removeChild(child.cloud.id); current = null; await refreshCloud(); route(); }, `اضغط مرة أخرى لحذف ${child.name} من قاعدة البيانات`);
         host.querySelectorAll('[data-remove-assessment]').forEach(button => { const [, childId, id] = button.dataset.removeAssessment.split(':'); twoTaps(button, async () => { await C.removeAssessment(childId, id); await refreshCloud(); }); });
+    }
+    // «مشاركة مع الأهل»: the child's name, number, end date and app links, ready to send.
+    async function shareDialog(child) {
+        if (!joinBox) { joinBox = document.createElement('dialog'); joinBox.className = 'dash-print-dialog dash-join'; joinBox.dir = 'rtl'; document.body.append(joinBox); }
+        const apps = (child.apps || []).map(id => APPS.find(app => app.id === id)).filter(Boolean);
+        if (!apps.length || !child.until) {
+            joinBox.innerHTML = `<h2>مشاركة مع الأهل</h2><p>${!apps.length ? 'اختر أولاً التطبيقات التي يظهر فيها الطفل' : 'اختر أولاً مدة الحساب (3 أو 6 أو 9 أو 12 شهراً)'}.</p><footer><button type="button" data-done>حسناً</button></footer>`;
+            joinBox.querySelector('[data-done]').onclick = () => joinBox.close(); joinBox.showModal(); return;
+        }
+        joinBox.innerHTML = '<h2>مشاركة مع الأهل</h2><p>جارٍ التجهيز…</p>'; joinBox.showModal();
+        try {
+            await window.SpeechCloud.ticket(child);
+            const number = window.SpeechCloud.formatCode(child.code), links = apps.map(app => `${app.name}: ${new URL(app.url, location.href).href}`);
+            const text = `دخول ${child.name} إلى تطبيقات العيادة\nاسم الطفل: ${child.name}\nرقم الطفل: ${number}\nصالح حتى: ${date(child.until)}\n\nافتح التطبيق واكتب الاسم والرقم:\n${links.join('\n')}`;
+            joinBox.innerHTML = `<h2>مشاركة مع الأهل · ${esc(child.name)}</h2>
+                <p>يكتب الأهل الاسم والرقم في شاشة الدخول لكل تطبيق. يعمل الرقم حتى ${date(child.until)}.</p>
+                <p class="dash-join-code" dir="ltr">${number}</p><pre class="dash-join-link">${esc(text)}</pre>
+                <footer>${navigator.share ? '<button type="button" data-share>مشاركة</button>' : ''}<button type="button" data-copy>نسخ النص</button><button type="button" data-done>تم</button></footer>`;
+            joinBox.querySelector('[data-share]')?.addEventListener('click', () => navigator.share({ title: `دخول ${child.name}`, text }).catch(() => {}));
+            joinBox.querySelector('[data-copy]').onclick = async event => { try { await navigator.clipboard.writeText(text); event.target.textContent = 'نُسخ'; } catch {} };
+        } catch (error) { joinBox.innerHTML = `<h2>مشاركة مع الأهل</h2><p class="dash-print-error">${esc(window.SpeechCloud.explain(error))}</p><footer><button type="button" data-done>إغلاق</button></footer>`; }
+        joinBox.querySelector('[data-done]').onclick = () => joinBox.close();
     }
     // A join code for a device: the therapist's own iPad (all children) or a parents' device (chosen children).
     let joinBox;
