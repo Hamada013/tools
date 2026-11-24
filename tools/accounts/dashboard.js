@@ -3,6 +3,10 @@
  * Children with the same name in different apps are shown as one child; different spellings can be
  * linked by hand. For each child: every app's report alone, or all apps together, and PDFs.
  *
+ * «ملف الطفل» files from other devices (the apps' share button, and assessment forms on the speech website)
+ * are imported here and kept on this device: their progress shows beside this device's, labelled with who
+ * recorded it, and assessments show in their own section. A newer file from the same device replaces the older.
+ *
  * Adding a future app: add one entry to APPS with its storage key, its address and a read() that
  * turns one saved child into { level, sessions: [{ date, kind, source, skills: { id: {correct,total} } }], plan }. */
 (() => {
@@ -108,7 +112,7 @@
 
     // ---- Reading every app ----
     const normalizeName = name => String(name || '').normalize('NFKC').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim().toLocaleLowerCase();
-    const LINKS_KEY = 'speech-dashboard-links-v1', LOCK_KEY = 'speech-dashboard-therapist';
+    const LINKS_KEY = 'speech-dashboard-links-v1', LOCK_KEY = 'speech-dashboard-therapist', IMPORTS_KEY = 'speech-dashboard-imports-v1', DEVICE_KEY = 'speech-device-id-v1';
     const store = { get: (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }, set: (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } } };
     function accounts() {
         const out = [];
@@ -118,11 +122,55 @@
                 if (!child?.id || child.role === 'admin' || data.deletedChildren?.[child.id]) continue;
                 let read; try { read = app.read(child); } catch { continue; }
                 read.sessions = read.sessions.filter(s => s.date).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
-                out.push({ ref: `${app.id}:${child.id}`, app, id: child.id, name: child.name || 'بدون اسم', created: child.created, child, ...read });
+                out.push({ ref: `${app.id}:${child.id}`, app, id: child.id, name: child.name || 'بدون اسم', created: child.created, child, from: null, ...read });
+            }
+        }
+        // Progress from other devices' child files; this device's own files are already shown above.
+        const here = (() => { try { return localStorage.getItem(DEVICE_KEY); } catch { return null; } })();
+        for (const { file } of imports()) {
+            if (file.device === here) continue;
+            for (const entry of file.accounts) {
+                const app = APPS.find(item => item.id === entry.app), child = entry.child; if (!app) continue;
+                let read; try { read = app.read(child); } catch { continue; }
+                read.sessions = read.sessions.filter(s => s.date).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+                out.push({ ref: `file:${file.device}:${app.id}:${child.id}`, app, id: child.id, name: child.name || file.child.name, created: child.created, child, from: { ...file.recorder, exported: file.exported, device: file.device }, ...read });
             }
         }
         return out;
     }
+    // ---- «ملف الطفل» files ----
+    const ROLES = { therapist: 'المعالج', parents: 'الأهل', other: 'معالج آخر' };
+    const sourceLabel = from => from ? [ROLES[from.role] || 'جهاز آخر', from.name].filter(Boolean).join(' · ') : 'هذا الجهاز';
+    const imports = () => store.get(IMPORTS_KEY, []).filter(entry => entry?.file?.format === 'speech-child-file');
+    const validSection = section => section && typeof section.title === 'string' && Array.isArray(section.items) && section.items.every(item => item && typeof item.label === 'string' && typeof item.value === 'string');
+    function checkFile(file) {
+        if (file?.format !== 'speech-child-file' || file.version !== 1) throw Error('ليس ملف طفل من التطبيقات.');
+        if (typeof file.device !== 'string' || !file.device || typeof file.child?.name !== 'string' || !file.child.name.trim() || Number.isNaN(Date.parse(file.exported))) throw Error('ملف الطفل غير مكتمل.');
+        if (!Array.isArray(file.accounts) || !file.accounts.every(entry => entry && typeof entry.app === 'string' && entry.child && typeof entry.child.id === 'string')) throw Error('بيانات التطبيقات في الملف غير صالحة.');
+        if (!Array.isArray(file.assessments) || !file.assessments.every(a => a && typeof a.form === 'string' && typeof a.title === 'string' && Array.isArray(a.sections) && a.sections.every(validSection))) throw Error('بيانات التقييم في الملف غير صالحة.');
+        file.recorder = { role: ROLES[file.recorder?.role] ? file.recorder.role : 'other', name: String(file.recorder?.name || '').slice(0, 60) };
+        return file;
+    }
+    // One entry per device, child and kind (apps, or one assessment form and date): a newer file replaces it.
+    const fileId = file => [file.device, normalizeName(file.child.name), file.accounts.length ? 'apps' : file.assessments.map(a => `${a.form}@${a.date || ''}`).join(',')].join('|');
+    async function importFiles(list) {
+        const saved = imports(), notes = [];
+        for (const input of list) {
+            try {
+                if (input.size > 8e6) throw Error('الملف كبير جداً.');
+                const file = checkFile(JSON.parse(await input.text())), id = fileId(file), old = saved.findIndex(entry => entry.id === id);
+                if (old >= 0 && Date.parse(saved[old].file.exported) > Date.parse(file.exported)) { notes.push(`${file.child.name}: لدينا ملف أحدث من نفس الجهاز.`); continue; }
+                const entry = { id, received: new Date().toISOString(), file };
+                if (old >= 0) saved[old] = entry; else saved.push(entry);
+                notes.push(`${file.child.name}: ${old >= 0 ? 'حُدّث' : 'أضيف'} (${sourceLabel(file.recorder)}).`);
+            } catch (error) { notes.push(`${input.name}: ${error instanceof SyntaxError ? 'ليس ملف طفل.' : error.message}`); }
+        }
+        if (!store.set(IMPORTS_KEY, saved)) notes.push('تعذّر الحفظ: مساحة التخزين على هذا الجهاز ممتلئة.');
+        return notes;
+    }
+    function removeImport(id) { store.set(IMPORTS_KEY, imports().filter(entry => entry.id !== id)); }
+    // Assessments from imported files, each with its child's name and its source.
+    const assessments = () => imports().flatMap(({ file }) => file.assessments.map((a, index) => ({ ...a, ref: `${fileId(file)}#${index}`, name: a.child?.name || file.child.name, from: { ...file.recorder, exported: file.exported } })));
     // One child = accounts with the same name, plus accounts the therapist linked by hand.
     function children() {
         const list = accounts(), links = store.get(LINKS_KEY, {}), groups = new Map();
@@ -134,8 +182,14 @@
             const group = groups.get(anchor) || { key: anchor, accounts: [] };
             group.accounts.push(account); groups.set(anchor, group);
         }
-        return [...groups.values()].map(group => ({ ...group, name: group.accounts[0].name,
-            last: Math.max(0, ...group.accounts.flatMap(a => a.sessions.map(s => Date.parse(s.date) || 0))) }))
+        // Assessments join the child with the same name; a child with only an assessment gets their own card.
+        for (const a of assessments()) {
+            const named = [...groups.values()].find(group => group.accounts.some(account => normalizeName(account.name) === normalizeName(a.name)));
+            const group = named || groups.get(`assess:${normalizeName(a.name)}`) || { key: `assess:${normalizeName(a.name)}`, accounts: [], name: a.name };
+            (group.assessments ||= []).push(a); groups.set(group.key, group);
+        }
+        return [...groups.values()].map(group => ({ ...group, assessments: group.assessments || [], name: group.accounts[0]?.name || group.name,
+            last: Math.max(0, ...group.accounts.flatMap(a => a.sessions.map(s => Date.parse(s.date) || 0)), ...(group.assessments || []).map(a => Date.parse(a.date) || 0)) }))
             .sort((a, b) => b.last - a.last || a.name.localeCompare(b.name, 'ar'));
     }
     function link(ref, toRef) { const links = store.get(LINKS_KEY, {}); links[ref] = toRef; store.set(LINKS_KEY, links); }
@@ -187,7 +241,7 @@
     let current = null, view = 'all';
     function route() {
         const open = isOpen();
-        $('#dash-gate').hidden = open; $('#dash-lock').hidden = !open;
+        $('#dash-gate').hidden = open; $('#dash-lock').hidden = !open; $('#dash-import').hidden = !open;
         $('#dash-list').hidden = !open || !!current; $('#dash-child').hidden = !open || !current;
         if (!open) { $('#dash-gate input').value = ''; $('#dash-gate input').focus(); return; }
         if (current) renderChild(); else renderList();
@@ -197,42 +251,54 @@
         $('#dash-count').textContent = `${all.length} طفل`;
         $('#dash-children').replaceChildren(...list.map(child => {
             const button = document.createElement('button'); button.type = 'button'; button.className = 'dash-child-card'; button.setAttribute('role', 'listitem');
-            button.innerHTML = `<strong>${esc(child.name)}</strong><span class="dash-apps">${child.accounts.map(a => `<i style="--app:${a.app.color}">${a.app.name}</i>`).join('')}</span><small>${child.last ? 'آخر جلسة ' + date(child.last) : 'لا توجد جلسات بعد'}</small>`;
+            button.innerHTML = `<strong>${esc(child.name)}</strong><span class="dash-apps">${child.accounts.map(a => `<i style="--app:${a.app.color}"${a.from ? ` title="${esc(sourceLabel(a.from))}"` : ''}>${a.app.name}${a.from ? ' · ' + esc(ROLES[a.from.role] || '') : ''}</i>`).join('')}${child.assessments.length ? `<i style="--app:#475569">تقييم (${child.assessments.length})</i>` : ''}</span><small>${child.last ? 'آخر جلسة ' + date(child.last) : 'لا توجد جلسات بعد'}</small>`;
             button.onclick = () => { current = child.key; view = 'all'; route(); window.scrollTo(0, 0); };
             return button;
         }));
         $('#dash-empty').hidden = !!list.length;
-        $('#dash-empty').textContent = all.length ? 'لا يوجد اسم مطابق.' : 'لا توجد حسابات أطفال على هذا الجهاز بعد. أضف الأطفال من داخل التطبيقات.';
+        const files = imports(), box = $('#dash-files');
+        box.hidden = !files.length;
+        box.innerHTML = files.length ? `<summary>الملفات المستوردة (${files.length})</summary><ul>${files.map(({ id, file }) => `<li><span><b>${esc(file.child.name)}</b><small>${esc(sourceLabel(file.recorder))} · ${date(file.exported)} · ${file.accounts.length ? file.accounts.map(e => APPS.find(app => app.id === e.app)?.name || e.app).join('، ') : file.assessments.map(a => esc(a.title)).join('، ')}</small></span><button type="button" class="dash-icon" data-remove-file="${esc(id)}" aria-label="حذف ملف ${esc(file.child.name)} من هذا الجهاز" title="حذف الملف"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></li>`).join('')}</ul>` : '';
+        // Two taps remove an imported copy (the first turns the button red); the file can be opened again later.
+        box.querySelectorAll('[data-remove-file]').forEach(button => { button.onclick = () => {
+            if (button.dataset.armed) { removeImport(button.dataset.removeFile); renderList(); return; }
+            button.dataset.armed = '1'; button.title = 'اضغط مرة أخرى للحذف'; button.setAttribute('aria-label', 'اضغط مرة أخرى لحذف الملف');
+            setTimeout(() => { if (button.isConnected) { delete button.dataset.armed; button.title = 'حذف الملف'; } }, 3000);
+        }; });
+        $('#dash-empty').textContent = all.length ? 'لا يوجد اسم مطابق.' : 'لا توجد حسابات أطفال على هذا الجهاز بعد. أضف الأطفال من داخل التطبيقات، أو افتح «ملف طفل» من جهاز آخر.';
     }
     const bar = (label, value, color, detail) => `<div class="dash-bar"><span class="dash-bar-label">${esc(label)}</span><span class="dash-bar-track"><i style="width:${value ?? 0}%;background:${color}"></i></span><b dir="ltr">${value == null ? '—' : value + '%'}</b>${detail ? `<small>${detail}</small>` : ''}</div>`;
     async function appSection(account) {
         const t = totals(account), app = account.app;
         const bank = await goalBank(app), goals = goalStates(bank, account.plan, account.child);
         const goalList = (state, title, rows, extra = row => row.percent == null ? 'لم يُقيّم' : `${row.percent}%${row.by === 'app' ? ' · تقدير' : ''}`) => rows.length ? `<div class="dash-goals" data-state="${state}"><h4>${title} <small>(${rows.length})</small></h4>${rows.map(row => `<p><span>${esc(row.text)}</span><b>${state === 'suggested' ? 'مقترح' : extra(row)}</b></p>`).join('')}</div>` : '';
-        return `<section class="dash-app" style="--app:${app.color}"><header><h3>${app.name}</h3>${account.level ? `<span class="dash-level" data-level="${account.level}">${LEVELS[account.level] || account.level}</span>` : ''}<a href="${app.url}" class="dash-open">فتح التطبيق</a></header>
+        return `<section class="dash-app" style="--app:${app.color}"><header><h3>${app.name}</h3><span class="dash-source" data-from="${account.from ? account.from.role : 'here'}">${esc(sourceLabel(account.from))}${account.from ? ' · ' + date(account.from.exported) : ''}</span>${account.level ? `<span class="dash-level" data-level="${account.level}">${LEVELS[account.level] || account.level}</span>` : ''}<a href="${app.url}" class="dash-open">فتح التطبيق</a></header>
             <div class="dash-stats"><div><strong>${t.sessions}</strong><span>جلسات</span></div><div><strong>${t.tests}</strong><span>اختبارات</span></div><div><strong>${t.last ? date(t.last) : '—'}</strong><span>آخر جلسة</span></div></div>
             ${Object.entries(app.skills).map(([id, label]) => bar(label, t.skills[id].percent, app.color, t.skills[id].total ? `<bdi dir="ltr">${t.skills[id].correct} / ${t.skills[id].total}</bdi>` : 'لم يُقيّم')).join('')}
             ${t.recent.length ? `<h4 class="dash-sub">آخر الاختبارات</h4><ul class="dash-recent">${t.recent.map(s => `<li><span>${date(s.date)}</span><span>${esc(app.sources[s.source] || 'اختبار')}</span><b dir="ltr">${scoreOf(s) ?? '—'}%</b></li>`).join('')}</ul>` : ''}
             ${goals ? `<h4 class="dash-sub">أهداف خطة التدخل · ${goals.percent}%</h4>${goalList('working', 'نعمل عليها الآن', goals.working)}${goalList('done', 'تحققت', goals.done)}${goalList('suggested', 'مقترحة', goals.suggested)}` : account.plan?.goals?.length ? '<p class="dash-note">افتح التطبيق مرة مع الإنترنت لعرض أهدافه هنا.</p>' : '<p class="dash-note">لا توجد خطة تدخل في هذا التطبيق.</p>'}
         </section>`;
     }
+    // One assessment from the speech website: its sections with each answered question.
+    const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span></header>
+        ${a.sections.filter(section => section.items.length).map(section => `<details><summary>${esc(section.title)} <small>(${section.items.length})</small></summary><dl>${section.items.map(item => `<div><dt>${esc(item.label)}</dt><dd>${esc(item.value).replace(/\n/g, '<br>')}</dd></div>`).join('')}</dl></details>`).join('')}</section>`;
     async function renderChild() {
         const child = children().find(entry => entry.key === current);
         if (!child) { current = null; route(); return; }
         const host = $('#dash-child'), accountsShown = view === 'all' ? child.accounts : child.accounts.filter(a => a.ref === view);
-        const others = accounts().filter(a => !child.accounts.some(own => own.ref === a.ref) && !child.accounts.some(own => own.app.id === a.app.id));
+        const others = accounts().filter(a => !child.accounts.some(own => own.ref === a.ref));
         host.innerHTML = `<div class="dash-child-head"><button type="button" class="dash-icon" data-back aria-label="كل الأطفال" title="كل الأطفال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><h2 id="dash-child-name">${esc(child.name)}</h2><button type="button" class="dash-print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>طباعة</button></div>
-            <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, a.app.name])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
+            <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, a.app.name + (a.from ? ' · ' + (ROLES[a.from.role] || '') : '')]), ...(child.assessments.length ? [['assess', 'التقييمات']] : [])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
             <nav class="dash-periods" aria-label="الفترة">${Object.entries(PERIODS).map(([id, [label]]) => `<button type="button" data-period="${id}" aria-pressed="${period === id}">${label}</button>`).join('')}</nav>
-            <div class="dash-sections">${(await Promise.all(accountsShown.map(appSection))).join('')}</div>
+            <div class="dash-sections">${view === 'all' || view === 'assess' ? child.assessments.map(assessmentSection).join('') : ''}${(await Promise.all((view === 'assess' ? [] : accountsShown).map(appSection))).join('')}</div>
             <details class="dash-link"><summary>ربط حساب بنفس الطفل باسم مختلف</summary>
-                ${others.length ? `<p>اختر حساب هذا الطفل في تطبيق آخر إن كُتب اسمه بشكل مختلف.</p><div class="dash-link-list">${others.map(a => `<button type="button" data-link="${a.ref}"><i style="--app:${a.app.color}">${a.app.name}</i>${esc(a.name)}</button>`).join('')}</div>` : '<p>لا توجد حسابات أخرى للربط.</p>'}
+                ${others.length ? `<p>اختر حساب هذا الطفل في تطبيق آخر إن كُتب اسمه بشكل مختلف.</p><div class="dash-link-list">${others.map(a => `<button type="button" data-link="${a.ref}"><i style="--app:${a.app.color}">${a.app.name}${a.from ? ' · ' + esc(ROLES[a.from.role] || '') : ''}</i>${esc(a.name)}</button>`).join('')}</div>` : '<p>لا توجد حسابات أخرى للربط.</p>'}
                 ${child.accounts.length > 1 ? `<p>فك الربط:</p><div class="dash-link-list">${child.accounts.map(a => `<button type="button" data-unlink="${a.ref}"><i style="--app:${a.app.color}">${a.app.name}</i>${esc(a.name)} ×</button>`).join('')}</div>` : ''}
             </details>`;
         host.querySelector('[data-back]').onclick = () => { current = null; route(); };
         host.querySelectorAll('[data-view]').forEach(button => { button.onclick = () => { view = button.dataset.view; renderChild(); }; });
         host.querySelectorAll('[data-period]').forEach(button => { button.onclick = () => { period = button.dataset.period; renderChild(); }; });
-        host.querySelectorAll('[data-link]').forEach(button => { button.onclick = () => { link(button.dataset.link, child.accounts[0].ref); renderChild(); }; });
+        host.querySelectorAll('[data-link]').forEach(button => { button.onclick = () => { if (child.accounts[0]) link(button.dataset.link, child.accounts[0].ref); renderChild(); }; });
         host.querySelectorAll('[data-unlink]').forEach(button => { button.onclick = () => { unlink(button.dataset.unlink); if (button.dataset.unlink === child.key) current = null; route(); }; });
         host.querySelector('[data-print]').onclick = () => choosePrint(child);
     }
@@ -277,7 +343,7 @@
         page();
         for (const account of list) {
             const t = totals(account), app = account.app, bank = await goalBank(app), goals = goalStates(bank, account.plan, account.child);
-            ensure(330); text(app.name, W - M, y + 20, 34, app.color); if (account.level) text(LEVELS[account.level] || '', M, y + 20, 24, '#587082', 'left'); y += 60;
+            ensure(330); text(account.from ? `${app.name} · ${sourceLabel(account.from)}` : app.name, W - M, y + 20, 34, app.color); if (account.level) text(LEVELS[account.level] || '', M, y + 20, 24, '#587082', 'left'); y += 60;
             [[t.sessions, 'جلسات'], [t.tests, 'اختبارات'], [t.last ? date(t.last) : '—', 'آخر جلسة']].forEach(([n, l], i) => { const x = W - M - 340 - i * 370; box(x, y, 340, 110, '#f7fafc'); text(n, x + 170, y + 40, 36, app.color, 'center'); text(l, x + 170, y + 85, 22, '#587082', 'center', 600); }); y += 140;
             for (const [id, label] of Object.entries(app.skills)) {
                 ensure(80); const s = t.skills[id], track = W - 2 * M - 520, right = W - M - 300;
@@ -303,9 +369,18 @@
         };
         $('#dash-lock').onclick = () => { current = null; setOpen(false); };
         $('#dash-search').oninput = renderList;
+        // «ملف طفل» from another device: one or more files at once.
+        const picker = $('#dash-import-file'), note = $('#dash-import-note');
+        $('#dash-import').onclick = () => picker.click();
+        picker.onchange = async () => {
+            if (!picker.files.length) return;
+            const notes = await importFiles([...picker.files]); picker.value = '';
+            note.textContent = notes.join('\n'); note.hidden = false; clearTimeout(note.timer); note.timer = setTimeout(() => { note.hidden = true; }, 9000);
+            route();
+        };
         // Another tab (an app) saving progress refreshes the open screen.
-        window.addEventListener('storage', event => { if (APPS.some(app => app.key === event.key) && isOpen()) route(); });
+        window.addEventListener('storage', event => { if ((APPS.some(app => app.key === event.key) || event.key === IMPORTS_KEY) && isOpen()) route(); });
         route();
     });
-    window.SpeechDashboard = { APPS, accounts, children, goalStates };
+    window.SpeechDashboard = { APPS, accounts, children, goalStates, importFiles, imports, assessments };
 })();
