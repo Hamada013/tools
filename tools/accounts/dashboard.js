@@ -173,13 +173,13 @@
     }
     function removeImport(id) { store.set(IMPORTS_KEY, imports().filter(entry => entry.id !== id)); }
     // ---- The clinic's online database ----
-    const cloud = { user: null, children: [], assessments: new Map(), error: '', busy: false };
+    const cloud = { user: null, children: [], assessments: new Map(), records: new Map(), devices: [], error: '', busy: false };
     async function refreshCloud() {
         const C = window.SpeechCloud; if (!C || !cloud.user) return;
         cloud.busy = true; cloud.error = '';
         try {
-            const list = await C.children(), all = await Promise.all(list.map(child => C.assessments(child.id).catch(() => [])));
-            cloud.children = list; cloud.assessments = new Map(list.map((child, index) => [child.id, all[index]]));
+            const list = await C.children(), [all, recs, devs] = await Promise.all([Promise.all(list.map(child => C.assessments(child.id).catch(() => []))), Promise.all(list.map(child => C.records(child.id).catch(() => []))), C.devices().catch(() => [])]);
+            cloud.children = list; cloud.assessments = new Map(list.map((child, index) => [child.id, all[index]])); cloud.records = new Map(list.map((child, index) => [child.id, recs[index]])); cloud.devices = devs;
         } catch (error) { cloud.error = C.explain(error); }
         cloud.busy = false; if (isOpen()) route();
     }
@@ -207,6 +207,13 @@
             const named = [...groups.values()].find(group => !group.cloud && (group.accounts.some(account => normalizeName(account.name) === normalizeName(child.name)) || normalizeName(group.name) === normalizeName(child.name)));
             const group = named || { key: `cloud:${child.id}`, accounts: [], name: child.name };
             group.cloud = child; group.name = child.name;
+            // Progress the apps sent from other devices (this computer's own apps are already shown above).
+            for (const rec of cloud.records.get(child.id) || []) {
+                const app = APPS.find(item => item.id === rec.app); if (!app || rec.device === cloud.user?.uid) continue;
+                let read; try { read = app.read(rec.child); } catch { continue; }
+                read.sessions = read.sessions.filter(x => x.date).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+                group.accounts.push({ ref: `cloud:${child.id}:${rec.id}`, app, id: rec.child.id, name: child.name, created: rec.child.created, child: rec.child, from: { role: rec.role, name: rec.label, exported: rec.updated }, ...read });
+            }
             for (const a of cloud.assessments.get(child.id) || []) (group.assessments ||= []).push({ ...a, ref: `cloud:${child.id}:${a.id}`, name: child.name, from: { role: 'therapist', name: a.examiner || '', exported: a.saved } });
             groups.set(group.key, group);
         }
@@ -280,6 +287,12 @@
             return button;
         }));
         $('#dash-empty').hidden = !!list.length;
+        const devBox = $('#dash-devices'); devBox.hidden = !cloud.user;
+        if (cloud.user) {
+            devBox.innerHTML = `<summary>الأجهزة المرتبطة بالعيادة (${cloud.devices.length})</summary><p><button type="button" class="dash-pill" data-join-all>ربط جهاز المعالج (كل الأطفال)</button></p><ul>${cloud.devices.map(d => `<li><span><b>${esc(d.label || 'جهاز')}</b><small>${esc(ROLES[d.role] || '')} · ${d.all ? 'كل الأطفال' : `${(d.children || []).length} طفل`} · ${date(d.joined)}</small></span><button type="button" class="dash-icon" data-remove-device="${esc(d.id)}" aria-label="فصل ${esc(d.label || 'الجهاز')}" title="فصل الجهاز">${TRASH}</button></li>`).join('')}</ul>`;
+            devBox.querySelector('[data-join-all]').onclick = () => joinDialog({ all: true, role: 'therapist', apps: ['voc'] });
+            devBox.querySelectorAll('[data-remove-device]').forEach(button => twoTaps(button, async () => { await window.SpeechCloud.removeDevice(button.dataset.removeDevice); await refreshCloud(); }, 'اضغط مرة أخرى لفصل الجهاز'));
+        }
         const files = imports(), box = $('#dash-files');
         box.hidden = !files.length;
         box.innerHTML = files.length ? `<summary>الملفات المستوردة (${files.length})</summary><ul>${files.map(({ id, file }) => `<li><span><b>${esc(file.child.name)}</b><small>${esc(sourceLabel(file.recorder))} · ${date(file.exported)} · ${file.accounts.length ? file.accounts.map(e => APPS.find(app => app.id === e.app)?.name || e.app).join('، ') : file.assessments.map(a => esc(a.title)).join('، ')}</small></span><button type="button" class="dash-icon" data-remove-file="${esc(id)}" aria-label="حذف ملف ${esc(file.child.name)} من هذا الجهاز" title="حذف الملف"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></li>`).join('')}</ul>` : '';
@@ -303,15 +316,63 @@
             ${goals ? `<h4 class="dash-sub">أهداف خطة التدخل · ${goals.percent}%</h4>${goalList('working', 'نعمل عليها الآن', goals.working)}${goalList('done', 'تحققت', goals.done)}${goalList('suggested', 'مقترحة', goals.suggested)}` : account.plan?.goals?.length ? '<p class="dash-note">افتح التطبيق مرة مع الإنترنت لعرض أهدافه هنا.</p>' : '<p class="dash-note">لا توجد خطة تدخل في هذا التطبيق.</p>'}
         </section>`;
     }
+    const TRASH = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
     // One assessment from the speech website: its sections with each answered question.
-    const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span></header>
+    const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span>${a.ref.startsWith('cloud:') ? `<button type="button" class="dash-icon dash-danger" data-remove-assessment="${esc(a.ref)}" aria-label="حذف هذا التقييم من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button>` : ''}</header>
         ${a.sections.filter(section => section.items.length).map(section => `<details><summary>${esc(section.title)} <small>(${section.items.length})</small></summary><dl>${section.items.map(item => `<div><dt>${esc(item.label)}</dt><dd>${esc(item.value).replace(/\n/g, '<br>')}</dd></div>`).join('')}</dl></details>`).join('')}</section>`;
+    // ---- Board tools for the clinic's database ----
+    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow'];
+    // Two taps for anything that deletes: the first turns the button red for three seconds.
+    function twoTaps(button, action, again = 'اضغط مرة أخرى للتأكيد') {
+        button.onclick = async () => {
+            if (!button.dataset.armed) { button.dataset.armed = '1'; const old = button.title; button.title = again; button.setAttribute('aria-label', again); setTimeout(() => { if (button.isConnected) { delete button.dataset.armed; button.title = old; button.setAttribute('aria-label', old); } }, 3000); return; }
+            button.disabled = true; try { await action(); } catch (error) { cloud.error = window.SpeechCloud.explain(error); route(); }
+        };
+    }
+    function cloudTools(child) {
+        if (!cloud.user || !window.SpeechCloud) return '';
+        if (!child.cloud) return `<div class="dash-cloud-tools"><p>هذا الطفل ليس في قاعدة بيانات العيادة بعد.</p><button type="button" class="dash-pill" data-cloud-create>حفظ في قاعدة البيانات وإعطاؤه رقماً</button></div>`;
+        const apps = child.cloud.apps || [];
+        return `<div class="dash-cloud-tools"><div class="dash-cloud-apps" role="group" aria-label="التطبيقات التي يظهر فيها الطفل"><span>يظهر في:</span>${APP_IDS.map(id => { const app = APPS.find(item => item.id === id); return `<button type="button" class="dash-pill" style="--app:${app.color}" data-app-toggle="${id}" aria-pressed="${apps.includes(id)}">${app.name}</button>`; }).join('')}</div>
+            <div class="dash-cloud-actions"><button type="button" class="dash-pill" data-join-child>ربط جهاز الأهل لهذا الطفل</button><button type="button" class="dash-icon dash-danger" data-cloud-remove aria-label="حذف ${esc(child.name)} من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button></div></div>`;
+    }
+    function wireCloudTools(host, child) {
+        const C = window.SpeechCloud; if (!C || !cloud.user) return;
+        host.querySelector('[data-cloud-create]')?.addEventListener('click', async event => { event.currentTarget.disabled = true; try { await C.createChild({ name: child.name }); await refreshCloud(); } catch (error) { cloud.error = C.explain(error); route(); } });
+        host.querySelectorAll('[data-app-toggle]').forEach(button => { button.onclick = async () => {
+            const apps = new Set(child.cloud.apps || []); apps.has(button.dataset.appToggle) ? apps.delete(button.dataset.appToggle) : apps.add(button.dataset.appToggle);
+            button.setAttribute('aria-pressed', String(apps.has(button.dataset.appToggle)));
+            try { await C.setApps(child.cloud.id, [...apps]); await refreshCloud(); } catch (error) { cloud.error = C.explain(error); route(); }
+        }; });
+        const join = host.querySelector('[data-join-child]'); if (join) join.onclick = () => joinDialog({ children: [child.cloud.id], role: 'parents', who: child.name, apps: child.cloud.apps || [] });
+        const remove = host.querySelector('[data-cloud-remove]'); if (remove) twoTaps(remove, async () => { await C.removeChild(child.cloud.id); current = null; await refreshCloud(); route(); }, `اضغط مرة أخرى لحذف ${child.name} من قاعدة البيانات`);
+        host.querySelectorAll('[data-remove-assessment]').forEach(button => { const [, childId, id] = button.dataset.removeAssessment.split(':'); twoTaps(button, async () => { await C.removeAssessment(childId, id); await refreshCloud(); }); });
+    }
+    // A join code for a device: the therapist's own iPad (all children) or a parents' device (chosen children).
+    let joinBox;
+    async function joinDialog({ all = false, children: ids = [], role = 'parents', who = '', apps = [] }) {
+        if (!joinBox) { joinBox = document.createElement('dialog'); joinBox.className = 'dash-print-dialog dash-join'; joinBox.dir = 'rtl'; document.body.append(joinBox); }
+        joinBox.innerHTML = '<h2>ربط جهاز</h2><p>جارٍ إنشاء الرمز…</p>'; joinBox.showModal();
+        try {
+            const { code, expires } = await window.SpeechCloud.makeJoinCode({ all, children: ids, role });
+            const first = APPS.find(app => app.id === (apps[0] || 'voc')), link = new URL(first.url + '?join=' + code, location.href).href;
+            joinBox.innerHTML = `<h2>ربط جهاز${who ? ' · ' + esc(who) : all ? ' المعالج' : ''}</h2>
+                <p>افتح هذا الرابط على الجهاز (أرسله عبر واتساب أو AirDrop)، أو اكتب الرمز في زر السحابة داخل أي تطبيق. يكفي الربط مرة واحدة لكل التطبيقات على الجهاز.</p>
+                <p class="dash-join-code" dir="ltr">${code.replace(/^(.{4})/, '$1-')}</p><p class="dash-note">صالح حتى ${date(expires.toISOString())} · ${all ? 'كل الأطفال' : 'هذا الطفل فقط'}</p>
+                <p class="dash-join-link" dir="ltr">${esc(link)}</p>
+                <footer>${navigator.share ? '<button type="button" data-share>مشاركة الرابط</button>' : ''}<button type="button" data-copy>نسخ الرابط</button><button type="button" data-done>تم</button></footer>`;
+            joinBox.querySelector('[data-share]')?.addEventListener('click', () => navigator.share({ title: 'ربط الجهاز بالعيادة', text: `رمز الربط: ${code}`, url: link }).catch(() => {}));
+            joinBox.querySelector('[data-copy]').onclick = async event => { try { await navigator.clipboard.writeText(link); event.target.textContent = 'نُسخ'; } catch {} };
+        } catch (error) { joinBox.innerHTML = `<h2>ربط جهاز</h2><p class="dash-print-error">${esc(window.SpeechCloud.explain(error))}</p><footer><button type="button" data-done>إغلاق</button></footer>`; }
+        joinBox.querySelector('[data-done]').onclick = () => joinBox.close();
+    }
     async function renderChild() {
         const child = children().find(entry => entry.key === current);
         if (!child) { current = null; route(); return; }
         const host = $('#dash-child'), accountsShown = view === 'all' ? child.accounts : child.accounts.filter(a => a.ref === view);
         const others = accounts().filter(a => !child.accounts.some(own => own.ref === a.ref));
         host.innerHTML = `<div class="dash-child-head"><button type="button" class="dash-icon" data-back aria-label="كل الأطفال" title="كل الأطفال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><h2 id="dash-child-name">${esc(child.name)}</h2>${child.cloud?.code ? `<span class="dash-code" title="رقم الطفل">رقم الطفل <bdi dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi></span>` : ''}<button type="button" class="dash-print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>طباعة</button></div>
+            ${cloudTools(child)}
             <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, a.app.name + (a.from ? ' · ' + (ROLES[a.from.role] || '') : '')]), ...(child.assessments.length ? [['assess', 'التقييمات']] : [])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
             <nav class="dash-periods" aria-label="الفترة">${Object.entries(PERIODS).map(([id, [label]]) => `<button type="button" data-period="${id}" aria-pressed="${period === id}">${label}</button>`).join('')}</nav>
             <div class="dash-sections">${view === 'all' || view === 'assess' ? child.assessments.map(assessmentSection).join('') : ''}${(await Promise.all((view === 'assess' ? [] : accountsShown).map(appSection))).join('')}</div>
@@ -320,6 +381,7 @@
                 ${child.accounts.length > 1 ? `<p>فك الربط:</p><div class="dash-link-list">${child.accounts.map(a => `<button type="button" data-unlink="${a.ref}"><i style="--app:${a.app.color}">${a.app.name}</i>${esc(a.name)} ×</button>`).join('')}</div>` : ''}
             </details>`;
         host.querySelector('[data-back]').onclick = () => { current = null; route(); };
+        wireCloudTools(host, child);
         host.querySelectorAll('[data-view]').forEach(button => { button.onclick = () => { view = button.dataset.view; renderChild(); }; });
         host.querySelectorAll('[data-period]').forEach(button => { button.onclick = () => { period = button.dataset.period; renderChild(); }; });
         host.querySelectorAll('[data-link]').forEach(button => { button.onclick = () => { if (child.accounts[0]) link(button.dataset.link, child.accounts[0].ref); renderChild(); }; });
@@ -397,7 +459,9 @@
         const cloudButton = $('#dash-cloud');
         const paint = () => { cloudButton.dataset.state = cloud.user ? 'on' : 'off'; const label = cloud.user ? `متصل بقاعدة بيانات العيادة (${cloud.user.email}) · اضغط مرتين لتسجيل الخروج` : 'تسجيل الدخول إلى قاعدة بيانات العيادة'; cloudButton.title = label; cloudButton.setAttribute('aria-label', label); };
         if (window.SpeechCloud) {
-            window.SpeechCloud.onUser(user => { cloud.user = user; cloud.children = []; cloud.assessments = new Map(); paint(); if (user) refreshCloud(); else if (isOpen()) route(); });
+            window.SpeechCloud.onUser(user => { cloud.user = user; cloud.children = []; cloud.assessments = new Map(); cloud.records = new Map(); paint();
+                // The apps on this computer share this sign-in: they send their progress too.
+                try { const st = JSON.parse(localStorage.getItem('speech-sync-state-v1') || 'null'); if (user) localStorage.setItem('speech-sync-state-v1', JSON.stringify({ mode: 'owner' })); else if (st?.mode === 'owner') localStorage.removeItem('speech-sync-state-v1'); } catch {} if (user) refreshCloud(); else if (isOpen()) route(); });
             cloudButton.onclick = async () => {
                 if (!cloud.user) { try { await window.SpeechCloud.signIn(); } catch (error) { cloud.error = window.SpeechCloud.explain(error); route(); } return; }
                 if (!cloudButton.dataset.armed) { cloudButton.dataset.armed = '1'; setTimeout(() => delete cloudButton.dataset.armed, 3000); return; }

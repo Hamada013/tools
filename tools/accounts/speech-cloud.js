@@ -113,5 +113,38 @@
         await store.setDoc(ref, { form: details.form, title: details.title, date: details.date || null, examiner: details.examiner || '', sections, saved: new Date().toISOString() });
         return { child, created, assessmentId: ref.id };
     }
-    root.SpeechCloud = { load, onUser, signIn, signOut, user, explain, children, assessments, saveAssessment, childFor, normalizeName, formatCode, validCode, checkDigit };
+    // ---- Managing children and devices (reports page) ----
+    /** A new child in the database (from a board that has none yet), with a new code. */
+    async function createChild({ name, birth, gender }) { return (await childFor({ name, birth, gender })).child; }
+    /** Which apps the child has: the apps on linked devices then offer the child in «أطفال من العيادة». */
+    async function setApps(childId, apps) { const { store, db } = await load(); await store.setDoc(store.doc(db, 'children', childId), { apps: [...new Set(apps)], updated: new Date().toISOString() }, { merge: true }); }
+    async function rename(childId, name) { const { store, db } = await load(); await store.setDoc(store.doc(db, 'children', childId), { name: String(name).trim(), updated: new Date().toISOString() }, { merge: true }); }
+    /** Progress the apps sent: one entry per app and device, with the app's saved child record. */
+    async function records(childId) {
+        const { store, db } = await load();
+        return (await store.getDocs(store.collection(db, 'children', childId, 'records'))).docs.map(entry => {
+            const value = entry.data(); let child = null; try { child = JSON.parse(value.data); } catch {}
+            return { id: entry.id, ...value, child };
+        }).filter(entry => entry.child);
+    }
+    async function removeAssessment(childId, assessmentId) { const { store, db } = await load(); await store.deleteDoc(store.doc(db, 'children', childId, 'assessments', assessmentId)); }
+    /** Deletes a child from the database with everything saved under them. The apps' own accounts on devices stay. */
+    async function removeChild(childId) {
+        const { store, db } = await load();
+        for (const part of ['records', 'assessments']) for (const entry of (await store.getDocs(store.collection(db, 'children', childId, part))).docs) await store.deleteDoc(entry.ref);
+        await store.deleteDoc(store.doc(db, 'children', childId));
+    }
+    // Join codes: 8 letters and digits without look-alikes (no 0/O, 1/I/L), valid for 7 days.
+    const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    async function makeJoinCode({ all = false, children: ids = [], role = 'parents' } = {}) {
+        const { store, db } = await load();
+        const code = Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => ALPHABET[byte % ALPHABET.length]).join('');
+        const expires = new Date(Date.now() + 7 * 864e5);
+        await store.setDoc(store.doc(db, 'joinCodes', code), { all: !!all, children: all ? [] : ids, role, created: new Date().toISOString(), expires });
+        return { code, expires };
+    }
+    async function devices() { const { store, db } = await load(); return (await store.getDocs(store.collection(db, 'devices'))).docs.map(entry => ({ id: entry.id, ...entry.data() })); }
+    async function removeDevice(uid) { const { store, db } = await load(); await store.deleteDoc(store.doc(db, 'devices', uid)); }
+    root.SpeechCloud = { load, onUser, signIn, signOut, user, explain, children, assessments, saveAssessment, childFor, normalizeName, formatCode, validCode, checkDigit,
+        createChild, setApps, rename, records, removeAssessment, removeChild, makeJoinCode, devices, removeDevice };
 })(globalThis);
