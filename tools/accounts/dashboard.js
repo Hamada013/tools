@@ -7,6 +7,15 @@
  * turns one saved child into { level, sessions: [{ date, kind, source, skills: { id: {correct,total} } }], plan }. */
 (() => {
     'use strict';
+    // The back arrow returns to the page on this site that opened the reports (a tools menu
+    // that links here), remembered for this tab; without one it opens this repository's menu.
+    (() => {
+        const back = document.querySelector('.dash-back'), KEY = 'dash-return';
+        let from = '';
+        try { const ref = document.referrer && new URL(document.referrer); if (ref && ref.origin === location.origin && ref.pathname !== location.pathname) from = ref.href; } catch {}
+        try { if (from) sessionStorage.setItem(KEY, from); else from = sessionStorage.getItem(KEY) || ''; } catch {}
+        if (back && from) back.href = from;
+    })();
     const LEVELS = { easy: 'سهل', moderate: 'متوسط', advanced: 'متقدم' };
     const sum = (list, field) => list.reduce((total, item) => total + (Number(item[field]) || 0), 0);
     // Skill totals for one session from records that carry their own domain (or the session's).
