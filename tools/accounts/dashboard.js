@@ -70,10 +70,10 @@
             skills: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
             sources: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
             read: child => soundRead(child, 'auditory-rehabilitation') },
-        { id: 'follow', name: 'اتبع التعليمات', color: '#16a34a', key: 'follow-direction-children-v1', url: '../../follow-direction/', goals: '../../follow-direction/assets/intervention-goals.js',
+        { id: 'follow', name: 'اتبع التعليمات', color: '#16a34a', key: 'follow-direction-children-v1', url: '../../follow-direction/', goals: ['../../follow-direction/assets/bank.js', '../../follow-direction/assets/intervention-goals.js'],
             skills: { one: 'حركة واحدة', objects: 'أشياء مألوفة', attributes: 'لون وحجم', quantity: 'واحد واثنان وثلاثة', function: 'استخدام الأشياء', space: 'المكان', two: 'حركتان بالترتيب', order: 'أشياء بالترتيب', play: 'خطوتان في اللعب', condition: 'إذا…', three: 'ثلاث خطوات' },
             sources: { practice: 'التدريب', screen: 'الفرز' },
-            // Answers count when done without help; the plan is the road itself (every skill practised).
+            // Answers count when done without help; the plan is the therapist's intervention plan (goal bank in the app).
             read: child => {
                 const skillOf = item => String(item || '').replace(/[-_]?\d+$/, '');
                 const sessions = (child.sessions || []).filter(s => s.ended).map(s => {
@@ -81,8 +81,7 @@
                     for (const r of s.results || []) { if (r.outcome === 'skip') continue; const k = skills[skillOf(r.item)] ||= { correct: 0, total: 0 }; k.total++; if (r.outcome === 'independent') k.correct++; }
                     return { date: s.finished || s.started, kind: s.mode === 'screen' ? 'assessment' : 'practice', source: s.mode, skills, raw: s };
                 });
-                const practised = [...new Set((child.sessions || []).filter(s => s.mode === 'practice').flatMap(s => (s.results || []).filter(r => r.outcome !== 'skip').map(r => skillOf(r.item))))];
-                return { level: null, plan: practised.length ? { goals: practised.map(id => ({ id })) } : null, sessions };
+                return { level: null, plan: child.intervention || null, sessions };
             } },
         { id: 'aural', name: 'التأهيل السمعي', color: '#0369a1', key: 'aural-rehabilitation-children-v1', url: '../../aural-rehabilitation-/', goals: ['../../aural-rehabilitation-/assets/lessons.js', '../../aural-rehabilitation-/assets/intervention-goals.js'],
             skills: { 'my-house': 'بيتي', 'my-kitchen': 'مطبخي', transport: 'مواصلات', buses: 'الباصات' },
