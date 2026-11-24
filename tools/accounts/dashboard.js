@@ -7,12 +7,19 @@
  * turns one saved child into { level, sessions: [{ date, kind, source, skills: { id: {correct,total} } }], plan }. */
 (() => {
     'use strict';
-    // The back arrow returns to the page on this site that opened the reports (a tools menu
-    // that links here), remembered for this tab; without one it opens this repository's menu.
+    // The back arrow returns to the menu that opened the reports: the address it passes as ?back=
+    // (any page on this site, or a local preview), else the same-site page it came from, remembered
+    // for this tab; without one it opens this repository's menu. No other site's address is written here.
     (() => {
         const back = document.querySelector('.dash-back'), KEY = 'dash-return';
+        const allowed = url => /^https?:$/.test(url.protocol) && (url.origin === location.origin || /^(localhost|127\.0\.0\.1)$/.test(url.hostname));
         let from = '';
-        try { const ref = document.referrer && new URL(document.referrer); if (ref && ref.origin === location.origin && ref.pathname !== location.pathname) from = ref.href; } catch {}
+        try {
+            const params = new URLSearchParams(location.search), given = params.get('back');
+            if (given && allowed(new URL(given))) from = new URL(given).href;
+            if (params.has('back')) { params.delete('back'); history.replaceState(history.state, '', location.pathname + (params.size ? '?' + params : '') + location.hash); }
+        } catch {}
+        try { const ref = !from && document.referrer && new URL(document.referrer); if (ref && ref.origin === location.origin && ref.pathname !== location.pathname) from = ref.href; } catch {}
         try { if (from) sessionStorage.setItem(KEY, from); else from = sessionStorage.getItem(KEY) || ''; } catch {}
         if (back && from) back.href = from;
     })();
