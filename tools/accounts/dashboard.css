@@ -98,3 +98,27 @@ svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke
 .dash-until{font-weight:700;color:#2f7a52}.dash-until[data-state=ended]{color:#b42318}.dash-until[data-state=none]{color:#a16207}
 .dash-need{padding:6px 8px;border-radius:14px;background:#fffbeb;outline:2px dashed #f6dfa0}
 pre.dash-join-link{white-space:pre-wrap;font:inherit;font-size:14px;direction:rtl}
+
+/* 2026-11: the reports logo, and apps shown by their logos (name on press, read by screen readers). */
+.dash-mark{flex:none;width:44px;height:44px;display:block}
+.dash-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.dash-logo{--size:34px;position:relative;flex:none;display:inline-grid;place-items:center;width:var(--size);height:var(--size);border-radius:30%;background:#fff;
+  box-shadow:0 0 0 2.5px var(--app),0 2px 6px #276b8f1f;vertical-align:middle;-webkit-touch-callout:none;user-select:none}
+.dash-logo img{width:100%;height:100%;border-radius:inherit;object-fit:cover;pointer-events:none}
+.dash-logo[data-size="s"]{--size:28px}.dash-logo[data-size="l"]{--size:48px}
+.dash-tip{position:fixed;z-index:50;translate:-50% -100%;padding:4px 12px;border-radius:999px;background:var(--app,#22445a);color:#fff;font-size:14px;font-weight:700;line-height:1.5;
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 150ms ease-out}
+.dash-tip[data-show]{opacity:1}
+.dash-apps i.dash-app-chip,.dash-apps i:has(.dash-logo){display:inline-flex;align-items:center;gap:6px;padding:3px;background:none}
+.dash-apps i small,.dash-tabs small,.dash-link-list small{font-size:12px;font-weight:700;color:var(--muted)}
+.dash-apps{gap:10px;padding-top:4px}
+.dash-app-title{display:flex;align-items:center;gap:10px;margin:0}
+.dash-tabs button,.dash-cloud-apps .dash-pill{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 10px}
+.dash-tabs button:has(.dash-logo){padding-inline:7px 12px}
+.dash-cloud-apps .dash-pill{padding:0 7px}
+.dash-cloud-apps .dash-pill[aria-pressed="false"] .dash-logo{filter:grayscale(1);opacity:.55;box-shadow:0 0 0 2px #cbd5e1}
+.dash-link-list button{display:inline-flex;align-items:center;gap:8px}
+.print-choice b{display:inline-flex;align-items:center;gap:8px}
+@media (prefers-reduced-motion:reduce){.dash-tip{transition:none}}
+@media (max-width:480px){.dash-brand p{display:none}.dash-brand h1{font-size:17px;line-height:1.35;white-space:nowrap}.dash-mark{width:36px;height:36px}.dash-header{gap:6px;padding-inline:8px}}
+@media (max-width:370px){.dash-mark{display:none}}

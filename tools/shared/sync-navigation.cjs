@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path');
-// Shared sources for the two sound apps in this repository.
-const soundApps=['arabicsounds','auditory-rehabilitation'];
+// Shared sources for the sound app in this repository (أصواتي العربية moved to Hamada013/arabic-sounds on 2026-11-25).
+const soundApps=['auditory-rehabilitation'];
 const appDirectory=app=>path.join(__dirname,'..',app);
 for(const app of soundApps)for(const file of ['app-navigation.css','flow-ui.js','flow-ui.css','updates.js']){
  const source=fs.readFileSync(path.join(__dirname,file)),target=path.join(appDirectory(app),'assets',file);

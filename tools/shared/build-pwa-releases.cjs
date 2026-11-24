@@ -1,7 +1,7 @@
 // One build entrypoint for GitHub Pages and the final app bundle. No npm install required.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto'),cp=require('node:child_process');
 const ROOT=path.resolve(__dirname,'../..'),TOOLS=path.join(ROOT,'tools');
-const APPS=['arabicsounds','auditory-rehabilitation'];
+const APPS=['auditory-rehabilitation'];
 const sha=(body,encoding='hex')=>crypto.createHash('sha256').update(body).digest(encoding);
 function inventory(app,root=TOOLS){
  const base=path.join(root,app),context={self:{}};
@@ -19,6 +19,26 @@ function inventory(app,root=TOOLS){
  const files=[...new Set([...shell,...media.map(entry=>entry.url)])].sort();
  if(files.some(file=>file.startsWith('/')||file.split('/').includes('..')))throw Error('Invalid shell path');
  return {app,version:release.version,mediaCount:media.length,mediaBytes:media.reduce((sum,entry)=>sum+entry.bytes,0),files};
+}
+// Apps that moved to their own repositories: old links and offline copies forward to the new address.
+// Saved children stay, because the new address is on the same site (hamada013.github.io).
+const MOVED=[['arabicsounds','/arabic-sounds/']];
+function writeMovedApps(destination){
+ for(const [app,to] of MOVED){
+  const dir=path.join(destination,app),from='/tools/'+app+'/',target='https://hamada013.github.io'+to;fs.mkdirSync(dir,{recursive:true});
+  fs.writeFileSync(path.join(dir,'index.html'),`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="${target}"><title>انتقل التطبيق</title><script>location.replace(${JSON.stringify(target)}+location.hash)</script></head><body><p><a href="${target}">انتقل التطبيق إلى عنوان جديد</a></p></body></html>`);
+  // Replaces the old worker: forwards open windows, then unregisters.
+  fs.writeFileSync(path.join(dir,'sw.js'),`'use strict';
+const FROM=${JSON.stringify(from)},TO=${JSON.stringify(to)};
+const moved=href=>{const url=new URL(href);url.pathname=TO+url.pathname.slice(FROM.length);return url.href;};
+self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{
+ try{await self.clients.claim();for(const client of await self.clients.matchAll({type:'window'}))if(new URL(client.url).pathname.startsWith(FROM))await client.navigate(moved(client.url)).catch(()=>{});}
+ finally{await self.registration.unregister();}
+})()));
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method==='GET'&&url.origin===self.location.origin&&url.pathname.startsWith(FROM))event.respondWith(Response.redirect(moved(url.href),302));});
+`);
+ }
 }
 function build(){
  cp.execFileSync(process.execPath,[path.join(__dirname,'sync-navigation.cjs')],{stdio:'inherit'});
@@ -44,6 +64,7 @@ function stageSite(releases){
  fs.writeFileSync(path.join(destination,'.nojekyll'),'');
  fs.copyFileSync(path.join(TOOLS,'tools.html'),path.join(destination,'index.html'));
  for(const release of releases)inventory(release.app,destination);
+ writeMovedApps(destination);
  console.log(`Pages artifact: ${total} files in output/pages; every app shell and media revision verified.`);
  return destination;
 }

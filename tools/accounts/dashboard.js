@@ -42,17 +42,17 @@
         return skills;
     };
     const APPS = [
-        { id: 'voc', name: 'كلمة', color: '#0284c7', key: 'vocabulary-builder-v1', url: '../../vocabulary-builder/', goals: '../../vocabulary-builder/assets/intervention-goals.js',
+        { id: 'voc', logo: '../../vocabulary-builder/icons/icon-192.png', name: 'كلمة', color: '#0284c7', key: 'vocabulary-builder-v1', url: '../../vocabulary-builder/', goals: '../../vocabulary-builder/assets/intervention-goals.js',
             skills: { receptive: 'الفهم', expressive: 'التعبير' },
             sources: { workplace: 'مساحة العمل', test: 'استمع واختر', rapid: 'البطاقات السريعة', matching: 'المطابقة', memory: 'الذاكرة', where: 'وين؟' },
             read: child => ({ level: child.level, plan: child.intervention || null,
                 sessions: (child.sessions || []).filter(s => !s.partial).map(s => ({ date: s.date || s.started, kind: s.kind, source: s.source, skills: skillsOf(s.records, s.domain), raw: s })) }) },
-        { id: 'senb', name: 'جملة', color: '#7c3aed', key: 'sentences-builder-v1', url: '../../sentences-builder/', goals: '../../sentences-builder/assets/intervention-goals.js',
+        { id: 'senb', logo: '../../sentences-builder/assets/icons/icon-192.png', name: 'جملة', color: '#7c3aed', key: 'sentences-builder-v1', url: '../../sentences-builder/', goals: '../../sentences-builder/assets/intervention-goals.js',
             skills: { receptive: 'فهم الجمل', expressive: 'التعبير بالجمل' },
             sources: { workplace: 'لوحة الجمل', comprehension: 'اختبار الفهم', expressive: 'اختبار التعبير', game: 'البطاقة الناقصة', repetition: 'التكرار' },
             read: child => ({ level: child.level || child.senb?.level, plan: child.senb?.intervention || null,
                 sessions: (child.senb?.sessions || []).filter(s => !s.partial).map(s => ({ date: s.date || s.startedAt, kind: s.kind, source: s.source || s.mode || s.activity, skills: skillsOf(s.records), raw: s })) }) },
-        { id: 'taffaha', name: 'مقطع', color: '#059669', key: 'syllables-builder-v1', url: '../../syllables-builder/', goals: '../../syllables-builder/assets/intervention-goals.js',
+        { id: 'taffaha', logo: '../../syllables-builder/assets/icons/icon-192.png', name: 'مقطع', color: '#059669', key: 'syllables-builder-v1', url: '../../syllables-builder/', goals: '../../syllables-builder/assets/intervention-goals.js',
             skills: { picture: 'المقاطع والصورة', count: 'الصورة وعدد المقاطع' },
             sources: { picture: 'المقاطع والصورة', count: 'الصورة وعدد المقاطع' },
             // Answers are saved one by one; a session is the set of answers with the same session id.
@@ -69,15 +69,15 @@
                 }
                 return { level: child.level || child.taffaha?.level, plan: child.taffaha?.intervention || null, sessions: [...groups.values()] };
             } },
-        { id: 'arabicsounds', name: 'أصواتي العربية', color: '#d97706', key: 'arabicsounds-children-v1', url: '../arabicsounds/', goals: '../arabicsounds/assets/intervention-goals.js',
+        { id: 'arabicsounds', logo: '../../arabic-sounds/icons/icon-192.png', name: 'أصواتي العربية', color: '#d97706', key: 'arabicsounds-children-v1', url: '../../arabic-sounds/', goals: '../../arabic-sounds/assets/intervention-goals.js',
             skills: { pair: 'تمييز أصوات الكلام', 'ling-detection': 'اكتشاف أصوات لينغ', 'ling-identification': 'التعرف على أصوات لينغ', matching: 'المطابقة', memory: 'الذاكرة' },
             sources: { pair: 'تمييز أصوات الكلام', 'ling-detection': 'اكتشاف أصوات لينغ', 'ling-identification': 'التعرف على أصوات لينغ', matching: 'المطابقة', memory: 'الذاكرة' },
             read: child => soundRead(child, 'arabicsounds') },
-        { id: 'auditory-rehabilitation', name: 'أصوات من حولي', color: '#0891b2', key: 'auditory-rehabilitation-children-v1', url: '../auditory-rehabilitation/', goals: '../auditory-rehabilitation/assets/intervention-goals.js',
+        { id: 'auditory-rehabilitation', logo: '../auditory-rehabilitation/icons/icon-192.png', name: 'أصوات من حولي', color: '#0891b2', key: 'auditory-rehabilitation-children-v1', url: '../auditory-rehabilitation/', goals: '../auditory-rehabilitation/assets/intervention-goals.js',
             skills: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
             sources: { detection: 'اكتشاف الصوت', discrimination: 'التمييز السمعي', identification: 'التعرف على الصوت', duration: 'طويل وقصير', memory: 'الذاكرة' },
             read: child => soundRead(child, 'auditory-rehabilitation') },
-        { id: 'follow', name: 'اتبع التعليمات', color: '#16a34a', key: 'follow-direction-children-v1', url: '../../follow-direction/', goals: ['../../follow-direction/assets/bank.js', '../../follow-direction/assets/intervention-goals.js'],
+        { id: 'follow', logo: '../../follow-direction/assets/icon-192.png', name: 'اتبع التعليمات', color: '#16a34a', key: 'follow-direction-children-v1', url: '../../follow-direction/', goals: ['../../follow-direction/assets/bank.js', '../../follow-direction/assets/intervention-goals.js'],
             skills: { one: 'حركة واحدة', objects: 'أشياء مألوفة', attributes: 'لون وحجم', quantity: 'واحد واثنان وثلاثة', function: 'استخدام الأشياء', space: 'المكان', two: 'حركتان بالترتيب', order: 'أشياء بالترتيب', play: 'خطوتان في اللعب', condition: 'إذا…', three: 'ثلاث خطوات' },
             sources: { practice: 'التدريب', screen: 'الفرز' },
             // Answers count when done without help; the plan is the therapist's intervention plan (goal bank in the app).
@@ -90,7 +90,7 @@
                 });
                 return { level: null, plan: child.intervention || null, sessions };
             } },
-        { id: 'aural', name: 'التأهيل السمعي', color: '#0369a1', key: 'aural-rehabilitation-children-v1', url: '../../aural-rehabilitation-/', goals: ['../../aural-rehabilitation-/assets/lessons.js', '../../aural-rehabilitation-/assets/intervention-goals.js'],
+        { id: 'aural', logo: '../../aural-rehabilitation-/icons/icon-192.png', name: 'التأهيل السمعي', color: '#0369a1', key: 'aural-rehabilitation-children-v1', url: '../../aural-rehabilitation-/', goals: ['../../aural-rehabilitation-/assets/lessons.js', '../../aural-rehabilitation-/assets/intervention-goals.js'],
             skills: { 'my-house': 'بيتي', 'my-kitchen': 'مطبخي', transport: 'مواصلات', buses: 'الباصات' },
             sources: { station: 'محطة' },
             // Each station play is one entry in child.aural.log ({t, l: lesson, v: level, s: station, pct}).
@@ -112,6 +112,20 @@
             sessions: (own.sessions || []).filter(s => !s.partial).map(s => ({ date: s.date, kind: s.kind, source: s.skill,
                 skills: s.kind === 'assessment' ? { [s.skill]: { correct: s.records.filter(r => r.correct).length, total: s.records.length } } : {}, raw: s })) };
     }
+
+    // An app shown by its logo, ringed in its colour. Screen readers hear the name; a press shows it in a small bubble.
+    const badge = (app, size = 'm') => `<span class="dash-logo" data-size="${size}" style="--app:${app.color}" data-name="${app.name}"><img src="${app.logo}" alt="" decoding="async"><span class="dash-sr">${app.name}</span></span>`;
+    let tipTimer = 0;
+    function showTip(target) {
+        const name = target?.dataset.name; if (!name) return;
+        let tip = document.getElementById('dash-tip');
+        if (!tip) { tip = document.createElement('div'); tip.id = 'dash-tip'; tip.className = 'dash-tip'; tip.setAttribute('aria-hidden', 'true'); document.body.append(tip); }
+        tip.textContent = name; tip.style.setProperty('--app', getComputedStyle(target).getPropertyValue('--app'));
+        const r = target.getBoundingClientRect(); tip.style.left = `${r.left + r.width / 2}px`; tip.style.top = `${r.top - 8}px`; tip.dataset.show = '';
+        clearTimeout(tipTimer); tipTimer = setTimeout(() => delete tip.dataset.show, 1400);
+    }
+    document.addEventListener('pointerdown', event => showTip(event.target.closest?.('.dash-logo')), { passive: true });
+    document.addEventListener('focusin', event => showTip(event.target.querySelector?.(':scope > .dash-logo')));
 
     // ---- Reading every app ----
     const normalizeName = name => String(name || '').normalize('NFKC').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim().toLocaleLowerCase();
@@ -282,7 +296,7 @@
         line.textContent = cloud.error || (cloud.user ? (cloud.busy ? 'جارٍ التحميل من قاعدة بيانات العيادة…' : `متصل بقاعدة بيانات العيادة · ${cloud.children.length} طفل محفوظ`) : 'سجّل الدخول بحساب العيادة (زر السحابة) لعرض ما حُفظ في قاعدة البيانات.');
         $('#dash-children').replaceChildren(...list.map(child => {
             const button = document.createElement('button'); button.type = 'button'; button.className = 'dash-child-card'; button.setAttribute('role', 'listitem');
-            button.innerHTML = `<strong>${esc(child.name)}${child.cloud?.code ? ` <bdi class="dash-code" dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi>` : ''}</strong><span class="dash-apps">${child.accounts.map(a => `<i style="--app:${a.app.color}"${a.from ? ` title="${esc(sourceLabel(a.from))}"` : ''}>${a.app.name}${a.from ? ' · ' + esc(ROLES[a.from.role] || '') : ''}</i>`).join('')}${child.assessments.length ? `<i style="--app:#475569">تقييم (${child.assessments.length})</i>` : ''}</span><small>${child.last ? 'آخر جلسة ' + date(child.last) : 'لا توجد جلسات بعد'}</small>`;
+            button.innerHTML = `<strong>${esc(child.name)}${child.cloud?.code ? ` <bdi class="dash-code" dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi>` : ''}</strong><span class="dash-apps">${child.accounts.map(a => `<i class="dash-app-chip" style="--app:${a.app.color}"${a.from ? ` title="${esc(sourceLabel(a.from))}"` : ''}>${badge(a.app, 's')}${a.from ? '<small>' + esc(ROLES[a.from.role] || '') + '</small>' : ''}</i>`).join('')}${child.assessments.length ? `<i style="--app:#475569">تقييم (${child.assessments.length})</i>` : ''}</span><small>${child.last ? 'آخر جلسة ' + date(child.last) : 'لا توجد جلسات بعد'}</small>`;
             button.onclick = () => { current = child.key; view = 'all'; route(); window.scrollTo(0, 0); };
             return button;
         }));
@@ -309,7 +323,7 @@
         const t = totals(account), app = account.app;
         const bank = await goalBank(app), goals = goalStates(bank, account.plan, account.child);
         const goalList = (state, title, rows, extra = row => row.percent == null ? 'لم يُقيّم' : `${row.percent}%${row.by === 'app' ? ' · تقدير' : ''}`) => rows.length ? `<div class="dash-goals" data-state="${state}"><h4>${title} <small>(${rows.length})</small></h4>${rows.map(row => `<p><span>${esc(row.text)}</span><b>${state === 'suggested' ? 'مقترح' : extra(row)}</b></p>`).join('')}</div>` : '';
-        return `<section class="dash-app" style="--app:${app.color}"><header><h3>${app.name}</h3><span class="dash-source" data-from="${account.from ? account.from.role : 'here'}">${esc(sourceLabel(account.from))}${account.from ? ' · ' + date(account.from.exported) : ''}</span>${account.level ? `<span class="dash-level" data-level="${account.level}">${LEVELS[account.level] || account.level}</span>` : ''}<a href="${app.url}" class="dash-open">فتح التطبيق</a></header>
+        return `<section class="dash-app" style="--app:${app.color}"><header><h3 class="dash-app-title">${badge(app, 'l')}</h3><span class="dash-source" data-from="${account.from ? account.from.role : 'here'}">${esc(sourceLabel(account.from))}${account.from ? ' · ' + date(account.from.exported) : ''}</span>${account.level ? `<span class="dash-level" data-level="${account.level}">${LEVELS[account.level] || account.level}</span>` : ''}<a href="${app.url}" class="dash-open">فتح التطبيق</a></header>
             <div class="dash-stats"><div><strong>${t.sessions}</strong><span>جلسات</span></div><div><strong>${t.tests}</strong><span>اختبارات</span></div><div><strong>${t.last ? date(t.last) : '—'}</strong><span>آخر جلسة</span></div></div>
             ${Object.entries(app.skills).map(([id, label]) => bar(label, t.skills[id].percent, app.color, t.skills[id].total ? `<bdi dir="ltr">${t.skills[id].correct} / ${t.skills[id].total}</bdi>` : 'لم يُقيّم')).join('')}
             ${t.recent.length ? `<h4 class="dash-sub">آخر الاختبارات</h4><ul class="dash-recent">${t.recent.map(s => `<li><span>${date(s.date)}</span><span>${esc(app.sources[s.source] || 'اختبار')}</span><b dir="ltr">${scoreOf(s) ?? '—'}%</b></li>`).join('')}</ul>` : ''}
@@ -321,7 +335,7 @@
     const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span>${a.ref.startsWith('cloud:') ? `<button type="button" class="dash-icon dash-danger" data-remove-assessment="${esc(a.ref)}" aria-label="حذف هذا التقييم من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button>` : ''}</header>
         ${a.sections.filter(section => section.items.length).map(section => `<details><summary>${esc(section.title)} <small>(${section.items.length})</small></summary><dl>${section.items.map(item => `<div><dt>${esc(item.label)}</dt><dd>${esc(item.value).replace(/\n/g, '<br>')}</dd></div>`).join('')}</dl></details>`).join('')}</section>`;
     // ---- Board tools for the clinic's database ----
-    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow'];
+    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds'];
     // Two taps for anything that deletes: the first turns the button red for three seconds.
     function twoTaps(button, action, again = 'اضغط مرة أخرى للتأكيد') {
         button.onclick = async () => {
@@ -333,7 +347,7 @@
         if (!cloud.user || !window.SpeechCloud) return '';
         if (!child.cloud) return `<div class="dash-cloud-tools"><p>هذا الطفل ليس في قاعدة بيانات العيادة بعد.</p><button type="button" class="dash-pill" data-cloud-create>حفظ في قاعدة البيانات وإعطاؤه رقماً</button></div>`;
         const apps = child.cloud.apps || [];
-        return `<div class="dash-cloud-tools"><div class="dash-cloud-apps" role="group" aria-label="التطبيقات التي يظهر فيها الطفل"><span>يظهر في:</span>${APP_IDS.map(id => { const app = APPS.find(item => item.id === id); return `<button type="button" class="dash-pill" style="--app:${app.color}" data-app-toggle="${id}" aria-pressed="${apps.includes(id)}">${app.name}</button>`; }).join('')}</div>
+        return `<div class="dash-cloud-tools"><div class="dash-cloud-apps" role="group" aria-label="التطبيقات التي يظهر فيها الطفل"><span>يظهر في:</span>${APP_IDS.map(id => { const app = APPS.find(item => item.id === id); return `<button type="button" class="dash-pill" style="--app:${app.color}" data-app-toggle="${id}" aria-pressed="${apps.includes(id)}" aria-label="${app.name}">${badge(app)}</button>`; }).join('')}</div>
             <div class="dash-cloud-apps${child.cloud.until ? '' : ' dash-need'}" role="group" aria-label="مدة حساب الطفل"><span>مدة الحساب:</span>${[3, 6, 9, 12].map(m => `<button type="button" class="dash-pill" data-months="${m}" aria-pressed="${child.cloud.months === m}">${m} أشهر</button>`).join('')}
                 <small class="dash-until" data-state="${!child.cloud.until ? 'none' : Date.parse(child.cloud.until) < Date.now() ? 'ended' : 'ok'}">${!child.cloud.until ? 'اختر المدة ليفتح الأهل التطبيقات' : Date.parse(child.cloud.until) < Date.now() ? `انتهت في ${date(child.cloud.until)} · مقفل حتى التجديد` : `صالح حتى ${date(child.cloud.until)}`}</small></div>
             <div class="dash-cloud-actions"><button type="button" class="dash-pill" data-share-parents>مشاركة مع الأهل (الاسم والرقم)</button><button type="button" class="dash-icon dash-danger" data-cloud-remove aria-label="حذف ${esc(child.name)} من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button></div></div>`;
@@ -398,12 +412,12 @@
         const others = accounts().filter(a => !child.accounts.some(own => own.ref === a.ref));
         host.innerHTML = `<div class="dash-child-head"><button type="button" class="dash-icon" data-back aria-label="كل الأطفال" title="كل الأطفال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><h2 id="dash-child-name">${esc(child.name)}</h2>${child.cloud?.code ? `<span class="dash-code" title="رقم الطفل">رقم الطفل <bdi dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi></span>` : ''}<button type="button" class="dash-print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>طباعة</button></div>
             ${cloudTools(child)}
-            <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, a.app.name + (a.from ? ' · ' + (ROLES[a.from.role] || '') : '')]), ...(child.assessments.length ? [['assess', 'التقييمات']] : [])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
+            <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, badge(a.app) + (a.from ? `<small>${esc(ROLES[a.from.role] || '')}</small>` : '')]), ...(child.assessments.length ? [['assess', 'التقييمات']] : [])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
             <nav class="dash-periods" aria-label="الفترة">${Object.entries(PERIODS).map(([id, [label]]) => `<button type="button" data-period="${id}" aria-pressed="${period === id}">${label}</button>`).join('')}</nav>
             <div class="dash-sections">${view === 'all' || view === 'assess' ? child.assessments.map(assessmentSection).join('') : ''}${(await Promise.all((view === 'assess' ? [] : accountsShown).map(appSection))).join('')}</div>
             <details class="dash-link"><summary>ربط حساب بنفس الطفل باسم مختلف</summary>
-                ${others.length ? `<p>اختر حساب هذا الطفل في تطبيق آخر إن كُتب اسمه بشكل مختلف.</p><div class="dash-link-list">${others.map(a => `<button type="button" data-link="${a.ref}"><i style="--app:${a.app.color}">${a.app.name}${a.from ? ' · ' + esc(ROLES[a.from.role] || '') : ''}</i>${esc(a.name)}</button>`).join('')}</div>` : '<p>لا توجد حسابات أخرى للربط.</p>'}
-                ${child.accounts.length > 1 ? `<p>فك الربط:</p><div class="dash-link-list">${child.accounts.map(a => `<button type="button" data-unlink="${a.ref}"><i style="--app:${a.app.color}">${a.app.name}</i>${esc(a.name)} ×</button>`).join('')}</div>` : ''}
+                ${others.length ? `<p>اختر حساب هذا الطفل في تطبيق آخر إن كُتب اسمه بشكل مختلف.</p><div class="dash-link-list">${others.map(a => `<button type="button" data-link="${a.ref}">${badge(a.app, 's')}${a.from ? '<small>' + esc(ROLES[a.from.role] || '') + '</small>' : ''}${esc(a.name)}</button>`).join('')}</div>` : '<p>لا توجد حسابات أخرى للربط.</p>'}
+                ${child.accounts.length > 1 ? `<p>فك الربط:</p><div class="dash-link-list">${child.accounts.map(a => `<button type="button" data-unlink="${a.ref}">${badge(a.app, 's')}${esc(a.name)} ×</button>`).join('')}</div>` : ''}
             </details>`;
         host.querySelector('[data-back]').onclick = () => { current = null; route(); };
         wireCloudTools(host, child);
@@ -422,7 +436,7 @@
             printDialog.innerHTML = `<h2>طباعة التقارير</h2><p>اختر التقارير. كل تقرير يُنزَّل في ملف PDF منفصل.</p><div class="dash-print-list"></div><p class="dash-print-error" role="alert" hidden></p><footer><button type="button" data-go>تنزيل</button><button type="button" data-cancel>إلغاء</button></footer>`;
             document.body.append(printDialog); printDialog.querySelector('[data-cancel]').onclick = () => printDialog.close();
         }
-        const choices = [['all', 'تقرير موحّد لكل التطبيقات'], ...child.accounts.map(a => [a.ref, `تقرير ${a.app.name}`])];
+        const choices = [['all', 'تقرير موحّد لكل التطبيقات'], ...child.accounts.map(a => [a.ref, `${badge(a.app, 's')} تقرير`])];
         printDialog.querySelector('.dash-print-list').innerHTML = choices.map(([id, label]) => `<button type="button" class="print-choice" data-choice="${id}" aria-pressed="true"><span class="print-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg></span><span><b>${label}</b></span></button>`).join('');
         const go = printDialog.querySelector('[data-go]'), sync = () => { go.disabled = !printDialog.querySelector('[aria-pressed=true]'); };
         printDialog.querySelectorAll('[data-choice]').forEach(el => { el.onclick = () => { el.setAttribute('aria-pressed', String(el.getAttribute('aria-pressed') !== 'true')); sync(); }; }); sync();

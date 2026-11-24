@@ -6,7 +6,7 @@ const original=JSON.stringify(legacy);values.set('voc-children-v1',original);
 const models={};
 for(const app of apps){
  const context={structuredClone,Event,crypto:require('node:crypto').webcrypto};vm.createContext(context);
- vm.runInContext(fs.readFileSync(path.join(__dirname,'..',app,'assets/sound-progress.js'),'utf8'),context);
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../shared/sound-progress.js'),'utf8'),context);
  const model=models[app]=context.SoundProgressModel.create({app,storage});
  assert.equal(model.active().name,'علي');assert.equal(model.children().length,1,'No built-in Hamada account');assert(!model.children().some(c=>c.role==='admin'||c.name==='Hamada'));assert.equal(model.active().words,undefined);
  assert.deepEqual(Object.keys(model.active().soundApps),[app]);
@@ -19,7 +19,7 @@ assert.equal(storage.getItem('auditory-rehabilitation-children-v1'),aroundBefore
 assert.equal(models['auditory-rehabilitation'].active().id,'child');
 const context={document:{currentScript:{dataset:{app:'arabicsounds'}}},module:{exports:{}},Intl,Event};vm.createContext(context);
 // Export the pure account operations without running the browser UI.
-const source=fs.readFileSync(path.join(__dirname,'../arabicsounds/assets/accounts.js'),'utf8').replace(' if(!root.document)return;',' return;');vm.runInContext(source,context);
+const source=fs.readFileSync(path.join(__dirname,'../shared/sound-accounts.js'),'utf8').replace(' if(!root.document)return;',' return;');vm.runInContext(source,context);
 assert(context.module.exports.remove(storage,child.id));
 assert(!context.module.exports.remove(storage,'no-such-child'));
 assert.equal(storage.getItem('auditory-rehabilitation-children-v1'),aroundBefore,'Deletion is isolated');
