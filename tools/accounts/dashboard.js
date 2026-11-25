@@ -113,6 +113,13 @@
             // every sound by level for the table below. Home practice is shown apart and never counts here.
             read: child => ({ level: null, plan: child.intervention || null, sessions: (child.summary?.sessions || []).map(s => ({ date: s.date, kind: 'assessment', source: s.part, skills: { [s.part]: { correct: s.percent ?? 0, total: 100 } }, raw: s })) }),
             table: account => articulationTable(account) },
+        { id: 'english-artic', logo: '../../English-speech-artic/icons/icon-192.png', name: 'Speech Sounds', color: '#0284c7', key: 'english-artic-children-v1', url: '../../English-speech-artic/',
+            // English articulation (General American): the same plan engine and summary as تدريب النطق, sounds by id (p, th, s+C…).
+            goals: ['../../English-speech-artic/assets/therapy.js', '../../English-speech-artic/assets/intervention-goals.js'],
+            skills: { syllables: 'Syllables', words: 'Words', phrases: 'Phrases', sentences: 'Sentences', stories: 'Stories', approaches: 'Approaches' },
+            sources: { syllables: 'Syllables', words: 'Words', phrases: 'Phrases', sentences: 'Sentences', stories: 'Stories', approaches: 'Approaches' },
+            read: child => ({ level: null, plan: child.intervention || null, sessions: (child.summary?.sessions || []).map(s => ({ date: s.date, kind: 'assessment', source: s.part, skills: { [s.part]: { correct: s.percent ?? 0, total: 100 } }, raw: s })) }),
+            table: account => articulationTable(account) },
     ];
     // تدريب النطق: each sound by level as a colour grid (green reached 80% twice, gold working, dash not practised),
     // the latest test, the error patterns and home practice, from the app's own summary of the child.
@@ -357,7 +364,7 @@
     const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span>${a.ref.startsWith('cloud:') ? `<button type="button" class="dash-icon dash-danger" data-remove-assessment="${esc(a.ref)}" aria-label="حذف هذا التقييم من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button>` : ''}</header>
         ${a.sections.filter(section => section.items.length).map(section => `<details><summary>${esc(section.title)} <small>(${section.items.length})</small></summary><dl>${section.items.map(item => `<div><dt>${esc(item.label)}</dt><dd>${esc(item.value).replace(/\n/g, '<br>')}</dd></div>`).join('')}</dl></details>`).join('')}</section>`;
     // ---- Board tools for the clinic's database ----
-    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds', 'auditory-rehabilitation', 'articulation'];
+    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds', 'auditory-rehabilitation', 'articulation', 'english-artic'];
     // Two taps for anything that deletes: the first turns the button red for three seconds.
     function twoTaps(button, action, again = 'اضغط مرة أخرى للتأكيد') {
         button.onclick = async () => {
