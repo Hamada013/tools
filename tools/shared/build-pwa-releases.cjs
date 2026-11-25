@@ -62,7 +62,9 @@ function stageSite(releases){
   const target=path.join(destination,file);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);total++;
  }
  fs.writeFileSync(path.join(destination,'.nojekyll'),'');
- fs.copyFileSync(path.join(TOOLS,'tools.html'),path.join(destination,'index.html'));
+ // The old tools menu was removed (2026-11-25): the tools are listed on the main website only. The site root says so,
+ // without a link back (tools never link to the website).
+ fs.writeFileSync(path.join(destination,'index.html'),`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>الأدوات · Tools</title><style>body{margin:0;min-height:100dvh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:#22445a;background:#f8fafc;text-align:center;padding:24px}img{width:88px;height:88px;border-radius:24px}h1{font-size:22px;margin:16px 0 6px}p{margin:4px 0;color:#5c7285}</style></head><body><main><img src="assets/logo.webp" alt=""><h1>الأدوات في موقع أحمد غانم</h1><p>افتح صفحة الأدوات من الموقع.</p><p lang="en" dir="ltr">The tools are on Ahmad Ghanem’s website: open its Tools page.</p></main></body></html>`);
  for(const release of releases)inventory(release.app,destination);
  writeMovedApps(destination);
  console.log(`Pages artifact: ${total} files in output/pages; every app shell and media revision verified.`);
