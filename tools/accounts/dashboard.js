@@ -103,8 +103,30 @@
                 }
                 const played = [...new Set(log.map(play => `${play.l}.${play.v}`))];
                 return { level: null, plan: played.length ? { goals: played.map(key => ({ prefix: key })) } : null, sessions: [...days.values()] };
-            } }
+            } },
+        { id: 'articulation', logo: '../../speech-sound-arctic-/icons/icon-192.png', name: 'تدريب النطق', color: '#e11d48', key: 'articulation-children-v1', url: '../../speech-sound-arctic-/',
+            // The goal file reads the plan engine's patterns, so the engine runs first.
+            goals: ['../../speech-sound-arctic-/assets/therapy.js', '../../speech-sound-arctic-/assets/intervention-goals.js'],
+            skills: { syllables: 'المقاطع', words: 'الكلمات', phrases: 'العبارات', sentences: 'الجمل', stories: 'القصص', approaches: 'المناهج' },
+            sources: { syllables: 'المقاطع', words: 'الكلمات', phrases: 'العبارات', sentences: 'الجمل', stories: 'القصص', approaches: 'المناهج' },
+            // The app keeps a summary with each child (its assets/clinic.js): the therapist-graded sessions by part, and
+            // every sound by level for the table below. Home practice is shown apart and never counts here.
+            read: child => ({ level: null, plan: child.intervention || null, sessions: (child.summary?.sessions || []).map(s => ({ date: s.date, kind: 'assessment', source: s.part, skills: { [s.part]: { correct: s.percent ?? 0, total: 100 } }, raw: s })) }),
+            table: account => articulationTable(account) },
     ];
+    // تدريب النطق: each sound by level as a colour grid (green reached 80% twice, gold working, dash not practised),
+    // the latest test, the error patterns and home practice, from the app's own summary of the child.
+    const ARTIC_LEVELS = [['syllables', 'مقاطع'], ['words', 'كلمات'], ['phrases', 'عبارات'], ['sentences', 'جمل'], ['stories', 'قصص']];
+    function articulationTable(account) {
+        const s = account.child?.summary; if (!s) return '';
+        const letters = Object.keys(s.sounds || {}).filter(letter => ARTIC_LEVELS.some(([part]) => s.sounds[letter][part]));
+        const cell = c => !c ? '<td data-state="none">—</td>' : `<td data-state="${c.reached ? 'done' : 'now'}"><b dir="ltr">${c.percent ?? '—'}%</b><small>${c.sessions} ${c.sessions === 1 ? 'جلسة' : 'جلسات'}</small></td>`;
+        const table = letters.length ? `<div class="dash-artic-wrap"><table class="dash-artic"><thead><tr><th scope="col">الصوت</th>${ARTIC_LEVELS.map(([, name]) => `<th scope="col">${name}</th>`).join('')}</tr></thead><tbody>${letters.map(letter => `<tr><th scope="row">${esc(letter)}</th>${ARTIC_LEVELS.map(([part]) => cell(s.sounds[letter][part])).join('')}</tr>`).join('')}</tbody></table></div>` : '<p class="dash-note">لا توجد جلسات مصحّحة بعد.</p>';
+        const test = s.test ? `<p class="dash-artic-line">آخر اختبار نطق ${date(s.test.date)}${s.test.percent != null ? ` · <b dir="ltr">${s.test.percent}%</b>` : ''}${s.test.errors?.length ? ` · يحتاج تدريباً: <span class="dash-artic-letters">${s.test.errors.map(esc).join(' ')}</span>` : ''}</p>` : '';
+        const patterns = Object.values(s.patterns || {}).map(p => `<span class="dash-artic-pattern" data-state="${p.reached ? 'done' : 'now'}">${esc(p.name)} <b dir="ltr">${p.percent ?? '—'}%</b></span>`).join('');
+        const home = s.home?.sessions ? `<p class="dash-artic-line">تدريب البيت (لا يدخل في النسب): ${s.home.sessions} ${s.home.sessions === 1 ? 'جلسة' : 'جلسات'} · صح ${s.home.right} · مرة ثانية ${s.home.again}${s.home.last ? ` · آخرها ${date(s.home.last)}` : ''}</p>` : '';
+        return `<h4 class="dash-sub">الأصوات والمستويات</h4>${test}${table}${patterns ? `<div class="dash-artic-patterns">${patterns}</div>` : ''}${home}`;
+    }
     // The two sound apps keep sessions per app (child.soundApps[app]); only tests have right/wrong answers.
     function soundRead(child, app) {
         const own = child.soundApps?.[app] || {};
@@ -325,7 +347,7 @@
         const goalList = (state, title, rows, extra = row => row.percent == null ? 'لم يُقيّم' : `${row.percent}%${row.by === 'app' ? ' · تقدير' : ''}`) => rows.length ? `<div class="dash-goals" data-state="${state}"><h4>${title} <small>(${rows.length})</small></h4>${rows.map(row => `<p><span>${esc(row.text)}</span><b>${state === 'suggested' ? 'مقترح' : extra(row)}</b></p>`).join('')}</div>` : '';
         return `<section class="dash-app" style="--app:${app.color}"><header><h3 class="dash-app-title">${badge(app, 'l')}</h3><span class="dash-source" data-from="${account.from ? account.from.role : 'here'}">${esc(sourceLabel(account.from))}${account.from ? ' · ' + date(account.from.exported) : ''}</span>${account.level ? `<span class="dash-level" data-level="${account.level}">${LEVELS[account.level] || account.level}</span>` : ''}<a href="${app.url}" class="dash-open">فتح التطبيق</a></header>
             <div class="dash-stats"><div><strong>${t.sessions}</strong><span>جلسات</span></div><div><strong>${t.tests}</strong><span>اختبارات</span></div><div><strong>${t.last ? date(t.last) : '—'}</strong><span>آخر جلسة</span></div></div>
-            ${Object.entries(app.skills).map(([id, label]) => bar(label, t.skills[id].percent, app.color, t.skills[id].total ? `<bdi dir="ltr">${t.skills[id].correct} / ${t.skills[id].total}</bdi>` : 'لم يُقيّم')).join('')}
+            ${Object.entries(app.skills).map(([id, label]) => bar(label, t.skills[id].percent, app.color, t.skills[id].total ? `<bdi dir="ltr">${t.skills[id].correct} / ${t.skills[id].total}</bdi>` : 'لم يُقيّم')).join('')}${app.table ? app.table(account) : ''}
             ${t.recent.length ? `<h4 class="dash-sub">آخر الاختبارات</h4><ul class="dash-recent">${t.recent.map(s => `<li><span>${date(s.date)}</span><span>${esc(app.sources[s.source] || 'اختبار')}</span><b dir="ltr">${scoreOf(s) ?? '—'}%</b></li>`).join('')}</ul>` : ''}
             ${goals ? `<h4 class="dash-sub">أهداف خطة التدخل · ${goals.percent}%</h4>${goalList('working', 'نعمل عليها الآن', goals.working)}${goalList('done', 'تحققت', goals.done)}${goalList('suggested', 'مقترحة', goals.suggested)}` : account.plan?.goals?.length ? '<p class="dash-note">افتح التطبيق مرة مع الإنترنت لعرض أهدافه هنا.</p>' : '<p class="dash-note">لا توجد خطة تدخل في هذا التطبيق.</p>'}
         </section>`;
@@ -335,7 +357,7 @@
     const assessmentSection = a => `<section class="dash-app dash-assessment" style="--app:#475569"><header><h3>${esc(a.title)}</h3><span class="dash-source" data-from="${a.from.role}">${esc(sourceLabel(a.from))}</span><span class="dash-level">${a.date ? date(a.date) : date(a.from.exported)}</span>${a.ref.startsWith('cloud:') ? `<button type="button" class="dash-icon dash-danger" data-remove-assessment="${esc(a.ref)}" aria-label="حذف هذا التقييم من قاعدة البيانات" title="حذف من قاعدة البيانات">${TRASH}</button>` : ''}</header>
         ${a.sections.filter(section => section.items.length).map(section => `<details><summary>${esc(section.title)} <small>(${section.items.length})</small></summary><dl>${section.items.map(item => `<div><dt>${esc(item.label)}</dt><dd>${esc(item.value).replace(/\n/g, '<br>')}</dd></div>`).join('')}</dl></details>`).join('')}</section>`;
     // ---- Board tools for the clinic's database ----
-    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds', 'auditory-rehabilitation'];
+    const APP_IDS = ['voc', 'senb', 'taffaha', 'follow', 'arabicsounds', 'auditory-rehabilitation', 'articulation'];
     // Two taps for anything that deletes: the first turns the button red for three seconds.
     function twoTaps(button, action, again = 'اضغط مرة أخرى للتأكيد') {
         button.onclick = async () => {

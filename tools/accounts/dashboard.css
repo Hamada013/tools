@@ -122,3 +122,19 @@ pre.dash-join-link{white-space:pre-wrap;font:inherit;font-size:14px;direction:rt
 @media (prefers-reduced-motion:reduce){.dash-tip{transition:none}}
 @media (max-width:480px){.dash-brand p{display:none}.dash-brand h1{font-size:17px;line-height:1.35;white-space:nowrap}.dash-mark{width:36px;height:36px}.dash-header{gap:6px;padding-inline:8px}}
 @media (max-width:370px){.dash-mark{display:none}}
+
+/* تدريب النطق: sounds by level (green reached 80% twice, gold working, grey not practised). */
+.dash-artic-wrap{overflow-x:auto;margin:6px 0 10px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.dash-artic{width:100%;border-collapse:collapse;font-size:14px;text-align:center}
+.dash-artic th,.dash-artic td{padding:8px 6px;border-bottom:1px solid #eef3f7}
+.dash-artic thead th{color:var(--muted);font-weight:700;font-size:13px}
+.dash-artic tbody th{font-size:22px;line-height:1.3;color:var(--ink)}
+.dash-artic td b{display:block;font-size:15px}.dash-artic td small{display:block;color:var(--muted);font-size:11px}
+.dash-artic td[data-state=done]{background:#e7f6ee;color:#166534}
+.dash-artic td[data-state=now]{background:#fff6dc;color:#92400e}
+.dash-artic td[data-state=none]{color:#b6c2cc}
+.dash-artic-line{margin:4px 0 8px;color:var(--ink);font-size:14px;line-height:1.7}
+.dash-artic-letters{font-size:18px;font-weight:800;letter-spacing:normal}
+.dash-artic-patterns{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.dash-artic-pattern{padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700;background:#fff6dc;color:#92400e}
+.dash-artic-pattern[data-state=done]{background:#e7f6ee;color:#166534}
