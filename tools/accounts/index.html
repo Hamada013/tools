@@ -14,14 +14,11 @@
 <body>
 <header class="dash-header">
   <a class="dash-back" href="../index.html" aria-label="الأدوات" title="الأدوات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
-  <img class="dash-mark" src="logo.svg" width="44" height="44" alt=""><div class="dash-brand"><h1>حسابات الأطفال</h1><p>تقارير الأطفال من التطبيقات وملفات الأطفال من الأجهزة الأخرى</p></div>
+  <img class="dash-mark" src="logo.svg" width="44" height="44" alt=""><div class="dash-brand"><h1>حسابات الأطفال</h1><p>تقارير الأطفال من كل التطبيقات والأجهزة</p></div>
   <button type="button" class="dash-icon" id="dash-cloud" hidden data-state="off" aria-label="تسجيل الدخول إلى قاعدة بيانات العيادة" title="تسجيل الدخول إلى قاعدة بيانات العيادة"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-8A6 6 0 0 0 6.2 11 3.5 3.5 0 0 0 7 18Z"/><path class="dash-cloud-tick" d="m9.5 13.5 2 2 3.5-3.5"/></svg></button>
-  <button type="button" class="dash-icon" id="dash-import" hidden aria-label="فتح ملف طفل من جهاز آخر" title="فتح ملف طفل من جهاز آخر"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6m-3-3 3 3 3-3"/></svg></button>
-  <input type="file" id="dash-import-file" accept=".json,application/json" multiple hidden>
   <button type="button" class="dash-icon" id="dash-lock" hidden aria-label="قفل اللوحة" title="قفل اللوحة"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 7.6-1.8M12 14v3"/></svg></button>
 </header>
 <main id="dash-main" class="dash-main">
-  <p id="dash-import-note" class="dash-import-note" role="status" aria-live="polite" hidden></p>
   <section id="dash-gate" class="dash-gate" hidden aria-labelledby="dash-gate-title">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>
     <h2 id="dash-gate-title">للمعالج فقط</h2>
@@ -30,13 +27,12 @@
     <p id="dash-gate-error" role="alert" hidden>كلمة المرور غير صحيحة.</p>
   </section>
   <section id="dash-list" class="dash-list" hidden aria-labelledby="dash-list-title">
-    <div class="dash-list-head"><h2 id="dash-list-title">الأطفال</h2><span id="dash-count"></span></div>
+    <div class="dash-list-head"><h2 id="dash-list-title">الأطفال</h2><span id="dash-count"></span><button type="button" class="dash-add-child" id="dash-add-child" aria-label="إضافة طفل" title="إضافة طفل"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
     <p id="dash-cloud-line" class="dash-cloud-line" hidden></p>
     <input type="search" id="dash-search" placeholder="ابحث بالاسم" aria-label="البحث عن طفل بالاسم" autocomplete="off">
     <div id="dash-children" class="dash-children" role="list"></div>
     <p id="dash-empty" class="dash-empty" hidden></p>
     <details id="dash-devices" class="dash-files" hidden></details>
-    <details id="dash-files" class="dash-files" hidden></details>
   </section>
   <section id="dash-child" class="dash-child" hidden aria-labelledby="dash-child-name"></section>
   <noscript><p class="dash-empty">فعّل JavaScript لعرض اللوحة.</p></noscript>

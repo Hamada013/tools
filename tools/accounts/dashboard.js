@@ -313,7 +313,7 @@
     let current = null, view = 'all';
     function route() {
         const open = isOpen();
-        $('#dash-gate').hidden = open; $('#dash-lock').hidden = !open; $('#dash-import').hidden = !open; $('#dash-cloud').hidden = !open || !window.SpeechCloud;
+        $('#dash-gate').hidden = open; $('#dash-lock').hidden = !open; $('#dash-cloud').hidden = !open || !window.SpeechCloud;
         $('#dash-list').hidden = !open || !!current; $('#dash-child').hidden = !open || !current;
         if (!open) { $('#dash-gate input').value = ''; $('#dash-gate input').focus(); return; }
         if (current) renderChild(); else renderList();
@@ -332,20 +332,10 @@
         $('#dash-empty').hidden = !!list.length;
         const devBox = $('#dash-devices'); devBox.hidden = !cloud.user;
         if (cloud.user) {
-            devBox.innerHTML = `<summary>الأجهزة المرتبطة بالعيادة (${cloud.devices.length})</summary><p><button type="button" class="dash-pill" data-join-all>ربط جهاز المعالج (كل الأطفال)</button></p><ul>${cloud.devices.map(d => `<li><span><b>${esc(d.label || 'جهاز')}</b><small>${esc(ROLES[d.role] || '')} · ${d.all ? 'كل الأطفال' : `${(d.children || []).length} طفل`} · ${date(d.joined)}</small></span><button type="button" class="dash-icon" data-remove-device="${esc(d.id)}" aria-label="فصل ${esc(d.label || 'الجهاز')}" title="فصل الجهاز">${TRASH}</button></li>`).join('')}</ul>`;
-            devBox.querySelector('[data-join-all]').onclick = () => joinDialog({ all: true, role: 'therapist', apps: ['voc'] });
+            devBox.innerHTML = `<summary>الأجهزة المرتبطة بالعيادة (${cloud.devices.length})</summary><ul>${cloud.devices.map(d => `<li><span><b>${esc(d.label || 'جهاز')}</b><small>${esc(ROLES[d.role] || '')} · ${d.all ? 'كل الأطفال' : `${(d.children || []).length} طفل`} · ${date(d.joined)}</small></span><button type="button" class="dash-icon" data-remove-device="${esc(d.id)}" aria-label="فصل ${esc(d.label || 'الجهاز')}" title="فصل الجهاز">${TRASH}</button></li>`).join('')}</ul>`;
             devBox.querySelectorAll('[data-remove-device]').forEach(button => twoTaps(button, async () => { await window.SpeechCloud.removeDevice(button.dataset.removeDevice); await refreshCloud(); }, 'اضغط مرة أخرى لفصل الجهاز'));
         }
-        const files = imports(), box = $('#dash-files');
-        box.hidden = !files.length;
-        box.innerHTML = files.length ? `<summary>الملفات المستوردة (${files.length})</summary><ul>${files.map(({ id, file }) => `<li><span><b>${esc(file.child.name)}</b><small>${esc(sourceLabel(file.recorder))} · ${date(file.exported)} · ${file.accounts.length ? file.accounts.map(e => APPS.find(app => app.id === e.app)?.name || e.app).join('، ') : file.assessments.map(a => esc(a.title)).join('، ')}</small></span><button type="button" class="dash-icon" data-remove-file="${esc(id)}" aria-label="حذف ملف ${esc(file.child.name)} من هذا الجهاز" title="حذف الملف"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></li>`).join('')}</ul>` : '';
-        // Two taps remove an imported copy (the first turns the button red); the file can be opened again later.
-        box.querySelectorAll('[data-remove-file]').forEach(button => { button.onclick = () => {
-            if (button.dataset.armed) { removeImport(button.dataset.removeFile); renderList(); return; }
-            button.dataset.armed = '1'; button.title = 'اضغط مرة أخرى للحذف'; button.setAttribute('aria-label', 'اضغط مرة أخرى لحذف الملف');
-            setTimeout(() => { if (button.isConnected) { delete button.dataset.armed; button.title = 'حذف الملف'; } }, 3000);
-        }; });
-        $('#dash-empty').textContent = all.length ? 'لا يوجد اسم مطابق.' : 'لا توجد حسابات أطفال على هذا الجهاز بعد. أضف الأطفال من داخل التطبيقات، أو افتح «ملف طفل» من جهاز آخر.';
+        $('#dash-empty').textContent = all.length ? 'لا يوجد اسم مطابق.' : 'لا يوجد أطفال بعد. اضغط + لإضافة طفل.';
     }
     const bar = (label, value, color, detail) => `<div class="dash-bar"><span class="dash-bar-label">${esc(label)}</span><span class="dash-bar-track"><i style="width:${value ?? 0}%;background:${color}"></i></span><b dir="ltr">${value == null ? '—' : value + '%'}</b>${detail ? `<small>${detail}</small>` : ''}</div>`;
     async function appSection(account) {
@@ -394,7 +384,17 @@
         const remove = host.querySelector('[data-cloud-remove]'); if (remove) twoTaps(remove, async () => { await C.removeChild(child.cloud.id); current = null; await refreshCloud(); route(); }, `اضغط مرة أخرى لحذف ${child.name} من قاعدة البيانات`);
         host.querySelectorAll('[data-remove-assessment]').forEach(button => { const [, childId, id] = button.dataset.removeAssessment.split(':'); twoTaps(button, async () => { await C.removeAssessment(childId, id); await refreshCloud(); }); });
     }
-    // «مشاركة مع الأهل»: the child's name, number, end date and app links, ready to send.
+    // «مشاركة مع الأهل»: a clear message for the parents, in Arabic or English (switch in the window). Every item is on its
+    // own line; the child's number stands alone as six plain digits, so Arabic text around it can never flip it.
+    const NAME_EN = { voc: 'Vocabulary Builder', senb: 'Sentence Builder', taffaha: 'Syllable Builder', follow: 'Follow Directions', arabicsounds: 'My Arabic Sounds', 'auditory-rehabilitation': 'Sounds Around Me', articulation: 'Arabic Articulation', 'english-artic': 'Speech Sounds', aural: 'Aural Rehabilitation' };
+    const LTR = '\u200E';
+    function parentMessage(child, apps, lang) {
+        const number = String(child.code || '').replace(/\D/g, ''), until = date(child.until), links = apps.map(app => [lang === 'en' ? (NAME_EN[app.id] || app.name) : app.name, new URL(app.url, location.href).href]);
+        return lang === 'en'
+            ? [`${child.name}: sign-in for the clinic apps`, '', 'Child’s name:', child.name, '', 'Child number:', number, '', 'Valid until:', until, '', 'Open each app, then type the name and the number:', '', ...links.flatMap(([name, url]) => [name, url, ''])].join('\n').trim()
+            // Left-to-right marks keep a link (and the number and date) whole inside Arabic text, e.g. the last «/» in place.
+            : [`دخول ${child.name} إلى تطبيقات العيادة`, '', 'اسم الطفل:', child.name, '', 'رقم الطفل:', LTR + number + LTR, '', 'صالح حتى:', LTR + until + LTR, '', 'افتح كل تطبيق، ثم اكتب الاسم والرقم:', '', ...links.flatMap(([name, url]) => [name, LTR + url + LTR, ''])].join('\n').trim();
+    }
     async function shareDialog(child) {
         if (!joinBox) { joinBox = document.createElement('dialog'); joinBox.className = 'dash-print-dialog dash-join'; joinBox.dir = 'rtl'; document.body.append(joinBox); }
         const apps = (child.apps || []).map(id => APPS.find(app => app.id === id)).filter(Boolean);
@@ -405,16 +405,49 @@
         joinBox.innerHTML = '<h2>مشاركة مع الأهل</h2><p>جارٍ التجهيز…</p>'; joinBox.showModal();
         try {
             await window.SpeechCloud.ticket(child);
-            const number = window.SpeechCloud.formatCode(child.code), links = apps.map(app => `${app.name}: ${new URL(app.url, location.href).href}`);
-            const text = `دخول ${child.name} إلى تطبيقات العيادة\nاسم الطفل: ${child.name}\nرقم الطفل: ${number}\nصالح حتى: ${date(child.until)}\n\nافتح التطبيق واكتب الاسم والرقم:\n${links.join('\n')}`;
-            joinBox.innerHTML = `<h2>مشاركة مع الأهل · ${esc(child.name)}</h2>
-                <p>يكتب الأهل الاسم والرقم في شاشة الدخول لكل تطبيق. يعمل الرقم حتى ${date(child.until)}.</p>
-                <p class="dash-join-code" dir="ltr">${number}</p><pre class="dash-join-link">${esc(text)}</pre>
-                <footer>${navigator.share ? '<button type="button" data-share>مشاركة</button>' : ''}<button type="button" data-copy>نسخ النص</button><button type="button" data-done>تم</button></footer>`;
-            joinBox.querySelector('[data-share]')?.addEventListener('click', () => navigator.share({ title: `دخول ${child.name}`, text }).catch(() => {}));
-            joinBox.querySelector('[data-copy]').onclick = async event => { try { await navigator.clipboard.writeText(text); event.target.textContent = 'نُسخ'; } catch {} };
-        } catch (error) { joinBox.innerHTML = `<h2>مشاركة مع الأهل</h2><p class="dash-print-error">${esc(window.SpeechCloud.explain(error))}</p><footer><button type="button" data-done>إغلاق</button></footer>`; }
-        joinBox.querySelector('[data-done]').onclick = () => joinBox.close();
+            let lang = 'ar';
+            const draw = () => {
+                const text = parentMessage(child, apps, lang);
+                joinBox.innerHTML = `<h2>مشاركة مع الأهل · ${esc(child.name)}</h2>
+                    <div class="dash-lang" role="group" aria-label="لغة الرسالة"><button type="button" data-lang="ar" aria-pressed="${lang === 'ar'}">العربية</button><button type="button" data-lang="en" aria-pressed="${lang === 'en'}" lang="en">English</button></div>
+                    <pre class="dash-join-message" dir="${lang === 'en' ? 'ltr' : 'rtl'}" lang="${lang}">${esc(text)}</pre>
+                    <footer>${navigator.share ? `<button type="button" data-share>${lang === 'en' ? 'Share' : 'مشاركة'}</button>` : ''}<button type="button" data-copy>${lang === 'en' ? 'Copy' : 'نسخ النص'}</button><button type="button" data-done>${lang === 'en' ? 'Done' : 'تم'}</button></footer>`;
+                joinBox.querySelectorAll('[data-lang]').forEach(button => { button.onclick = () => { lang = button.dataset.lang; draw(); }; });
+                joinBox.querySelector('[data-share]')?.addEventListener('click', () => navigator.share({ text }).catch(() => {}));
+                joinBox.querySelector('[data-copy]').onclick = async event => { try { await navigator.clipboard.writeText(text); event.target.textContent = lang === 'en' ? 'Copied' : 'نُسخ'; } catch {} };
+                joinBox.querySelector('[data-done]').onclick = () => joinBox.close();
+            };
+            draw();
+        } catch (error) {
+            joinBox.innerHTML = `<h2>مشاركة مع الأهل</h2><p class="dash-print-error">${esc(window.SpeechCloud.explain(error))}</p><footer><button type="button" data-done>إغلاق</button></footer>`;
+            joinBox.querySelector('[data-done]').onclick = () => joinBox.close();
+        }
+    }
+    // «إضافة طفل» (+ beside the list title): the only place a child is made. It gets a number at once; then choose its
+    // apps and account period on its board, and share the parents' message.
+    let addBox;
+    function addChildDialog() {
+        if (!addBox) { addBox = document.createElement('dialog'); addBox.className = 'dash-print-dialog dash-join'; addBox.dir = 'rtl'; document.body.append(addBox); }
+        if (!cloud.user || !window.SpeechCloud) {
+            addBox.innerHTML = '<h2>إضافة طفل</h2><p>سجّل الدخول بحساب العيادة أولاً (زر السحابة في الأعلى).</p><footer><button type="button" data-done>حسناً</button></footer>';
+            addBox.querySelector('[data-done]').onclick = () => addBox.close(); addBox.showModal(); return;
+        }
+        addBox.innerHTML = `<h2>إضافة طفل</h2><form class="dash-add-form"><label for="dash-new-name">اسم الطفل</label><input id="dash-new-name" maxlength="60" autocomplete="off" dir="auto" required><p class="dash-print-error" role="alert" hidden></p>
+            <footer><button type="submit">إضافة</button><button type="button" data-done>إلغاء</button></footer></form>`;
+        const form = addBox.querySelector('form'), input = form.querySelector('input'), error = form.querySelector('[role=alert]');
+        addBox.querySelector('[data-done]').onclick = () => addBox.close();
+        form.onsubmit = async event => {
+            event.preventDefault();
+            const name = input.value.normalize('NFKC').replace(/\s+/g, ' ').trim();
+            if (!name) { error.textContent = 'اكتب اسم الطفل.'; error.hidden = false; input.focus(); return; }
+            form.querySelector('[type=submit]').disabled = true;
+            try {
+                const made = await window.SpeechCloud.createChild({ name }); await refreshCloud();
+                const group = children().find(child => child.cloud?.id === made.id); addBox.close();
+                if (group) { current = group.key; view = 'all'; } route(); window.scrollTo(0, 0);
+            } catch (e) { error.textContent = window.SpeechCloud.explain(e); error.hidden = false; form.querySelector('[type=submit]').disabled = false; }
+        };
+        addBox.showModal(); input.focus();
     }
     // A join code for a device: the therapist's own iPad (all children) or a parents' device (chosen children).
     let joinBox;
@@ -537,15 +570,9 @@
             };
             paint();
         }
-        // «ملف طفل» from another device: one or more files at once.
-        const picker = $('#dash-import-file'), note = $('#dash-import-note');
-        $('#dash-import').onclick = () => picker.click();
-        picker.onchange = async () => {
-            if (!picker.files.length) return;
-            const notes = await importFiles([...picker.files]); picker.value = '';
-            note.textContent = notes.join('\n'); note.hidden = false; clearTimeout(note.timer); note.timer = setTimeout(() => { note.hidden = true; }, 9000);
-            route();
-        };
+        $('#dash-add-child').onclick = addChildDialog;
+        // Back: to the page that opened the reports (the website's tools page), else the tools site.
+        $('.dash-back')?.addEventListener('click', event => { if (history.length > 1 && document.referrer) { event.preventDefault(); history.back(); } });
         // Another tab (an app) saving progress refreshes the open screen.
         window.addEventListener('storage', event => { if ((APPS.some(app => app.key === event.key) || event.key === IMPORTS_KEY) && isOpen()) route(); });
         route();

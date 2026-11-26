@@ -52,6 +52,7 @@
     // A friendly message for the errors a therapist can meet.
     function explain(error) {
         const code = String(error?.code || '');
+        if (code === 'no-child') return 'هذا الطفل غير موجود في صفحة التقارير. أضفه أولاً بزر + في صفحة التقارير، ثم احفظ بالاسم نفسه.';
         if (code.includes('permission-denied')) return 'هذا الحساب ليس حساب العيادة. سجّل الدخول بحساب Google الخاص بالعيادة.';
         if (code.includes('popup-closed')) return 'أُغلقت نافذة تسجيل الدخول.';
         if (code.includes('unavailable') || code.includes('network')) return 'لا يوجد اتصال بالإنترنت. أعد المحاولة عند الاتصال.';
@@ -83,7 +84,7 @@
     }
     /** Finds the child a form belongs to: the remembered child id, else one with the same name (and birth date when both
      *  are known), else a new child with a new code. Returns { child, created }. */
-    async function childFor({ id, name, birth, gender }) {
+    async function childFor({ id, name, birth, gender }, create = true) {
         const { store, db } = await load(), list = await children();
         let child = id && list.find(entry => entry.id === id);
         if (!child) {
@@ -96,6 +97,8 @@
             await store.setDoc(store.doc(db, 'children', child.id), changes, { merge: true });
             return { child: { ...child, ...changes }, created: false };
         }
+        // Children are added only on the reports page (+); forms never create them (decided 2026-11-26).
+        if (!create) throw Object.assign(Error('no child'), { code: 'no-child' });
         const ref = store.doc(store.collection(db, 'children')), code = newCode(new Set(list.map(entry => entry.code)));
         const fresh = { name: String(name).trim(), code, apps: [], created: now, updated: now, ...(birth ? { birth } : {}), ...(gender ? { gender } : {}) };
         await store.setDoc(ref, fresh);
@@ -107,8 +110,8 @@
     async function saveAssessment(details) {
         if (!String(details.child?.name || '').trim()) throw Object.assign(Error('name'), { code: 'name' });
         const { store, db } = await load();
-        const { child, created } = await childFor(details.child);
-        if (details.apps?.length) { const apps = [...new Set([...(child.apps || []), ...details.apps])]; await store.setDoc(store.doc(db, 'children', child.id), { apps }, { merge: true }); child.apps = apps; }
+        // Forms attach the assessment to a child already on the reports page; they never add children or apps.
+        const { child, created } = await childFor(details.child, false);
         const ref = details.assessmentId ? store.doc(db, 'children', child.id, 'assessments', details.assessmentId) : store.doc(store.collection(db, 'children', child.id, 'assessments'));
         const sections = (details.sections || []).map(section => ({ title: String(section.title || ''), items: (section.items || []).map(item => ({ label: String(item.label || ''), value: String(item.value ?? '') })) }));
         await store.setDoc(ref, { form: details.form, title: details.title, date: details.date || null, examiner: details.examiner || '', sections, saved: new Date().toISOString() });

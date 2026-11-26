@@ -138,3 +138,10 @@ pre.dash-join-link{white-space:pre-wrap;font:inherit;font-size:14px;direction:rt
 .dash-artic-patterns{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
 .dash-artic-pattern{padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700;background:#fff6dc;color:#92400e}
 .dash-artic-pattern[data-state=done]{background:#e7f6ee;color:#166534}
+/* + beside the list title (2026-11-26): the only place a child is added. */
+.dash-add-child{display:inline-grid;place-items:center;width:44px;height:44px;margin-inline-start:auto;padding:0;border:0;border-radius:50%;background:var(--accent,#2f7a52);color:#fff;cursor:pointer;box-shadow:0 4px 12px #2f7a5240}
+.dash-add-child svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.dash-list-head{align-items:center;gap:10px}
+.dash-add-form{display:grid;gap:8px}.dash-add-form label{font-weight:800}.dash-add-form input{min-height:48px;padding:8px 12px;border:1.5px solid #dbe7ee;border-radius:14px;font:inherit}
+.dash-lang{display:flex;gap:6px;padding:4px;border-radius:14px;background:#f1f5f9;width:max-content}.dash-lang button{min-height:40px;padding:0 16px;border:0;border-radius:10px;background:transparent;font:inherit;font-weight:800;color:#587082;cursor:pointer}.dash-lang [aria-pressed=true]{background:#fff;color:#18394b;box-shadow:0 1px 4px #0f2a3a1f}
+.dash-join-message{margin:0;padding:14px;border-radius:16px;background:#f6fafc;border:1px solid #dbe7ee;font:inherit;font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-height:50vh;overflow:auto}
