@@ -467,6 +467,39 @@
         } catch (error) { joinBox.innerHTML = `<h2>ربط جهاز</h2><p class="dash-print-error">${esc(window.SpeechCloud.explain(error))}</p><footer><button type="button" data-done>إغلاق</button></footer>`; }
         joinBox.querySelector('[data-done]').onclick = () => joinBox.close();
     }
+    // ---- Usage time (2026-11-26): how long the child used the apps, from each device's progress (_usage) ----
+    const dayKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const minutesText = seconds => { const m = Math.round(seconds / 60); if (m < 1) return seconds ? 'أقل من دقيقة' : '٠'; const h = Math.floor(m / 60), r = m % 60; return h ? `${h} س${r ? ` ${r} د` : ''}` : `${m} د`; };
+    const DAYS_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    function usageOf(child) {
+        const out = []; // { app, role, day, seconds }
+        for (const rec of (child.cloud && cloud.records.get(child.cloud.id)) || []) {
+            let data = null; try { data = JSON.parse(rec.data || 'null'); } catch {}
+            for (const [day, seconds] of Object.entries(data?._usage || {})) out.push({ app: rec.app, role: rec.role === 'parents' ? 'parents' : 'clinic', day, seconds: Number(seconds) || 0 });
+        }
+        return out;
+    }
+    function usageSection(child) {
+        const all = usageOf(child); if (!all.length) return '';
+        const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - 6 + i); return d; });
+        const keys = days.map(dayKey), week = all.filter(u => keys.includes(u.day));
+        const total = week.reduce((n, u) => n + u.seconds, 0), byDay = keys.map(k => week.filter(u => u.day === k)), max = Math.max(60, ...byDay.map(list => list.reduce((n, u) => n + u.seconds, 0)));
+        const used = byDay.filter(list => list.some(u => u.seconds >= 60)).length;
+        const home = week.filter(u => u.role === 'parents').reduce((n, u) => n + u.seconds, 0), clinic = total - home;
+        const perApp = Object.entries(week.reduce((m, u) => ({ ...m, [u.app]: (m[u.app] || 0) + u.seconds }), {})).sort((a, b) => b[1] - a[1]);
+        const bars = byDay.map((list, i) => {
+            const h = list.filter(u => u.role === 'parents').reduce((n, u) => n + u.seconds, 0), c = list.reduce((n, u) => n + u.seconds, 0) - h, hp = h / max * 100, cp = c / max * 100;
+            return `<div class="dash-use-day" role="img" aria-label="${DAYS_AR[days[i].getDay()]}: ${minutesText(h + c)}${h ? `، في البيت ${minutesText(h)}` : ''}"><span class="dash-use-num">${h + c ? minutesText(h + c) : ''}</span><span class="dash-use-bar"><i class="home" style="height:${hp}%"></i><i class="clinic" style="height:${cp}%"></i></span><b>${DAYS_AR[days[i].getDay()]}</b><small dir="ltr">${days[i].getDate()}/${days[i].getMonth() + 1}</small></div>`;
+        }).join('');
+        const apps = perApp.map(([id, seconds]) => { const app = APPS.find(a => a.id === id); return `<li>${app ? `<img class="dash-use-logo" src="${app.logo}" alt="" width="30" height="30" style="--app:${app.color}">` : ''}<span>${esc(app?.name || id)}</span><b>${minutesText(seconds)}</b></li>`; }).join('');
+        const allTime = all.reduce((n, u) => n + u.seconds, 0);
+        return `<section class="dash-use" aria-labelledby="dash-use-title"><h3 id="dash-use-title">وقت الاستخدام · آخر ٧ أيام</h3>
+            <div class="dash-use-stats"><div><b>${minutesText(total)}</b><span>هذا الأسبوع</span></div><div><b>${used} من ٧</b><span>أيام تدرّب فيها</span></div><div><b>${minutesText(home)}</b><span>في البيت (الأهل)</span></div><div><b>${minutesText(clinic)}</b><span>مع المعالج</span></div></div>
+            <div class="dash-use-chart">${bars}</div>
+            <p class="dash-use-key"><i class="home"></i>في البيت <i class="clinic"></i>مع المعالج</p>
+            ${apps ? `<ul class="dash-use-apps">${apps}</ul>` : ''}
+            <p class="dash-note">يُحسب الوقت حين يكون حساب الطفل مفتوحاً والتطبيق على الشاشة ويُستخدم؛ يتوقف بعد دقيقتين دون لمس. المجموع منذ البداية: ${minutesText(allTime)}.</p></section>`;
+    }
     async function renderChild() {
         const child = children().find(entry => entry.key === current);
         if (!child) { current = null; route(); return; }
@@ -474,6 +507,7 @@
         const others = accounts().filter(a => !child.accounts.some(own => own.ref === a.ref));
         host.innerHTML = `<div class="dash-child-head"><button type="button" class="dash-icon" data-back aria-label="كل الأطفال" title="كل الأطفال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><h2 id="dash-child-name">${esc(child.name)}</h2>${child.cloud?.code ? `<span class="dash-code" title="رقم الطفل">رقم الطفل <bdi dir="ltr">${esc(window.SpeechCloud.formatCode(child.cloud.code))}</bdi></span>` : ''}<button type="button" class="dash-print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>طباعة</button></div>
             ${cloudTools(child)}
+            ${usageSection(child)}
             <nav class="dash-tabs" aria-label="التطبيقات">${[['all', 'كل التطبيقات'], ...child.accounts.map(a => [a.ref, badge(a.app) + (a.from ? `<small>${esc(ROLES[a.from.role] || '')}</small>` : '')]), ...(child.assessments.length ? [['assess', 'التقييمات']] : [])].map(([id, label]) => `<button type="button" data-view="${id}" aria-pressed="${view === id}">${label}</button>`).join('')}</nav>
             <nav class="dash-periods" aria-label="الفترة">${Object.entries(PERIODS).map(([id, [label]]) => `<button type="button" data-period="${id}" aria-pressed="${period === id}">${label}</button>`).join('')}</nav>
             <div class="dash-sections">${view === 'all' || view === 'assess' ? child.assessments.map(assessmentSection).join('') : ''}${(await Promise.all((view === 'assess' ? [] : accountsShown).map(appSection))).join('')}</div>

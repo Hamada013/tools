@@ -135,7 +135,12 @@
     /** Deletes a child from the database with everything saved under them. The apps' own accounts on devices stay. */
     async function removeChild(childId) {
         const { store, db } = await load();
+        // Everything about the child goes: progress, assessments, the parents' sign-in ticket and the devices linked
+        // only to this child (a deleted child leaves nothing behind that could still open the apps).
+        const child = await store.getDoc(store.doc(db, 'children', childId)).catch(() => null), data = child?.exists?.() ? child.data() : null;
         for (const part of ['records', 'assessments']) for (const entry of (await store.getDocs(store.collection(db, 'children', childId, part))).docs) await store.deleteDoc(entry.ref);
+        if (data?.name && data?.code) await store.deleteDoc(store.doc(db, 'joinCodes', await parentKey(data.name, data.code))).catch(() => {});
+        for (const entry of (await store.getDocs(store.collection(db, 'devices'))).docs) { const d = entry.data(); if (!d.all && (d.children || []).length === 1 && d.children[0] === childId) await store.deleteDoc(entry.ref).catch(() => {}); }
         await store.deleteDoc(store.doc(db, 'children', childId));
     }
     // Join codes: 8 letters and digits without look-alikes (no 0/O, 1/I/L), valid for 7 days.
